@@ -1,0 +1,153 @@
+{% extends 'admin/bas.html' %}
+
+{% block title %}Edit Product{% endblock %}
+
+
+{% block content %}
+{% load static %}
+
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>User List</h4>
+                <h6>Manage your User</h6>
+            </div>
+            
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-top">
+                    <div class="search-set">
+                        <div class="search-path">
+                            <a class="btn btn-filter" id="filter_search">
+                                <img src="{% static 'admin_assets/img/icons/filter.svg' %}" alt="img">
+                                <span><img src="{% static 'admin_assets/img/icons/closes.svg' %}"
+                                        alt="img"></span>
+                            </a>
+                        </div>
+                        
+                    </div>
+                    <div class="wordset">
+                        <ul>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf"><img
+                                        src="{% static 'admin_assets/img/icons/pdf.svg' %}" alt="img"></a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel"><img
+                                        src="{% static 'admin_assets/img/icons/excel.svg' %}" alt="img"></a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="print"><img
+                                        src="{% static 'admin_assets/img/icons/printer.svg' %}" alt="img"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card" id="filter_inputs">
+                    <div class="card-body pb-0">
+                        <div class="row">
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Enter User Name">
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Enter Phone">
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Enter Email">
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <select class="select">
+                                        <option>Disable
+                                        </option>
+                                        <option>Enable
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-1 col-sm-6 col-12 ms-auto">
+                                <div class="form-group">
+                                    <a class="btn btn-filters ms-auto"><img
+                                            src="{% static 'admin_assets/img/icons/search-whites.svg' %}"
+                                            alt="img"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table  datanew">
+                        <thead>
+                            <tr>
+                                <th>
+                                   SL.no
+                                </th>
+                                {% comment %} <th>Profile
+                                </th> {% endcomment %}
+                                 <th>First name
+                                </th>
+                                <th>Last name
+                                </th> 
+                                <th>User name
+                                </th>
+                            
+                                <th>email
+                                </th>
+                                <th>status
+                                </th>
+                                
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+
+                            <tr>
+                                <td>
+                                   {{user.id}}
+                                </td>
+                               
+                                <td>{{user.first_name}}</td>
+                                <td>{{user.last_name}}</td>
+                                <td>{{ user.username }}</td>
+                               
+                                <td>{{user.email}}</td>
+                               
+                                <td>
+                                    {% if user.is_active %}
+                                    <a href="{% url 'block_user' user.id %}" class="btn btn-danger">Block</a>
+                                    {% else %}
+                                    <a href="{% url 'unblock_user' user.id %}" class="btn btn-success">Unblock</a>
+                                    {% endif %}
+                                </td>
+                                
+                               
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>{% endblock %}

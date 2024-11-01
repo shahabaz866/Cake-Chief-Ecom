@@ -1,0 +1,66 @@
+{% extends 'admin/bas.html' %}
+
+{% block title %}Flavour List{% endblock %}
+{% block extra_css %}
+
+</style>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %} <!-- Load the custom filter -->
+
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Product Flavour List</h4>
+            </div>
+            <div class="page-btn">
+                <a href="{% url 'add_flavour' %}" class="btn btn-added">
+                    <img src="{% static 'admin_assets/img/icons/plus.svg' %}" class="me-1" alt="img">
+                    Add Flavour
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table datanew">
+                        <thead>
+                            <tr>
+                                <th>Flavour Name</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for flavour in flavours %}
+                            <tr>
+                                <td>{{ flavour.name }}</td>
+                                <td class="description-cell">{{ flavour.description|wrap_text:120|safe }}</td>
+                                <td>
+                                    <a class="me-3" href="{% url 'edit_flavour' flavour.id %}">
+                                        <img src="{% static 'admin_assets/img/icons/edit.svg' %}" alt="Edit">
+                                    </a>
+                                    {% if flavour.is_active %}
+                                        <a href="{% url 'delete_flavour' flavour.id %}" class="btn btn-danger">Block</a>
+                                    {% else %}
+                                        <a href="{% url 'unblock_flavour' flavour.id %}" class="btn btn-success">Unblock</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

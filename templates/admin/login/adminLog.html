@@ -1,0 +1,193 @@
+{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Design by foolishdeveloper.com -->
+    <title>Login Page</title>
+ 
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <!--Stylesheet-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <style media="screen">
+        *,
+        *:before,
+        *:after {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+        }
+        
+        form {
+            width: 370px; /* Same width as your previous form */
+            {% comment %} background-color: rgba(255, 255, 255, 0.7); {% endcomment %}
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            {% comment %} box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional for shadow effect */ {% endcomment %}
+        }
+        
+        .background {
+            width: 430px;
+            height: 500px; /* Reduced height */
+            position: absolute;
+            transform: translate(-50%, -50%);
+            left: 50%;
+            top: 50%;
+        }
+        {% comment %} form {
+            height: 550px; /* Further reduced height */
+            width: 370px; /* Reduced width to bring it inside the box */
+            background-color: rgba(255, 255, 255, 0.7);
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            padding: 20px 30px; /* Reduced padding */
+        } {% endcomment %}
+        form * {
+            font-family: 'Poppins', sans-serif;
+            color: #000000;
+            letter-spacing: 0.5px;
+            outline: none;
+            border: none;
+        }
+        form h3 {
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 42px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 5px; /* Adjusted margin */
+            font-size: 16px;
+            font-weight: 500;
+        }
+        input {
+            display: block;
+            height: 30px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 0 10px;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 300;
+            border: 1px solid rgb(128, 128, 128);
+        }
+        button, .google-btn {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #D33C3C;
+            color: #ffffff;
+            padding: 5px 0; /* Adjusted padding */
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 7px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .google-btn img {
+            margin-right: 10px;
+        }
+        #msg {
+            margin-top: 15px; /* Adjusted margin */
+            text-align: center;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px; /* Reduced margin */
+        }
+        .log_logo {
+            width: 80px; /* Reduced logo size */
+            height: auto;
+        }
+        
+
+    </style>
+</head>
+<body>
+   
+    <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+        
+        <div class="logo-container">
+            <a href="{% url 'home' %}">
+                <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo">
+            </a>
+        </div>
+        {% csrf_token %} 
+       
+        <label for="username">Username</label>
+        <input type="text" placeholder="Enter Username" id="username" name="username" >
+    
+        <label for="password">Password</label>
+        <input type="password" placeholder="Password" id="password" name="pass">
+    
+        {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+        {% endif %}
+    
+        <button type="submit">Login</button>
+         
+     
+    </form>
+    <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mySmallModalLabel">Messages</h5>
+                    
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ message }}
+                              
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No messages to display.</p>
+                    {% endif %}
+
+      
+                </div>
+            </div>
+        </div>
+    </div>
+    
+     
+   
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if there are any messages inside the modal to show it
+        if (document.querySelectorAll('.bd-example-modal-sm .alert').length > 0) {
+            var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
+            messageModal.show();
+        }
+    });
+</script>
+</body>
+</html>

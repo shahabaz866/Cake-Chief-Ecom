@@ -1,0 +1,128 @@
+{% extends 'admin/bas.html' %}
+
+{% block title %}Category list{% endblock %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+
+
+
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Product Category list</h4>
+            </div>
+            <div class="page-btn">
+                <a href="{% url 'add_category' %}" class="btn btn-added">
+                    <img src="{% static 'admin_assets/img/icons/plus.svg' %}" class="me-1" alt="img">
+                    Add Category
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-top">
+                    <div class="search-set">
+                        <div class="search-input">
+                            <form method="get" action="{% url 'category_list' %}" class="d-flex">
+                            </form>
+                        </div>
+                    </div>
+                    <div class="wordset">
+                        <ul>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf">
+                                    <img src="{% static 'admin_assets/img/icons/pdf.svg' %}" alt="img">
+                                </a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel">
+                                    <img src="{% static 'admin_assets/img/icons/excel.svg' %}" alt="img">
+                                </a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="print">
+                                    <img src="{% static 'admin_assets/img/icons/printer.svg' %}" alt="img">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table datanew">
+                        <thead>
+                            <tr>
+                                <th>Category name</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in page_obj %}
+                            <tr>
+                                <td>{{category.name}}</td>
+                                <td class="description-cell">{{ category.description|wrap_text:120|safe }}</td>
+                                <td>
+                                    <a class="me-3" href="{% url 'edit_category' category.id %}">
+                                        <img src="{% static 'admin_assets/img/icons/edit.svg' %}" alt="img">
+                                    </a>
+                                    {% if category.is_active %}
+                                        <a href="{% url 'delete_category' category.id %}" class="btn btn-danger" data-id="{{ category.id }}">
+                                            Block
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'unblock_category' category.id %}" class="btn btn-success" data-id="{{ category.id }}">
+                                            Unblock
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination-wrap">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">&laquo;</a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">&raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+{% endblock %}

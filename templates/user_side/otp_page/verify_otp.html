@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>OTP Verification</title>
+    <link rel="icon" type="image/png" href="{% static 'admin_assets/img/Starlogo.png' %}">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style media="screen">
+        *, *:before, *:after {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+        }
+
+        .background {
+            width: 430px;
+            height: 520px;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            left: 50%;
+            top: 50%;
+        }
+
+        form {
+            height: 520px;
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.7);
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 3px solid #D33C3C;
+            padding: 10px 35px;
+        }
+
+        form * {
+            font-family: 'Poppins', sans-serif;
+            color: #000000;
+            letter-spacing: 0.5px;
+            outline: none;
+            border: none;
+        }
+
+        form h3 {
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 42px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 30px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        input {
+            display: block;
+            height: 50px;
+            width: 100%;
+            background-color: rgb(255, 255, 255);
+            border-radius: 6px;
+            padding: 0 10px;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 300;
+            border-color: #676464;
+            border-style: solid;
+        }
+
+        button {
+            margin-top: 30px;
+            width: 100%;
+            background-color: #D33C3C;
+            color: #ffffff;
+            padding: 15px 0;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        button#resendOtpButton {
+            margin-top: 10px;
+            background-color: transparent;
+            color: #D33C3C;
+            border: 2px solid #D33C3C;
+        }
+
+        button#resendOtpButton:hover {
+            background-color: #D33C3C;
+            color: white;
+        }
+
+        #msg {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: -10px;
+        }
+
+        .log_logo {
+            width: 100px;
+            height: auto;
+        }
+
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #D33C3C;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #D33C3C;
+        }
+
+        .modal-body .alert {
+            margin-bottom: 10px;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+        }
+
+        #timerDisplay {
+            text-align: center;
+            margin-top: 10px;
+            color: #676464;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+            {% csrf_token %}
+            <div class="logo-container">
+                <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo">
+            </div>
+            <label for="email">Email</label>
+            <input readonly type="email" placeholder="email" id="email" value="{{ email }}">
+            <label for="OTP">OTP</label>
+            <input type="text" placeholder="Enter OTP" id="otp" name="otp">
+
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif %}
+
+            <button type="submit">Verify</button>
+            
+            <button type="button" id="resendOtpButton" style="display: none;" 
+                    onclick="window.location.href='{% url 'verify_otp' %}?email={{ email }}'">
+                Resend OTP
+            </button>
+            
+            <p id="timerDisplay">You can resend the OTP in <span id="countdown">60</span> seconds.</p>
+            
+            <p style="text-align: center; margin-top: 10px;">
+                Don't you receive the OTP? <a href="{% url 'SignupPage' %}" style="color: #D33C3C;">Sign up</a>
+            </p>
+        </form>
+
+        {% if messages %}
+    {% for message in messages %}
+    <div class="alert 
+    {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %}
+    alert-dismissible fade show custom-alert" role="alert">  
+            {{ message }}
+        </div>
+    {% endfor %}
+    <script>
+        // Dismiss alert messages after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => alert.classList.remove('show'));
+        }, 5000); // 5000 ms = 5 seconds
+    </script>
+{% else %}
+    
+{% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there are any messages inside the modal to show it
+            if (document.querySelectorAll('.bd-example-modal-sm .alert').length > 0) {
+                var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
+                messageModal.show();
+            }
+
+            var countdownDuration = 60;
+            var countdownDisplay = document.getElementById('countdown');
+            var resendOtpButton = document.getElementById('resendOtpButton');
+            var timerDisplay = document.getElementById('timerDisplay');
+
+            function updateCountdown() {
+                countdownDuration--;
+                countdownDisplay.textContent = countdownDuration;
+
+                if (countdownDuration <= 0) {
+                    clearInterval(countdownInterval);
+                    timerDisplay.style.display = 'none';
+                    resendOtpButton.style.display = 'block';
+                }
+            }
+
+            var countdownInterval = setInterval(updateCountdown, 1000);
+        });
+    </script>
+</body>
+</html>

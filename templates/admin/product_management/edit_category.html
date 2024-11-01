@@ -1,0 +1,48 @@
+{% extends 'admin/bas.html' %}
+
+{% block title %}Edit category{% endblock %}
+
+
+{% block content %}
+{% load static %}
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Product Edit Category</h4>
+                <h6>Edit a product Category</h6>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'edit_category' category.id %}">
+                    {% csrf_token %}
+                    <div class="col-lg-6 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Category Name</label>
+                            <input type="text" name="category_name" class="form-control" value="{{ category.name }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" class="form-control">{{ category.description }}</textarea>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="col-lg-12">
+                       <button type="submit" class="btn btn-primary">Update</button>
+                        <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

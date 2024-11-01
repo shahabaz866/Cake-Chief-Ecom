@@ -1,0 +1,152 @@
+{% extends 'admin/bas.html' %}
+
+{% block title %}Edit Product{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+{% load static %}
+<!-- Your add product form goes here -->
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Product Edit</h4>
+                <h6>Update your product</h6>
+            </div>
+        </div>
+        <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mySmallModalLabel">Messages</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No messages to display.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'edit_product' product.id %}">
+                    {% csrf_token %}
+                    <div class="col-lg-6 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Product Name:</label>
+                            <input type="text" name="product_name" class="form-control" value="{{ product.title }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Quantity:</label>
+                            <input type="number" name="quantity" class="form-control" value="{{ product.stock }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <textarea name="description" class="form-control">{{ product.description }}</textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Price:</label>
+                            <input type="text" name="price" class="form-control" value="{{ product.price }}">
+                        </div>
+                    </div>
+                   <!-- Edit Main Image -->
+                   <div class="col-lg-12">
+                    <div class="form-group">
+                        <label>Main Image:</label>
+                        <div>
+                            <img src="{{ product.image.url }}" alt="Main image" width="150">
+                        </div>
+                        <input type="file" name="main_image" class="form-control mt-2">
+                    </div>
+                </div>
+
+                <!-- Edit Additional Images -->
+                <div class="col-lg-12">
+                    <label>Additional Images:</label>
+                    <div class="form-group">
+                        <div class="row">
+                            {% for img in product_images %}
+                                <div class="col-md-4">
+                                    <img src="{{ img.image.url }}" alt="Additional image" width="100">
+                                    <input type="file" name="extra_image_{{ forloop.counter }}" class="form-control mt-2">
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" name="remove_image_{{ forloop.counter }}" value="True">
+                                        <label class="form-check-label" for="remove_image_{{ forloop.counter }}">
+                                            Remove this image
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                    
+                    <div class="col-lg-3 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Category:</label>
+                            <select name="category" class="form-control">
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Flavour:</label>
+                            <select name="flavour" class="form-control">
+                                {% for flavour in flavours %}
+                                    <option value="{{ flavour.id }}" {% if flavour.id == product.flavour.id %}selected{% endif %}>{{ flavour.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-12">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalAlerts = document.querySelectorAll('.bd-example-modal-sm .alert');
+        if (modalAlerts.length > 0) {
+            var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
+            messageModal.show();
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

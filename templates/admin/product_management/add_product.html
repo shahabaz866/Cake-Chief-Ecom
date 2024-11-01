@@ -1,0 +1,614 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <meta name="description" content="POS - Bootstrap Admin Template">
+    <meta name="keywords"
+        content="admin, estimates, bootstrap, business, corporate, creative, invoice, html5, responsive, Projects">
+    <meta name="author" content="Dreamguys - Bootstrap Admin Template">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Dreams Pos admin template</title>
+
+    <style>
+    .image-upload {
+        position: relative;
+        display: inline-block;
+        margin-right: 10px; /* Space between image inputs */
+    }
+    
+    .image-uploads {
+        margin-top: 5px;
+        text-align: center;
+    }
+    
+    .crop-button {
+        margin-top: 10px;
+        margin-bottum: 10px;
+        display: none; /* Hide by default, show when an image is uploaded */
+    }
+</style>
+
+    <link rel="icon" href="{% static 'admin_assets\img\Starlogo.png' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/css/bootstrap-datetimepicker.min.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/plugins/fontawesome/css/fontawesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/plugins/fontawesome/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_assets/css/style.css' %}">
+    <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link rel="stylesheet" href="path/to/cropper.css">
+    <link rel="stylesheet" href="{% static 'path/to/cropper.css' %}">
+
+
+
+</head>
+
+<body>
+    <div id="global-loader">
+        <div class="whirly-loader"> </div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+
+            <div class="header-left active">
+                <a href="index.html" class="logo">
+                    <h2 style="color: #D33C3C;">Cake Chief</h2>
+                </a>
+                <a href="index.html" class="logo-small">
+                    <img src="{% static 'admin_assets/img/logo-small.png' %}" alt="">
+                </a>
+                <a id="toggle_btn" href="javascript:void(0);">
+                </a>
+            </div>
+
+            <a id="mobile_btn" class="mobile_btn" href="#sidebar">
+                <span class="bar-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </a>
+
+            <ul class="nav user-menu">
+
+                <li class="nav-item">
+                    <div class="top-nav-search">
+                        <a href="javascript:void(0);" class="responsive-search">
+                            <i class="fa fa-search"></i>
+                        </a>
+                        <form action="#">
+                            <div class="searchinputs">
+                                <input type="text" placeholder="Search Here ...">
+                                <div class="search-addon">
+                                    <span><img src="{% static 'admin_assets/img/icons/closes.svg' %}" alt="img"></span>
+                                </div>
+                            </div>
+                            <a class="btn" id="searchdiv"><img src="{% static 'admin_assets/img/icons/search.svg' %}"
+                                    alt="img"></a>
+                        </form>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown has-arrow flag-nav">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);"
+                        role="button">
+                        <img src="{% static 'admin_assets/img/flags/us1.png' %}" alt="" height="20">
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a href="javascript:void(0);" class="dropdown-item">
+                            <img src="{% static 'admin_assets/img/flags/us.png' %}" alt="" height="16">
+                            English
+                        </a>
+                        <a href="javascript:void(0);" class="dropdown-item">
+                            <img src="{% static 'admin_assets/img/flags/fr.png' %}" alt="" height="16">
+                            French
+                        </a>
+                        <a href="javascript:void(0);" class="dropdown-item">
+                            <img src="{% static 'admin_assets/img/flags/es.png' %}" alt="" height="16">
+                            Spanish
+                        </a>
+                        <a href="javascript:void(0);" class="dropdown-item">
+                            <img src="{% static 'admin_assets/img/flags/de.png' %}" alt="" height="16">
+                            German
+                        </a>
+                    </div>
+                </li>
+
+
+                <li class="nav-item dropdown">
+                    <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+                        <img src="{% static 'admin_assets/img/icons/notification-bing.svg' %}" alt="img">
+                         <span class="badge rounded-pill">4</span>
+                    </a>
+                    <div class="dropdown-menu notifications">
+                        <div class="topnav-dropdown-header">
+                            <span class="notification-title">Notifications</span>
+                            <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+                        </div>
+                        
+                        <div class="topnav-dropdown-footer">
+                            <a href="activities.html">View all Notifications</a>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown has-arrow main-drop">
+                    <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
+                        <span class="user-img"><img src="{% static 'admin_assets/img/profiles/avatoradmn.jpg' %}" alt="">
+                            <span class="status online"></span></span>
+                    </a>
+                    <div class="dropdown-menu menu-drop-user">
+                        <div class="profilename">
+                            <div class="profileset">
+                                <span class="user-img"><img src="{% static 'admin_assets/img/profiles/avator1.jpg' %}" alt="">
+                                    <span class="status online"></span></span>
+                                <div class="profilesets">
+                                    <h6>John Doe</h6>
+                                    <h5>Admin</h5>
+                                </div>
+                            </div>
+                            <hr class="m-0">
+                            <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> My
+                                Profile</a>
+                            <a class="dropdown-item" href="generalsettings.html"><i class="me-2"
+                                    data-feather="settings"></i>Settings</a>
+                            <hr class="m-0">
+                            <a class="dropdown-item logout pb-0" href="signin.html"><img
+                                    src="{% static 'admin_assets/img/icons/log-out.svg' %}" class="me-2" alt="img">Logout</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+
+            <div class="dropdown mobile-user-menu">
+                <a href="javascript:void(0);" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="profile.html">My Profile</a>
+                    <a class="dropdown-item" href="generalsettings.html">Settings</a>
+                    <a class="dropdown-item" href="signin.html">Logout</a>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-inner slimscroll">
+                <div id="sidebar-menu" class="sidebar-menu">
+                    <ul>
+                        <li>
+                            <a href="{% url "dashboard" %}"><img src="{% static 'admin_assets/img/icons/dashboard.svg' %}" alt="img">
+                                    <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="submenu">
+                            <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/product.svg' %}" alt="img">
+                                    <span>Product</span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <ul>
+                                <li>
+                                    <a href="{% url "product_list" %}">Product List</a>
+                                </li>
+                                <li><a href="{% url "add_products" %}">Add
+                                        Product</a>
+                                </li>
+                                <li><a href="{% url "category_list" %}">Category
+                                        List</a>
+                                </li>
+                                <li><a href="{% url "add_category" %}">Add
+                                        Category</a>
+                                </li>
+                                <li><a href="{% url "flavour_list" %}">Flavour
+                                        List</a>
+                                </li>
+                                <li><a href="{% url "add_flavour" %}">Add
+                                    Flavour</a>
+                                </li>
+                                
+                            </ul>
+                        </li>
+                     
+                        <li class="submenu">
+                            <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/users1.svg' %}"
+                                    alt="img"><span>
+                                    Users</span>
+                                <span class="menu-arrow"></span></a>
+                            <ul>
+                                
+                                <li><a href="{% url "user_management" %}">Users
+                                        List</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>{% if messages %}
+                            {% for message in messages %}
+                            <div class="alert 
+                            {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %}
+                            alert-dismissible fade show custom-alert" role="alert">  
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                            <script>
+                                // Dismiss alert messages after 5 seconds
+                                setTimeout(function() {
+                                    const alerts = document.querySelectorAll('.alert');
+                                    alerts.forEach(alert => alert.classList.remove('show'));
+                                }, 5000); // 5000 ms = 5 seconds
+                            </script>
+                        {% else %}
+                            
+                        {% endif %}
+                    </li>
+                       
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h4>Product Add</h4>
+                        <h6>Create new product</h6>
+                    </div>
+                </div>
+        
+                <div class="card">
+                    <div class="card-body">
+                        <form action="{% url 'add_products' %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Product Name</label>
+                                        <input type="text" placeholder="Enter product Name" name="product_name" required class="form-control">
+                                    </div>
+                                </div>
+        
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Category</label>
+                                        <select name="category" class="select form-control" required>
+                                            <option value="" disabled selected>Select Category</option>
+                                            {% for cate in categories %}
+                                            <option value="{{cate.id}}">{{cate.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Flavours</label>
+                                        <select name="flavour" class="select form-control" required>
+                                            <option value="" disabled selected>Select Flavour</option>
+                                            {% for flav in flavours %}
+                                            <option value="{{flav.id}}">{{flav.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Size</label>
+                                        <select name="sizes" class="select form-control" multiple required>
+                                            <option value="" disabled>Select Sizes</option>
+                                            {% for size in sizes %}
+                                                <option value="{{ size.id }}">{{ size.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+        
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Quantity</label>
+                                        <input type="number" name="quantity" class="form-control" placeholder="0" required>
+                                    </div>
+                                </div>
+        
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea name="description" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+        
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Price</label>
+                                        <input type="number" name="price" step="0.01" class="form-control" placeholder="0" required>
+                                    </div>
+                                </div>
+        
+                                <!-- Main Product Image -->
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Main Product Image:</label>
+                                        <input type="file" id="mainImageInput" name="main_product_image" accept="image/*" class="form-control" required>
+                                        <div class="image-uploads">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                        
+                                                            <!-- Additional Product Images -->
+                                                            <div class="col-lg-12">
+                                                                <div class="form-group">
+                                                                    <label>Additional Product Images (Upload at least 3 images):</label>
+                                                                    <div id="additionalImageInputs" class="d-flex flex-wrap">
+                                                                        {% for i in 3|range %}
+                                                                        <div class="image-upload me-2">
+                                                                            <input type="file" name="additional_product_image_{{i}}" id="additionalImageInput{{i}}" 
+                                                                                   accept="image/*" class="form-control" required onchange="previewImage(this, {{i}})">
+                                                                            <div class="image-uploads">
+                                                                                <img src="{% static 'admin_assets/img/icons/upload.svg' %}" alt="img" style="width: 40px; height: auto;">
+                                                                                <h4>Drag and drop files to upload</h4>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div id="additionalImagePreview{{i}}" class="mt-2" style="width:300px">
+                                                                            <!-- Image preview will be displayed here -->
+                                                                        </div>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                <div id="cropContainer" style="display:none; position: relative; ">
+                                    <!-- Cropped image will be displayed here -->
+                                </div>
+        
+                                <div class="col-lg-12">
+                                    <button type="submit" class="btn btn-submit me-2">Submit</button>
+                                    <a href="{% url 'product_list' %}" class="btn btn-cancel">Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      // Constants for image requirements
+const IMAGE_CONFIG = {
+    main: {
+        width: 539,
+        height: 539,
+        aspectRatio: 1,
+        required: true
+    },
+    additional: {
+        width: 539,
+        height: 539,
+        aspectRatio: 1,
+        minCount: 3,
+        required: true
+    }
+};
+
+class ImageUploadHandler {
+    constructor() {
+        this.croppers = new Map();
+        this.initialize();
+    }
+
+    initialize() {
+        this.setupMainImageUpload();
+        this.setupAdditionalImagesUpload();
+        this.setupFormValidation();
+    }
+
+    setupMainImageUpload() {
+        const mainInput = document.getElementById('mainImageInput');
+        if (!mainInput) return;
+
+        mainInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.handleImageUpload(file, 'main', {
+                    cropContainerId: 'cropContainer',
+                    previewId: 'mainImagePreview',
+                    inputId: 'mainImageInput'
+                });
+            }
+        });
+    }
+
+    setupAdditionalImagesUpload() {
+        for (let i = 0; i < 3; i++) {
+            const input = document.getElementById(`additionalImageInput${i}`);
+            if (!input) continue;
+
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.handleImageUpload(file, 'additional', {
+                        cropContainerId: 'cropContainer',
+                        previewId: `additionalImagePreview${i}`,
+                        inputId: `additionalImageInput${i}`,
+                        index: i
+                    });
+                }
+            });
+        }
+    }
+
+    handleImageUpload(file, type, config) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload an image file');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size should be less than 5MB');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.initCropper(e.target.result, type, config);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    initCropper(imageData, type, config) {
+        const cropContainer = document.getElementById(config.cropContainerId);
+        if (!cropContainer) return;
+
+        if (this.croppers.has(config.inputId)) {
+            this.croppers.get(config.inputId).destroy();
+        }
+
+        cropContainer.innerHTML = `
+            <div class="crop-container">
+                <img src="${imageData}" class="crop-target">
+                <div class="crop-controls mt-3">
+                    <button type="button" class="btn btn-primary crop-confirm" style="margin-bottom: 20px;">Confirm Crop</button>
+                    <button type="button" class="btn btn-secondary crop-cancel" style="margin-bottom: 20px;">Cancel</button>
+                </div>
+            </div>
+        `;
+        cropContainer.style.display = 'block';
+
+        const image = cropContainer.querySelector('.crop-target');
+        const cropper = new Cropper(image, {
+            aspectRatio: IMAGE_CONFIG[type].aspectRatio,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true
+        });
+
+        this.croppers.set(config.inputId, cropper);
+
+        cropContainer.querySelector('.crop-confirm').addEventListener('click', () => {
+            this.processCroppedImage(cropper, type, config);
+        });
+
+        cropContainer.querySelector('.crop-cancel').addEventListener('click', () => {
+            this.cancelCrop(config);
+        });
+    }
+
+    processCroppedImage(cropper, type, config) {
+        const canvas = cropper.getCroppedCanvas({
+            width: IMAGE_CONFIG[type].width,
+            height: IMAGE_CONFIG[type].height
+        });
+
+        canvas.toBlob((blob) => {
+            const croppedFile = new File([blob], 'cropped_image.png', { type: 'image/png' });
+            const input = document.getElementById(config.inputId);
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            input.files = dataTransfer.files;
+
+            const preview = document.getElementById(config.previewId);
+            if (preview) {
+                preview.innerHTML = `<img src="${URL.createObjectURL(croppedFile)}" alt="Cropped Image" style="width: 100px; height: auto;">`;
+                preview.style.display = 'block';
+            }
+
+            this.cleanupCropper(config);
+        }, 'image/png');
+    }
+
+    cancelCrop(config) {
+        const input = document.getElementById(config.inputId);
+        if (input) input.value = '';
+
+        const preview = document.getElementById(config.previewId);
+        if (preview) {
+            preview.innerHTML = '';
+            preview.style.display = 'none';
+        }
+
+        this.cleanupCropper(config);
+    }
+
+    cleanupCropper(config) {
+        if (this.croppers.has(config.inputId)) {
+            this.croppers.get(config.inputId).destroy();
+            this.croppers.delete(config.inputId);
+        }
+
+        const cropContainer = document.getElementById(config.cropContainerId);
+        if (cropContainer) {
+            cropContainer.style.display = 'none';
+            cropContainer.innerHTML = '';
+        }
+    }
+
+    setupFormValidation() {
+        const form = document.querySelector('form');
+        if (!form) return;
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const mainImage = document.getElementById('mainImageInput');
+            if (IMAGE_CONFIG.main.required && (!mainImage || !mainImage.files[0])) {
+                alert('Please upload a main product image');
+                return;
+            }
+
+            let additionalImagesCount = 0;
+            for (let i = 0; i < 3; i++) {
+                const input = document.getElementById(`additionalImageInput${i}`);
+                if (input && input.files[0]) additionalImagesCount++;
+            }
+
+            if (IMAGE_CONFIG.additional.required && additionalImagesCount < IMAGE_CONFIG.additional.minCount) {
+                alert(`Please upload at least ${IMAGE_CONFIG.additional.minCount} additional images`);
+                return;
+            }
+
+            form.submit();
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new ImageUploadHandler();
+});
+        </script>
+    
+    
+
+    
+    
+
+
+        <script src="{% static 'admin_assets/js/jquery-3.6.0.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/feather.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/jquery.slimscroll.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/jquery.dataTables.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/dataTables.bootstrap4.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'admin_assets/plugins/select2/js/select2.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/moment.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/bootstrap-datetimepicker.min.js' %}"></script>
+        <script src="{% static 'admin_assets/js/script.js' %}"></script>
+        <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+
+
+</body>
+
+</html>
+
+

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cropper Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+    <style>
+        #preview {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<input type="file" id="inputImage" accept="image/*">
+<div id="preview"></div>
+<button id="cropButton">Crop Image</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script>
+    let cropper;
+    const image = document.createElement('img');
+    document.getElementById('inputImage').addEventListener('change', function(event) {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                image.src = e.target.result;
+                document.getElementById('preview').innerHTML = '';
+                document.getElementById('preview').appendChild(image);
+
+                cropper = new Cropper(image, {
+                    aspectRatio: 16 / 9,
+                    viewMode: 1,
+                });
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    });
+
+    document.getElementById('cropButton').addEventListener('click', function() {
+        const canvas = cropper.getCroppedCanvas();
+        document.body.appendChild(canvas); // Display the cropped image
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            console.log(url); // Check the URL of the cropped image in console
+        });
+    });
+</script>
+
+</body>
+</html>
