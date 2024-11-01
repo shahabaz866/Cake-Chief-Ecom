@@ -1,764 +1,793 @@
-{% extends "user_side/base.html" %}
-{% block content %} 
+{% extends "user_side/base.html" %} 
+{% block content %}
 {% load static %} 
-{% load temp_tags %} 
-    {% block extra_css %}
-    <style>
-      .product-section {
-        padding: 4rem 0;
-        background-color: #ffffff;
-    }
-
-    .product-gallery {
-      position: relative;
-      padding: 1rem;
-      background-color: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+{%load temp_tags %}
+{% block extra_css %}
+<style>
+  .product-section {
+    padding: 4rem 0;
+    background-color: #ffffff;
   }
-        /* Main Image Styles */
-        .main-image-container {
-          position: relative;
-          width: 100%;
-          margin-bottom: 1.5rem;
-          border-radius: 8px;
-          overflow: visible; 
-          cursor: crosshair;
-      }
 
-        /* Zoom Container Styles */
-        .img-zoom-container {
-          position: relative;
-          width: 500px;
-          margin: 0 auto;
-      }
-      
-        .img-zoom-lens {
-            position: absolute;
-            border-radius: 5px;
-            width: 100px;
-            height: 100px;
-            z-index: 111;
-            opacity: 0;
-            transition: opacity 300ms;
-            box-shadow: 0 0 10px rgba(0,0,0,0.7);
-        }
+  .product-gallery {
+    position: relative;
+    padding: 1rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  /* Main Image Styles */
+  .main-image-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    overflow: visible;
+    cursor: crosshair;
+  }
 
-        .img-zoom-lens.open {
-            opacity: 0.8;
-        }
+  /* Zoom Container Styles */
+  .img-zoom-container {
+    position: relative;
+    width: 500px;
+    margin: 0 auto;
+  }
 
-        .img-zoom-result {
-            border: 4px solid white;
-            border-radius: 5px;
-            width:400px;
-            height: 500px;
-            transition: transform 300ms;
-            position: absolute;
-            top: 0%;
-            right: -450px;
-            transform: translateX(-200px) scale(0);
-            background-color: #fff;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-        }
+  .img-zoom-lens {
+    position: absolute;
+    border-radius: 5px;
+    width: 100px;
+    height: 100px;
+    z-index: 111;
+    opacity: 0;
+    transition: opacity 300ms;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  }
 
-        .img-zoom-result.open {
-            transform: translateX(0) scale(1);
-        }
+  .img-zoom-lens.open {
+    opacity: 0.8;
+  }
 
-        .main-image {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
+  .img-zoom-result {
+    border: 4px solid white;
+    border-radius: 5px;
+    width: 400px;
+    height: 500px;
+    transition: transform 300ms;
+    position: absolute;
+    top: 0%;
+    right: -450px;
+    transform: translateX(-200px) scale(0);
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
 
-        /* Thumbnail Navigation Styles */
-        .thumbnail-navigation {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+  .img-zoom-result.open {
+    transform: translateX(0) scale(1);
+  }
 
-        .thumbnails-container {
-            flex: 1;
-            overflow: hidden;
-        }
+  .main-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
 
-        .thumbnails-wrapper {
-            display: flex;
-            gap: 1rem;
-            transition: transform 0.3s ease;
-        }
+  /* Thumbnail Navigation Styles */
+  .thumbnail-navigation {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
 
-        .thumbnail-item {
-            flex: 0 0 calc(25% - 0.75rem);
-            position: relative;
-            padding-top: calc(25% - 0.75rem);
-            cursor: pointer;
-            border-radius: 6px;
-            overflow: hidden;
-        }
+  .thumbnails-container {
+    flex: 1;
+    overflow: hidden;
+  }
 
-        .thumbnail-item img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
+  .thumbnails-wrapper {
+    display: flex;
+    gap: 1rem;
+    transition: transform 0.3s ease;
+  }
 
-        .thumbnail-item.active img {
-            border-color: #e74c3c;
-        }
+  .thumbnail-item {
+    flex: 0 0 calc(25% - 0.75rem);
+    position: relative;
+    padding-top: calc(25% - 0.75rem);
+    cursor: pointer;
+    border-radius: 6px;
+    overflow: hidden;
+  }
 
-        .thumbnail-item:hover img {
-            transform: scale(1.05);
-        }
+  .thumbnail-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
 
-        .nav-button {
-            background: white;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+  .thumbnail-item.active img {
+    border-color: #e74c3c;
+  }
 
-        .nav-button:hover {
-            background: #f8f9fa;
-            transform: scale(1.1);
-        }
+  .thumbnail-item:hover img {
+    transform: scale(1.05);
+  }
 
-        /* Responsive Adjustments */
-      @media (max-width: 768px) {
-        .thumbnail-item {
-          flex: 0 0 calc(33.333% - 0.667rem);
-          padding-top: calc(33.333% - 0.667rem);
-        }
-      }
-    
-      @media (max-width: 576px) {
-        .thumbnail-item {
-          flex: 0 0 calc(50% - 0.5rem);
-          padding-top: calc(50% - 0.5rem);
-        }
-      }
-    
-      .product-info {
-        padding: 2rem;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-      }
-    
-      .product-title {
-        color: #2c3e50;
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        font-family: "Playfair Display", serif;
-      }
-    
-      .product-badges .badge {
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-      }
-    
-      .product-rating {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-    
-      .stars {
-        color: #ffd700;
-      }
-    
-      .product-price {
-        font-size: 2rem;
-        color: #e74c3c;
-        font-weight: 600;
-      }
-    
-      .serving-info {
-        font-size: 1rem;
-        margin-left: 10px;
-      }
-    
-      .cake-specs {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 2rem;
-      }
-    
-      .spec-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        gap: 10px;
-      }
-    
-      .spec-item i {
-        color: #e74c3c;
-        font-size: 1.2rem;
-      }
-    
-      .section-title {
-        font-size: 1.5rem;
-        color: #2c3e50;
-        margin-bottom: 1rem;
-        font-family: "Playfair Display", serif;
-      }
-    
-      .dietary-icons {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 1rem;
-      }
-    
-      .dietary-item {
-        font-size: 1.5rem;
-        color: #27ae60;
-      }
-    
-      .quantity-selector .form-control {
-        max-width: 80px;
-      }
-    
-      .add-to-cart {
-        background-color: #e74c3c;
-        border-color: #e74c3c;
-        transition: all 0.3s ease;
-      }
-    
-      .add-to-cart:hover {
-        background-color: #c0392b;
-        border-color: #c0392b;
-      }
-    
-      .accordion-button:not(.collapsed) {
-        background-color: #f8f9fa;
-        color: #e74c3c;
-      }
-    
-      .accordion-button:focus {
-        box-shadow: none;
-        border-color: rgba(231, 76, 60, 0.25);
-      }
-    
-      .btn-group .btn-outline-primary {
-        color: #e74c3c;
-        border-color: #e74c3c;
-      }
-    
-      .btn-group .btn-outline-primary:hover,
-      .btn-group .btn-check:checked + .btn-outline-primary {
-        background-color: #e74c3c;
-        border-color: #e74c3c;
-        color: white;
-      }
-      //--------------//
-/* Stock Indicator Styles */
-.stock-indicator {
+  .nav-button {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .nav-button:hover {
+    background: #f8f9fa;
+    transform: scale(1.1);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .thumbnail-item {
+      flex: 0 0 calc(33.333% - 0.667rem);
+      padding-top: calc(33.333% - 0.667rem);
+    }
+  }
+
+  @media (max-width: 576px) {
+    .thumbnail-item {
+      flex: 0 0 calc(50% - 0.5rem);
+      padding-top: calc(50% - 0.5rem);
+    }
+  }
+
+  .product-info {
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .product-title {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-family: "Playfair Display", serif;
+  }
+
+  .product-badges .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+  }
+
+  .product-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .stars {
+    color: #ffd700;
+  }
+
+  .product-price {
+    font-size: 2rem;
+    color: #e74c3c;
+    font-weight: 600;
+  }
+
+  .serving-info {
+    font-size: 1rem;
+    margin-left: 10px;
+  }
+
+  .cake-specs {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .spec-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 10px;
+  }
+
+  .spec-item i {
+    color: #e74c3c;
+    font-size: 1.2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-family: "Playfair Display", serif;
+  }
+
+  .dietary-icons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 1rem;
+  }
+
+  .dietary-item {
+    font-size: 1.5rem;
+    color: #27ae60;
+  }
+
+  .quantity-selector .form-control {
+    max-width: 80px;
+  }
+
+  .add-to-cart {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+    transition: all 0.3s ease;
+  }
+
+  .add-to-cart:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+  }
+
+  .accordion-button:not(.collapsed) {
+    background-color: #f8f9fa;
+    color: #e74c3c;
+  }
+
+  .accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(231, 76, 60, 0.25);
+  }
+
+  .btn-group .btn-outline-primary {
+    color: #e74c3c;
+    border-color: #e74c3c;
+  }
+
+  .btn-group .btn-outline-primary:hover,
+  .btn-group .btn-check:checked + .btn-outline-primary {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+    color: white;
+  }
+  //--------------//
+  /* Stock Indicator Styles */
+  .stock-indicator {
     margin: 0.5rem 0;
     width: 100%;
     max-width: 300px;
-}
+  }
 
-.stock-status {
+  .stock-status {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0.25rem;
-}
+  }
 
-.stock-text {
+  .stock-text {
     font-size: 0.875rem;
     font-weight: 500;
-}
+  }
 
-.stock-badge {
+  .stock-badge {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
-    display: none;  /* Hidden by default, shown via JS */
-}
+    display: none; /* Hidden by default, shown via JS */
+  }
 
-.stock-bar-container {
+  .stock-bar-container {
     width: 100%;
     height: 0.5rem;
     background-color: #e5e7eb;
     border-radius: 9999px;
     overflow: hidden;
-}
+  }
 
-.stock-bar {
+  .stock-bar {
     height: 100%;
     border-radius: 9999px;
     transition: width 300ms ease-in-out;
-}
+  }
 
-/* Stock Status Variants */
-.stock-indicator[data-status="in-stock"] .stock-text {
-    color:#D33C3C;
-}
+  /* Stock Status Variants */
+  .stock-indicator[data-status="in-stock"] .stock-text {
+    color: #d33c3c;
+  }
 
-.stock-indicator[data-status="in-stock"] .stock-bar {
-    background-color:  #D33C3C;
-}
+  .stock-indicator[data-status="in-stock"] .stock-bar {
+    background-color: #d33c3c;
+  }
 
-.stock-indicator[data-status="low-stock"] .stock-text {
+  .stock-indicator[data-status="low-stock"] .stock-text {
     color: #d97706;
-}
+  }
 
-.stock-indicator[data-status="low-stock"] .stock-bar {
+  .stock-indicator[data-status="low-stock"] .stock-bar {
     background-color: #d97706;
-}
+  }
 
-.stock-indicator[data-status="low-stock"] .stock-badge {
+  .stock-indicator[data-status="low-stock"] .stock-badge {
     display: inline-block;
     background-color: #fef3c7;
     color: #d97706;
-}
+  }
 
-.stock-indicator[data-status="critical-stock"] .stock-text {
+  .stock-indicator[data-status="critical-stock"] .stock-text {
     color: #dc2626;
-}
+  }
 
-.stock-indicator[data-status="critical-stock"] .stock-bar {
+  .stock-indicator[data-status="critical-stock"] .stock-bar {
     background-color: #dc2626;
-}
+  }
 
-.stock-indicator[data-status="critical-stock"] .stock-badge {
+  .stock-indicator[data-status="critical-stock"] .stock-badge {
     display: inline-block;
     background-color: #fee2e2;
     color: #dc2626;
-}
+  }
 
-.stock-indicator[data-status="out-of-stock"] .stock-text {
+  .stock-indicator[data-status="out-of-stock"] .stock-text {
     color: #dc2626;
-}
+  }
 
-.stock-indicator[data-status="out-of-stock"] .stock-bar {
+  .stock-indicator[data-status="out-of-stock"] .stock-bar {
     background-color: #dc2626;
     width: 0 !important;
-}
+  }
 
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
     .stock-indicator {
-        max-width: 100%;
+      max-width: 100%;
     }
-}
+  }
 
-//----------//
+  //----------//
+</style>
+{% endblock %}
 
-    </style>
-    {% endblock %}
-
-    <div class="product-section">
-        <div class="container">
-            <div class="row">
-                <!-- Product Gallery Section -->
-                <div class="col-lg-6">
-                    <div class="product-gallery">
-                        <!-- Main Image Container with Zoom -->
-                        <div class="main-image-container">
-                            <div class="img-zoom-container">
-                                <img id="mainImage" 
-                                     src="{{ product.image.url }}" 
-                                     alt="{{ product.title }}" 
-                                     class="main-image">
-                                <div id="myresult" class="img-zoom-result"></div>
-                            </div>
-                        </div>
-
-                        <!-- Thumbnail Navigation -->
-                        <div class="thumbnail-navigation">
-                            <button class="nav-button prev-button" onclick="slideImages('prev')">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-
-                            <div class="thumbnails-container">
-                                <div class="thumbnails-wrapper">
-                                    <!-- Main Product Image Thumbnail -->
-                                    <div class="thumbnail-item active">
-                                        <img src="{{ product.image.url }}" 
-                                             alt="{{ product.title }}"
-                                             onclick="changeMainImage('{{ product.image.url }}', this)">
-                                    </div>
-
-                                    <!-- Additional Images Thumbnails -->
-                                    {% for imag in aditional_img %}
-                                    <div class="thumbnail-item">
-                                        <img src="{{ imag.image.url }}"
-                                             alt="Additional image for {{ product.title }}"
-                                             onclick="changeMainImage('{{ imag.image.url }}', this)">
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                            <button class="nav-button next-button" onclick="slideImages('next')">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="col-lg-6">
-                  <div class="product-info">
-                  <h1 class="product-title">{{ product.title }}</h1>
-          
-                  <div class="product-badges mb-3">
-                      <!-- Bestseller Badge -->
-                      {% if product.is_bestseller %}
-                      <span class="badge bg-warning text-dark me-2">Bestseller</span>
-                      {% endif %}
-          
-                      <!-- New Flavor Badge -->
-                      {% if product.is_new %}
-                      <span class="badge bg-success me-2">New Flavor</span>
-                      {% endif %} {% if product.stock <= 0 %}
-                      <span class="badge bg-danger me-2">Out of Stock</span>
-          
-                      {% else %}
-                      <span class="badge bg-success me-2">In Stock</span>
-          
-                      {% endif %}
-          
-                      <!-- Dietary Info Badge -->
-                      {% if product.dietary_info %}
-                      <span class="badge bg-info text-dark me-2"
-                      >{{ product.dietary_info }}</span
-                      >
-                      {% endif %}
-                  </div>
-          
-                  <div class="product-price mb-4">
-                      <span class="current-price">₹{{ product.price }}</span>
-                      <span class="serving-info text-muted">( 400-g )</span>
-                  </div>
-                  <div class="stock-indicator" data-stock="{{ product.stock }}">
-                    <div class="stock-status">
-                        <span class="stock-text"></span>
-                        <span class="stock-badge"></span>
-                    </div>
-                    <div class="stock-bar-container">
-                        <div class="stock-bar"></div>
-                    </div>
-                </div>
-                  
-          
-                <div class="product-description mb-4 p-3 rounded" style="
-                background-color: #f9f9f9; 
-                border-left: 4px solid #e74c3c; 
-                font-family: 'Playfair Display', serif; 
-                color: #2c3e50;
-                margin-top:20px;">
-                <strong style="font-size: 1.2rem; color: #e74c3c;">Description:</strong>
-                <p style="margin-top: 0.5rem; font-size: 1.1rem; line-height: 1.6;">
-                    {{ product.description }}
-                </p>
+<div class="product-section">
+  <div class="container">
+    <div class="row">
+      <!-- Product Gallery Section -->
+      <div class="col-lg-6">
+        <div class="product-gallery">
+          <!-- Main Image Container with Zoom -->
+          <div class="main-image-container">
+            <div class="img-zoom-container">
+              <img
+                id="mainImage"
+                src="{{ product.image.url }}"
+                alt="{{ product.title }}"
+                class="main-image"
+              />
+              <div id="myresult" class="img-zoom-result"></div>
             </div>
-          
-                  <!-- Cake Specifications -->
-                  <div class="cake-specs mb-4">
-                      <div class="spec-item">
-                      <i class="fas fa-birthday-cake"></i>
-                      <span class="spec-label">Base Flavor:</span>
-                      <span class="spec-value">{{ product.flavour }}</span>
-                      </div>
-                      <div class="spec-item">
-                      <i class="fas fa-heart"></i>
-                      <span class="spec-label">Base category:</span>
-                      <span class="spec-value">{{ product.category }}</span>
-                      </div>
-                      {% comment %} <div class="spec-item">
-                      <i class="fas fa-layer-group"></i>
-                      <span class="spec-label">Layers:</span>
-                      <span class="spec-value">{{ product.layers }}</span>
-                      </div> {% endcomment %}
+          </div>
 
+          <!-- Thumbnail Navigation -->
+          <div class="thumbnail-navigation">
+            <button
+              class="nav-button prev-button"
+              onclick="slideImages('prev')"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
 
+            <div class="thumbnails-container">
+              <div class="thumbnails-wrapper">
+                <!-- Main Product Image Thumbnail -->
+                <div class="thumbnail-item active">
+                  <img
+                    src="{{ product.image.url }}"
+                    alt="{{ product.title }}"
+                    onclick="changeMainImage('{{ product.image.url }}', this)"
+                  />
+                </div>
 
-                      <div class="spec-item">
-                      <i class="fas fa-clock"></i>
-                      <span class="spec-label">Preparation Time:</span>
-                      <span class="spec-value">3 Hrs.</span>
-                      </div>
-                      <div class="spec-item">
-                        <i class="fas fa-utensils"></i> 
-                        <span class="spec-label">Prepared Status:</span>
-                        <span class="spec-value">{{ product.created_at }}</span> 
-                    </div>
-                      {% comment %} <div class="spec-item">
-                      <i class="fas fa-snowflake"></i>
-                      <span class="spec-label">Storage:</span>
-                      <span class="spec-value">{{ product.storage_info }}</span>
-                      </div> {% endcomment %}
-                      
-                      <div class="spec-item">
-                        <i class="fas fa-ruler-combined"></i>
-                        <span class="spec-label">Base Size:</span>
-                        <span class="spec-value">
-                            {% for size in product.sizes.all %}
-                                {{ size.name }}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </span>
-                    </div>
-                  </div>
-          
-                  <!-- Customization Options -->
-                  <div class="customization-section mb-4">
-                      <h3 class="section-title">Customize Your Cake</h3>
-          
-                     
-          
-                      <!-- Message on Cake -->
-                      <div class="cake-message mb-4">
-                      <label class="form-label">Message on Cake (Optional):</label>
-                      <input
-                          type="text"
-                          class="form-control"
-                          placeholder="Happy Birthday!"
-                          maxlength="50"
-                      />
-                      <small class="text-muted">Maximum 50 characters</small>
-                      </div>
-                  </div>
-          
-                  <!-- Ordering Section -->
-                  <div class="ordering-section mb-4">
-                    <div class="quantity-selector mb-3">
-                      <label class="form-label">Quantity:</label>
-                      <div class="input-group">
-                        <button class="btn btn-outline-secondary" onclick="decrementQuantity()">
-                          <i class="fas fa-minus"></i>
-                        </button>
-                        <input
-                          type="number"
-                          id="quantityInput"
-                          class="form-control text-center quantity-input"
-                          value="1"
-                          min="1"
-                          max="10"
-                          onchange="updateCartLink()"
-                        />
-                        <button class="btn btn-outline-secondary" onclick="incrementQuantity()">
-                          <i class="fas fa-plus"></i>
-                        </button>
-                      </div>
-                    </div>
-                  
-                    <div class="action-buttons">
-                      <a
-                        id="addToCartLink"
-                        href="{% url 'add_cart' product.id %}?quantity=1"
-                        class="btn btn-primary btn-lg add-to-cart w-75"
-                      >
-                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-                      </a>
-                      <a href="your-wishlist-url" class="btn btn-outline-danger btn-lg wishlist-btn">
-                        <i class="far fa-heart"></i>
-                      </a>
-                    </div>
-                  </div>
-          
-                  <!-- Additional Information -->
-                  </div>
+                <!-- Additional Images Thumbnails -->
+                {% for imag in aditional_img %}
+                <div class="thumbnail-item">
+                  <img
+                    src="{{ imag.image.url }}"
+                    alt="Additional image for {{ product.title }}"
+                    onclick="changeMainImage('{{ imag.image.url }}', this)"
+                  />
+                </div>
+                {% endfor %}
               </div>
-
             </div>
+
+            <button
+              class="nav-button next-button"
+              onclick="slideImages('next')"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="product-info">
+          <h1 class="product-title">{{ product.title }}</h1>
+
+          <div class="product-badges mb-3">
+            <!-- Bestseller Badge -->
+            {% if product.is_bestseller %}
+            <span class="badge bg-warning text-dark me-2">Bestseller</span>
+            {% endif %}
+
+            <!-- New Flavor Badge -->
+            {% if product.is_new %}
+            <span class="badge bg-success me-2">New Flavor</span>
+            {% endif %} {% if product.stock <= 0 %}
+            <span class="badge bg-danger me-2">Out of Stock</span>
+
+            {% else %}
+            <span class="badge bg-success me-2">In Stock</span>
+
+            {% endif %}
+
+            <!-- Dietary Info Badge -->
+            {% if product.dietary_info %}
+            <span class="badge bg-info text-dark me-2"
+              >{{ product.dietary_info }}</span
+            >
+            {% endif %}
+          </div>
+
+          <div class="product-price mb-4">
+            <span class="current-price">₹{{ product.price }}</span>
+            <span class="serving-info text-muted">( 400-g )</span>
+          </div>
+          <div class="stock-indicator" data-stock="{{ product.stock }}">
+            <div class="stock-status">
+              <span class="stock-text"></span>
+              <span class="stock-badge"></span>
+            </div>
+            <div class="stock-bar-container">
+              <div class="stock-bar"></div>
+            </div>
+          </div>
+
+          <div
+            class="product-description mb-4 p-3 rounded"
+            style="
+              background-color: #f9f9f9;
+              border-left: 4px solid #e74c3c;
+              font-family: 'Playfair Display', serif;
+              color: #2c3e50;
+              margin-top: 20px;
+            "
+          >
+            <strong style="font-size: 1.2rem; color: #e74c3c"
+              >Description:</strong
+            >
+            <p style="margin-top: 0.5rem; font-size: 1.1rem; line-height: 1.6">
+              {{ product.description }}
+            </p>
+          </div>
+
+          <!-- Cake Specifications -->
+          <div class="cake-specs mb-4">
+            <div class="spec-item">
+              <i class="fas fa-birthday-cake"></i>
+              <span class="spec-label">Base Flavor:</span>
+              <span class="spec-value">{{ product.flavour }}</span>
+            </div>
+            <div class="spec-item">
+              <i class="fas fa-heart"></i>
+              <span class="spec-label">Base category:</span>
+              <span class="spec-value">{{ product.category }}</span>
+            </div>
+            {% comment %}
+            <div class="spec-item">
+              <i class="fas fa-layer-group"></i>
+              <span class="spec-label">Layers:</span>
+              <span class="spec-value">{{ product.layers }}</span>
+            </div>
+            {% endcomment %}
+
+            <div class="spec-item">
+              <i class="fas fa-clock"></i>
+              <span class="spec-label">Preparation Time:</span>
+              <span class="spec-value">3 Hrs.</span>
+            </div>
+            <div class="spec-item">
+              <i class="fas fa-utensils"></i>
+              <span class="spec-label">Prepared Status:</span>
+              <span class="spec-value">{{ product.created_at }}</span>
+            </div>
+            {% comment %}
+            <div class="spec-item">
+              <i class="fas fa-snowflake"></i>
+              <span class="spec-label">Storage:</span>
+              <span class="spec-value">{{ product.storage_info }}</span>
+            </div>
+            {% endcomment %}
+
+            <div class="spec-item">
+              <i class="fas fa-ruler-combined"></i>
+              <span class="spec-label">Base Size:</span>
+              <span class="spec-value">
+                {% for size in product.sizes.all %} {{ size.name }}{% if not
+                forloop.last %}, {% endif %} {% endfor %}
+              </span>
+            </div>
+          </div>
+
+          <!-- Customization Options -->
+          <div class="customization-section mb-4">
+            <h3 class="section-title">Customize Your Cake</h3>
+
+            <!-- Message on Cake -->
+            <div class="cake-message mb-4">
+              <label class="form-label">Message on Cake (Optional):</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Happy Birthday!"
+                maxlength="50"
+              />
+              <small class="text-muted">Maximum 50 characters</small>
+            </div>
+          </div>
+
+          <!-- Ordering Section -->
+          <div class="ordering-section mb-4">
+            {% comment %}
+            <div class="quantity-selector mb-3">
+              <label class="form-label">Quantity:</label>
+              <div class="input-group">
+                <button
+                  class="btn btn-outline-secondary"
+                  onclick="decrementQuantity()"
+                >
+                  <i class="fas fa-minus"></i>
+                </button>
+                <input
+                  type="number"
+                  id="quantityInput"
+                  class="form-control text-center quantity-input"
+                  value="1"
+                  min="1"
+                  max="10"
+                  onchange="updateCartLink()"
+                />
+                <button
+                  class="btn btn-outline-secondary"
+                  onclick="incrementQuantity()"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+            {% endcomment %}
+
+            <div class="action-buttons">
+              <a
+                id="addToCartLink"
+                href="{% url 'add_cart' product.id %}?quantity=1"
+                class="btn btn-primary btn-lg add-to-cart w-75"
+              >
+                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+              </a>
+              <a
+                href="your-wishlist-url"
+                class="btn btn-outline-danger btn-lg wishlist-btn"
+              >
+                <i class="far fa-heart"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Additional Information -->
+        </div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <script>
-        // Image Zoom Function
-        function imageZoom(imgID, resultID) {
-            var img, lens, result, cx, cy;
-            img = document.getElementById(imgID);
-            result = document.getElementById(resultID);
+<script>
+  // Image Zoom Function
+  function imageZoom(imgID, resultID) {
+    var img, lens, result, cx, cy;
+    img = document.getElementById(imgID);
+    result = document.getElementById(resultID);
 
-            // Create lens
-            lens = document.createElement("DIV");
-            lens.setAttribute("class", "img-zoom-lens");
-            img.parentElement.insertBefore(lens, img);
+    // Create lens
+    lens = document.createElement("DIV");
+    lens.setAttribute("class", "img-zoom-lens");
+    img.parentElement.insertBefore(lens, img);
 
-            // Calculate ratios
-            cx = result.offsetWidth / lens.offsetWidth;
-            cy = result.offsetHeight / lens.offsetHeight;
+    // Calculate ratios
+    cx = result.offsetWidth / lens.offsetWidth;
+    cy = result.offsetHeight / lens.offsetHeight;
 
-            // Set background properties
-            result.style.backgroundImage = `url('${img.src}')`;
-            result.style.backgroundSize = `${img.width * cx}px ${img.height * cy}px`;
+    // Set background properties
+    result.style.backgroundImage = `url('${img.src}')`;
+    result.style.backgroundSize = `${img.width * cx}px ${img.height * cy}px`;
 
-            // Mouse leave event
-            lens.addEventListener("mouseleave", () => {
-                lens.classList.remove("open");
-                result.classList.remove("open");
-            });
+    // Mouse leave event
+    lens.addEventListener("mouseleave", () => {
+      lens.classList.remove("open");
+      result.classList.remove("open");
+    });
 
-            // Mouse move events
-            lens.addEventListener("mousemove", moveLens);
-            img.addEventListener("mousemove", moveLens);
+    // Mouse move events
+    lens.addEventListener("mousemove", moveLens);
+    img.addEventListener("mousemove", moveLens);
 
-            function moveLens(e) {
-                e.preventDefault();
-                lens.classList.add("open");
-                result.classList.add("open");
+    function moveLens(e) {
+      e.preventDefault();
+      lens.classList.add("open");
+      result.classList.add("open");
 
-                const pos = getCursorPos(e);
-                
-                let x = pos.x - lens.offsetWidth / 2;
-                let y = pos.y - lens.offsetHeight / 2;
-                
-                // Boundary checks
-                if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
-                if (x < 0) x = 0;
-                if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
-                if (y < 0) y = 0;
-                
-                // Update positions
-                lens.style.left = `${x}px`;
-                lens.style.top = `${y}px`;
-                result.style.backgroundPosition = `-${x * cx}px -${y * cy}px`;
-            }
+      const pos = getCursorPos(e);
 
-            function getCursorPos(e) {
-                var rect = img.getBoundingClientRect();
-                var x = e.pageX - rect.left - window.pageXOffset;
-                var y = e.pageY - rect.top - window.pageYOffset;
-                return { x, y };
-            }
-        }
+      let x = pos.x - lens.offsetWidth / 2;
+      let y = pos.y - lens.offsetHeight / 2;
 
-        // Initialize zoom
-        document.addEventListener('DOMContentLoaded', function() {
-            imageZoom("mainImage", "myresult");
-        });
+      // Boundary checks
+      if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
+      if (x < 0) x = 0;
+      if (y > img.height - lens.offsetHeight)
+        y = img.height - lens.offsetHeight;
+      if (y < 0) y = 0;
 
-        // Change Main Image Function
-        function changeMainImage(src, thumbnailElement) {
-            const mainImage = document.getElementById("mainImage");
-            mainImage.src = src;
-            
-            // Update result background
-            const result = document.getElementById("myresult");
-            result.style.backgroundImage = `url('${src}')`;
+      // Update positions
+      lens.style.left = `${x}px`;
+      lens.style.top = `${y}px`;
+      result.style.backgroundPosition = `-${x * cx}px -${y * cy}px`;
+    }
 
-            // Update active thumbnail
-            document.querySelectorAll(".thumbnail-item").forEach((item) => {
-                item.classList.remove("active");
-            });
-            thumbnailElement.parentElement.classList.add("active");
-        }
+    function getCursorPos(e) {
+      var rect = img.getBoundingClientRect();
+      var x = e.pageX - rect.left - window.pageXOffset;
+      var y = e.pageY - rect.top - window.pageYOffset;
+      return { x, y };
+    }
+  }
 
-        // Thumbnail Navigation
-        let currentPosition = 0;
-        const thumbnailsWrapper = document.querySelector(".thumbnails-wrapper");
-        const thumbnails = document.querySelectorAll(".thumbnail-item");
-        const itemWidth = thumbnails[0].offsetWidth + 16; // Including gap
+  // Initialize zoom
+  document.addEventListener("DOMContentLoaded", function () {
+    imageZoom("mainImage", "myresult");
+  });
 
-        function slideImages(direction) {
-            const maxScroll = thumbnails.length * itemWidth - thumbnailsWrapper.offsetWidth;
+  // Change Main Image Function
+  function changeMainImage(src, thumbnailElement) {
+    const mainImage = document.getElementById("mainImage");
+    mainImage.src = src;
 
-            if (direction === "next" && currentPosition > -maxScroll) {
-                currentPosition -= itemWidth;
-            } else if (direction === "prev" && currentPosition < 0) {
-                currentPosition += itemWidth;
-            }
+    // Update result background
+    const result = document.getElementById("myresult");
+    result.style.backgroundImage = `url('${src}')`;
 
-            thumbnailsWrapper.style.transform = `translateX(${currentPosition}px)`;
-        }
-    </script>
-    <script>
-      // Stock Indicator Functionality
-      function initializeStockIndicators() {
-          const stockIndicators = document.querySelectorAll('.stock-indicator');
-          
-          stockIndicators.forEach(indicator => {
-              const stock = parseInt(indicator.dataset.stock);
-              const lowThreshold = 5;
-              const criticalThreshold = 2;
-              
-              updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold);
-          });
-      }
-      
-      function updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold) {
-          const textElement = indicator.querySelector('.stock-text');
-          const badgeElement = indicator.querySelector('.stock-badge');
-          const barElement = indicator.querySelector('.stock-bar');
-          
-          let status, barWidth, text;
-          
-          if (stock <= 0) {
-              status = 'out-of-stock';
-              barWidth = 0;
-              text = 'Out of Stock';
-          } else if (stock <= criticalThreshold) {
-              status = 'critical-stock';
-              barWidth = 20;
-              text = `Only ${stock} left!`;
-              badgeElement.textContent = 'Selling Fast!';
-          } else if (stock <= lowThreshold) {
-              status = 'low-stock';
-              barWidth = 40;
-              text = `Low Stock - ${stock} remaining`;
-              badgeElement.textContent = 'Selling Fast!';
-          } else {
-              status = 'in-stock';
-              barWidth = 100;
-              text = `In Stock (${stock} available)`;
-          }
-          
-          // Update elements
-          indicator.dataset.status = status;
-          textElement.textContent = text;
-          barElement.style.width = `${barWidth}%`;
-      }
-      
-      // Initialize when DOM is loaded
-      document.addEventListener('DOMContentLoaded', initializeStockIndicators);
-      </script>
-      <script>
-        function updateCartLink() {
-          const quantity = document.getElementById('quantityInput').value;
-          const addToCartLink = document.getElementById('addToCartLink');
-          addToCartLink.href = `{% url 'add_cart' product.id %}?quantity=${quantity}`;
-        }
-        
-        function incrementQuantity() {
-          const quantityInput = document.getElementById('quantityInput');
-          if (quantityInput.value < quantityInput.max) {
-            quantityInput.value++;
-            updateCartLink();
-          }
-        }
-        
-        function decrementQuantity() {
-          const quantityInput = document.getElementById('quantityInput');
-          if (quantityInput.value > quantityInput.min) {
-            quantityInput.value--;
-            updateCartLink();
-          }
-        }
-        </script>
-        
+    // Update active thumbnail
+    document.querySelectorAll(".thumbnail-item").forEach((item) => {
+      item.classList.remove("active");
+    });
+    thumbnailElement.parentElement.classList.add("active");
+  }
 
-    
+  // Thumbnail Navigation
+  let currentPosition = 0;
+  const thumbnailsWrapper = document.querySelector(".thumbnails-wrapper");
+  const thumbnails = document.querySelectorAll(".thumbnail-item");
+  const itemWidth = thumbnails[0].offsetWidth + 16; // Including gap
+
+  function slideImages(direction) {
+    const maxScroll =
+      thumbnails.length * itemWidth - thumbnailsWrapper.offsetWidth;
+
+    if (direction === "next" && currentPosition > -maxScroll) {
+      currentPosition -= itemWidth;
+    } else if (direction === "prev" && currentPosition < 0) {
+      currentPosition += itemWidth;
+    }
+
+    thumbnailsWrapper.style.transform = `translateX(${currentPosition}px)`;
+  }
+</script>
+<script>
+  // Stock Indicator Functionality
+  function initializeStockIndicators() {
+    const stockIndicators = document.querySelectorAll(".stock-indicator");
+
+    stockIndicators.forEach((indicator) => {
+      const stock = parseInt(indicator.dataset.stock);
+      const lowThreshold = 5;
+      const criticalThreshold = 2;
+
+      updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold);
+    });
+  }
+
+  function updateStockIndicator(
+    indicator,
+    stock,
+    lowThreshold,
+    criticalThreshold
+  ) {
+    const textElement = indicator.querySelector(".stock-text");
+    const badgeElement = indicator.querySelector(".stock-badge");
+    const barElement = indicator.querySelector(".stock-bar");
+
+    let status, barWidth, text;
+
+    if (stock <= 0) {
+      status = "out-of-stock";
+      barWidth = 0;
+      text = "Out of Stock";
+    } else if (stock <= criticalThreshold) {
+      status = "critical-stock";
+      barWidth = 20;
+      text = `Only ${stock} left!`;
+      badgeElement.textContent = "Selling Fast!";
+    } else if (stock <= lowThreshold) {
+      status = "low-stock";
+      barWidth = 40;
+      text = `Low Stock - ${stock} remaining`;
+      badgeElement.textContent = "Selling Fast!";
+    } else {
+      status = "in-stock";
+      barWidth = 100;
+      text = `In Stock (${stock} available)`;
+    }
+
+    // Update elements
+    indicator.dataset.status = status;
+    textElement.textContent = text;
+    barElement.style.width = `${barWidth}%`;
+  }
+
+  // Initialize when DOM is loaded
+  document.addEventListener("DOMContentLoaded", initializeStockIndicators);
+</script>
+<script>
+  function updateCartLink() {
+    const quantity = document.getElementById("quantityInput").value;
+    const addToCartLink = document.getElementById("addToCartLink");
+    addToCartLink.href = `{% url 'add_cart' product.id %}?quantity=${quantity}`;
+  }
+
+  function incrementQuantity() {
+    const quantityInput = document.getElementById("quantityInput");
+    if (quantityInput.value < quantityInput.max) {
+      quantityInput.value++;
+      updateCartLink();
+    }
+  }
+
+  function decrementQuantity() {
+    const quantityInput = document.getElementById("quantityInput");
+    if (quantityInput.value > quantityInput.min) {
+      quantityInput.value--;
+      updateCartLink();
+    }
+  }
+</script>
+
 {% endblock %}

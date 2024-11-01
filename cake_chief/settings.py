@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'dashboard',
     'order_app',
     'cart_app',
+    'user_app',
     
 
     

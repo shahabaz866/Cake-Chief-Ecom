@@ -480,7 +480,7 @@ grid-template-columns: 1fr;
                           <i class="icon fas fa-user"></i>
                         </button>
                         <div class="dropdown-menu">
-                          <a href="#" class="dropdown-item">
+                          <a href="{% url "user_profile:profile" %}" class="dropdown-item">
                             <i class="fas fa-user-circle"></i>
                             Profile
                           </a>
@@ -501,7 +501,7 @@ grid-template-columns: 1fr;
                         </a>
                       </li>
                       <li class="icon-item">
-                        <a href="cart.html" class="icon-link site-cart">
+                        <a href="{% url "cart" %}" class="icon-link site-cart">
                             <i class="icon fas fa-shopping-cart"></i>
                           {% comment %} <span class="count" stl>2</span> {% endcomment %}
                         </a>
