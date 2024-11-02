@@ -23,7 +23,50 @@
 
 
 <style>
-
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .log_logo {
+    max-width: 100px;
+    max-height: 100px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: all 0.3s ease;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .log_logo {
+      max-width: 80px;
+      max-height: 80px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .log_logo {
+      max-width: 60px;
+      max-height: 60px;
+    }
+    
+    .logo-container {
+      padding: 5px;
+    }
+  }
+  
+  /* Ensure the navbar maintains proper spacing */
+  .site-navbar-top {
+    padding: 15px 0;
+  }
+  
+  .site-navbar .site-navigation {
+    padding-top: 20px;
+  }
 .site-blocks-cover {
 background-image: url("{% static 'user_assets/images/hero_im.jpg' %}");
 }
@@ -466,8 +509,8 @@ grid-template-columns: 1fr;
                 
                 
                 <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
-                  <a href="{% url 'home' %}">
-                    <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo" style="max-width: 100px; max-height: 100px; width: auto; height: auto; object-fit: contain;">
+                  <a href="{% url 'home' %}" class="logo-container">
+                    <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo">
                   </a>
                 </div>
        

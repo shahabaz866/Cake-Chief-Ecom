@@ -6,10 +6,10 @@
 <style>
     /* Modern color palette */
     :root {
-        --primary-color: #4a90e2;
+        --danger-color: #D33C3C;
         --secondary-color: #f5f7fa;
         --text-color: #333;
-        --border-color: #e0e6ed;
+        --border-color: #D33C3C;
         --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
@@ -59,14 +59,14 @@
         height: 100%;
         object-fit: cover;
         border-radius: 50%;
-        border: 4px solid var(--primary-color);
+        border: 4px solid var(--danger-color);
     }
 
     .profileupload {
         position: absolute;
         bottom: 0;
         right: 0;
-        background-color: var(--primary-color);
+        background-color: var(--danger-color);
         border-radius: 50%;
         padding: 10px;
         cursor: pointer;
@@ -87,7 +87,7 @@
     }
 
     .profile-contentname h4 {
-        color: #6c757d;
+        color: #000;
         font-size: 0.9rem;
     }
 
@@ -99,7 +99,7 @@
     .form-group label {
         display: block;
         margin-bottom: 8px;
-        color: #495057;
+        color: #000;
         font-weight: 500;
     }
 
@@ -113,7 +113,7 @@
 
     .form-group input:focus {
         outline: none;
-        border-color: var(--primary-color);
+        border-color: var(--danger-color);
         box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     }
 
@@ -140,13 +140,14 @@
     }
 
     .btn-submit {
-        background-color: var(--primary-color);
+        background-color: var(--danger-color);
         color: white;
         border: none;
     }
 
     .btn-submit:hover {
-        background-color: #3a7bd5;
+        background-color: #D33C3C;
+        
     }
 
     .btn-cancel {
@@ -156,7 +157,17 @@
     }
 
     .btn-cancel:hover {
-        background-color: #f1f3f5;
+        background-color:  #D33C3C;
+        color: white;
+    }
+    .page-title {
+        padding-left: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .page-title {
+            padding-left: 10px; /* Less space for smaller screens */
+        }
     }
 </style>
 {% endblock %}

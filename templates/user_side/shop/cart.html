@@ -58,7 +58,7 @@
                                 <td>
                                     <form method="POST" action="{% url 'remove_from_cart' item.id %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger btn-sm rounded-circle">
+                                        <button type="submit" class="btn btn-danger btn-sm ">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>

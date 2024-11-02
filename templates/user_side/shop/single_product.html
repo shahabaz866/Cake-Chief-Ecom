@@ -1,7 +1,7 @@
 {% extends "user_side/base.html" %} 
 {% block content %}
 {% load static %} 
-{%load temp_tags %}
+{% load temp_tags %}
 {% block extra_css %}
 <style>
   .product-section {
@@ -442,7 +442,8 @@
             <!-- New Flavor Badge -->
             {% if product.is_new %}
             <span class="badge bg-success me-2">New Flavor</span>
-            {% endif %} {% if product.stock <= 0 %}
+            {% endif %}
+             {% if product.stock <= 0 %}
             <span class="badge bg-danger me-2">Out of Stock</span>
 
             {% else %}
@@ -532,8 +533,10 @@
               <i class="fas fa-ruler-combined"></i>
               <span class="spec-label">Base Size:</span>
               <span class="spec-value">
-                {% for size in product.sizes.all %} {{ size.name }}{% if not
-                forloop.last %}, {% endif %} {% endfor %}
+                {% for size in product.sizes.all %} {{ size.name }}
+                {% if not forloop.last %}, 
+                {% endif %}
+                 {% endfor %}
               </span>
             </div>
           </div>
@@ -585,7 +588,13 @@
               </div>
             </div>
             {% endcomment %}
+            {% if product.stock <= 0 %}
+            <span class="badge bg-danger me-2">Out of Stock</span>
 
+            {% else %}
+            
+
+           
             <div class="action-buttons">
               <a
                 id="addToCartLink"
@@ -594,6 +603,7 @@
               >
                 <i class="fas fa-shopping-cart me-2"></i>Add to Cart
               </a>
+              {% endif %}
               <a
                 href="your-wishlist-url"
                 class="btn btn-outline-danger btn-lg wishlist-btn"
