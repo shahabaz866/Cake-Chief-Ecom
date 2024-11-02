@@ -1,0 +1,367 @@
+{% extends 'user_side/base.html' %}
+{% block content %}
+{% load static %}
+{% load temp_tags %}
+{% block extra_css %}
+<style>
+    .about-container {
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        color: white;
+        margin-bottom: 60px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
+    }
+
+    .hero-title {
+        font-size: 3em;
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-family: 'Georgia', serif;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2em;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .stats-section {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+        margin: -30px auto 60px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9em;
+    }
+
+    .content-section {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+        margin-bottom: 60px;
+    }
+
+    .content-image {
+        border-radius: 15px;
+        overflow: hidden;
+        height: 400px;
+        background-color: #f5f6fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .content-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .content-text {
+        padding: 20px;
+    }
+
+    .content-title {
+        font-size: 2em;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .content-description {
+        color: #666;
+        line-height: 1.8;
+        margin-bottom: 30px;
+    }
+
+    .team-section {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .team-title {
+        font-size: 2.5em;
+        color: #2c3e50;
+        margin-bottom: 50px;
+    }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+    }
+
+    .team-member {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+
+    .team-member:hover {
+        transform: translateY(-5px);
+    }
+
+    .member-image {
+        width: 100%;
+        height: 200px;
+        background-color: #f5f6fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .member-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .member-info {
+        padding: 20px;
+    }
+
+    .member-name {
+        font-size: 1.2em;
+        color: #2c3e50;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .member-role {
+        color: #7f8c8d;
+        font-size: 0.9em;
+    }
+
+    .values-section {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin-bottom: 60px;
+    }
+
+    .value-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    }
+
+    .value-icon {
+        width: 60px;
+        height: 60px;
+        background: #3498db;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+        font-size: 1.5em;
+    }
+
+    .value-title {
+        font-size: 1.3em;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .value-description {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 1024px) {
+        .stats-section {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .team-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .content-section {
+            grid-template-columns: 1fr;
+        }
+
+        .values-section {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .hero-title {
+            font-size: 2.5em;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-section {
+            grid-template-columns: 1fr;
+        }
+
+        .team-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .values-section {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+<div class="about-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="hero-title">About Us</h1>
+        <p class="hero-subtitle">We are a passionate team dedicated to creating innovative solutions that make a difference in people's lives. Our journey began with a simple idea and has grown into a mission to transform the digital landscape.</p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-number">10+</div>
+            <div class="stat-label">Years Experience</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Projects Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">100+</div>
+            <div class="stat-label">Team Members</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">Countries Served</div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="content-section">
+        <div class="content-image">
+            <img src="/api/placeholder/600/400" alt="Our Story">
+        </div>
+        <div class="content-text">
+            <h2 class="content-title">Our Story</h2>
+            <p class="content-description">Founded in 2013, we began our journey with a vision to revolutionize how businesses approach digital solutions. What started as a small team of passionate innovators has grown into a global community of problem solvers, creators, and visionaries.</p>
+            <p class="content-description">Today, we continue to push boundaries and explore new possibilities, always staying true to our core mission of delivering excellence and innovation to our clients worldwide.</p>
+        </div>
+    </div>
+
+    <!-- Core Values Section -->
+    <div class="values-section">
+        <div class="value-card">
+            <div class="value-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <h3 class="value-title">Excellence</h3>
+            <p class="value-description">We strive for excellence in everything we do, setting high standards and consistently delivering quality results.</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h3 class="value-title">Innovation</h3>
+            <p class="value-description">We embrace creativity and forward-thinking approaches to solve complex challenges and drive progress.</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon">
+                <i class="fas fa-handshake"></i>
+            </div>
+            <h3 class="value-title">Integrity</h3>
+            <p class="value-description">We maintain the highest standards of integrity in all our interactions, building trust through transparency and honesty.</p>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="team-section">
+        <h2 class="team-title">Our Leadership Team</h2>
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="/api/placeholder/300/300" alt="Team Member 1">
+                </div>
+                <div class="member-info">
+                    <h3 class="member-name">John Smith</h3>
+                    <p class="member-role">Chief Executive Officer</p>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="/api/placeholder/300/300" alt="Team Member 2">
+                </div>
+                <div class="member-info">
+                    <h3 class="member-name">Sarah Johnson</h3>
+                    <p class="member-role">Chief Technology Officer</p>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="/api/placeholder/300/300" alt="Team Member 3">
+                </div>
+                <div class="member-info">
+                    <h3 class="member-name">Michael Chen</h3>
+                    <p class="member-role">Chief Design Officer</p>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="/api/placeholder/300/300" alt="Team Member 4">
+                </div>
+                <div class="member-info">
+                    <h3 class="member-name">Emily Davis</h3>
+                    <p class="member-role">Chief Marketing Officer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

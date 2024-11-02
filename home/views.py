@@ -80,12 +80,21 @@ def validate_password(password):
         re.search("[!@#$%^&*(),.?\":{}|<>]", password)
     )
 
+@never_cache
+@login_required(login_url='login')
+def contact(request):
+    return render(request,'user_side/contact/contact.html')
+
+@never_cache
+@login_required(login_url='login')
+def about(request):
+    return render(request,'user_side/about/about.html')
 
 @never_cache
 @login_required(login_url='login')
 def shoplist(request, flavor_id=None, category_id=None, size_id=None):
     query = request.GET.get('q')
-    sort_option = request.GET.get('sort', 'latest')  # Default sort option
+    sort_option = request.GET.get('sort', 'latest')
     flavours = Flavour.objects.all()
     categories = Category.objects.all()
     sizes = Size.objects.all()
@@ -102,36 +111,36 @@ def shoplist(request, flavor_id=None, category_id=None, size_id=None):
     if category_id:
         products = products.filter(category__id=category_id)
     if size_id:
-        products = products.filter(sizes__id=size_id) 
+        products = products.filter(sizes__id=size_id)
 
     if query:
         products = products.filter(
             Q(title__icontains=query) | 
             Q(category__name__icontains=query) |
-            Q(flavour__name__icontains=query)|
-            Q(price__icontains=query) 
+            Q(flavour__name__icontains=query) |
+            Q(price__icontains=query)
         )
-    if not products.exists():
-        messages.error(request, "No products match your search criteria.")
+        if not products.exists():
+            messages.error(request, "No products match your search criteria.")
 
+    # Simplified sort mapping
     sort_mapping = {
         'name_asc': 'title',
         'name_desc': '-title',
         'price_low': 'price',
         'price_high': '-price',
-        'latest': '-created_at',
+        'new_arrivals': '-added_on',  # Assuming you have an 'added_on' field
+        'latest': '-created_at',       # Assuming you have a 'created_at' field
         'relevance': None  # Default, keep the original order
     }
-    # Apply sorting
-    if sort_option in sort_mapping and sort_mapping[sort_option]:
-        products = products.order_by(sort_mapping[sort_option])
-    else:
-        products = products.order_by('-created_at')  # Fallback to latest if option not recognized
 
+    # Apply sorting
+    sort_field = sort_mapping.get(sort_option, '-created_at')  # Default to latest if option not recognized
+    products = products.order_by(sort_field)
 
     # Set up the paginator
     page = request.GET.get('page', 1)
-    paginator = Paginator(products, 16)  
+    paginator = Paginator(products, 16)
     try:
         page_products = paginator.page(page)
     except PageNotAnInteger:
@@ -163,8 +172,11 @@ def size_filter(request, size_id):
         'selected_size': selected_size,
     }
 
-    return render(request, 'user_side/shop/shop.html', context)  # Adjust to your template
+    return render(request, 'user_side/shop/shop.html', context)  
 
+def new_arrivals(request):
+    new_arrivals = Product.objects.order_by('-added_on')[:10]  # Get the latest 10 cakes
+    return render(request, 'your_template.html', {'new_arrivals': new_arrivals})
 @never_cache
 @login_required(login_url='login')
 def product_detail(request, product_id):
@@ -279,3 +291,5 @@ def LogoutPage(request):
     request.session.flush()
     messages.success(request, "Successfully logged out")
     return redirect('home')
+
+

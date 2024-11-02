@@ -389,7 +389,7 @@
 <div class="cart-container">
   <a href="{% url "cart" %}" class="cart-button">
     <i class="fas fa-shopping-cart"></i>
-    <span class="cart-count" id="cart-count">0</span>
+    {% comment %} <span class="cart-count" id="cart-count">0</span> {% endcomment %}
   </a>
 </div>
 <!-- Breadcrumb Navigation -->
@@ -436,7 +436,7 @@
               <!-- Reference Dropdown -->
               <div class="btn-group">
                 <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" id="dropdownMenuReference" data-toggle="dropdown">
-                    Reference
+                  Sort By
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuReference">
                     <a class="dropdown-item" href="?sort=relevance">Relevance</a>

@@ -50,6 +50,7 @@ class Product(models.Model):
     is_new = models.BooleanField(default=False) 
     dietary_info = models.CharField(max_length=100, blank=True, null=True)  
     sizes = models.ManyToManyField(Size, related_name='products')
+    added_on = models.DateTimeField(auto_now_add=True ,null=True)
 
     def __str__(self):
         return self.title

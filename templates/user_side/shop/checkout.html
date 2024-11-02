@@ -1,0 +1,155 @@
+{% extends "user_side/base.html" %}
+{% block title %}Checkout{% endblock %}
+
+{% load static %}
+{% load cart_filters %}
+
+{% block content %}
+<div class="bg-light py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mb-0">
+                <a href="{% url 'home' %}">Home</a> <span class="mx-2 mb-0">/</span>
+                <a href="{% url 'cart' %}">Cart</a> <span class="mx-2 mb-0">/</span>
+                <strong class="text-black">Checkout</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container">
+        <form method="POST" class="row">
+            {% csrf_token %}
+            <!-- Billing Details -->
+            <div class="col-md-6 mb-5 mb-md-0">
+                <h2 class="h3 mb-3 text-black">Billing Details</h2>
+                <div class="p-3 p-lg-5 border">
+                    <div class="form-group row mb-3">
+                        <div class="col-md-6">
+                            <label for="firstName" class="text-black">First Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="lastName" class="text-black">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="email" class="text-black">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="phone" class="text-black">Phone <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="address" class="text-black">Address <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="address" name="address" placeholder="Street address" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Apartment, suite, unit etc. (optional)">
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <div class="col-md-6">
+                            <label for="city" class="text-black">City <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="city" name="city" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="state" class="text-black">State <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="state" name="state" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <div class="col-md-6">
+                            <label for="pincode" class="text-black">Pincode <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="pincode" name="pincode" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="orderNotes" class="text-black">Order Notes</label>
+                        <textarea name="orderNotes" id="orderNotes" cols="30" rows="5" class="form-control" placeholder="Write your notes here..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-md-6">
+                <div class="row mb-5">
+                    <div class="col-md-12">
+                        <h2 class="h3 mb-3 text-black">Your Order</h2>
+                        <div class="p-3 p-lg-5 border">
+                            <table class="table site-block-order-table mb-5">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart_items %}
+                                    <tr>
+                                        <td>{{ item.product.title }} <strong class="mx-2">x</strong> {{ item.quantity }}</td>
+                                        <td>₹{{ item.product.price|multiply:item.quantity }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
+                                        <td class="text-black" id="cartSubtotal">₹{{ cart.total }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
+                                        <td class="text-black font-weight-bold" id="orderTotal">₹{{ cart.total }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Payment Options -->
+                            <div class="border p-3 mb-3">
+                                <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank" role="button" aria-expanded="false" aria-controls="collapsebank">Payment Options</a></h3>
+
+                                <div class="collapse" id="collapsebank">
+                                    <div class="py-2">
+                                        {% comment %} <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="payment" id="upi" value="upi" required>
+                                            <label class="form-check-label" for="upi">UPI Payment</label>
+                                        </div> {% endcomment %}
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="payment" id="cod" value="cod" required>
+                                            <label class="form-check-label" for="cod">Cash on Delivery</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <button class="btn btn-danger btn-lg py-3 btn-block" type="submit">
+                                    <i class="fas fa-shopping-bag me-2"></i>Place Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updateOrderSummary() {
+        // Get subtotal from cart page or calculate it here
+        const subtotal = parseFloat(localStorage.getItem('cartSubtotal')) || 0;
+        document.getElementById('cartSubtotal').innerText = '₹' + subtotal.toFixed(2);
+        document.getElementById('orderTotal').innerText = '₹' + subtotal.toFixed(2); // Add logic for shipping/tax if needed
+    }
+
+    document.addEventListener("DOMContentLoaded", updateOrderSummary);
+</script>
+{% endblock %}

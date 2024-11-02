@@ -1,150 +1,186 @@
-{% extends "user_side/base.html" %}
-{% block title %}Cart{% endblock %}
-
-{% load static %}
-{% load cart_filters %}
-
-{% block content %}
+{% extends "user_side/base.html" %} {% block title %}Cart{% endblock %} {% load
+static %} {% load cart_filters %} {% block content %}
 <div class="bg-light py-3">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12 mb-0">
-                <a href="{% url 'home' %}">Home</a> <span class="mx-2 mb-0">/</span> <strong class="text-black">Cart</strong>
-            </div>
-        </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 mb-0">
+        <a href="{% url 'home' %}">Home</a> <span class="mx-2 mb-0">/</span>
+        <strong class="text-black">Cart</strong>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="site-section">
-    <div class="container">
-        <div class="row mb-5">
-            <div class="col-md-12">
-                <div class="site-blocks-table">
-                    <table class="table table-bordered table-responsive-md">
-                        <thead>
-                            <tr>
-                                <th class="product-thumbnail">Image</th>
-                                <th class="product-name">Product</th>
-                                <th class="product-price">Price</th>
-                                <th class="product-quantity">Quantity</th>
-                                <th class="product-size">Size</th>
-                                <th class="product-total">Total</th>
-                                <th class="product-remove">Remove</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in cart_items %}
-                            <tr>
-                                <td class="product-thumbnail">
-                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="img-fluid rounded shadow">
-                                </td>
-                                <td class="product-name">
-                                    <h5 class="text-black">{{ item.product.title }}</h5>
-                                </td>
-                                <td>
-                                    <p class="text-black font-weight-bold">₹{{ item.product.price }}</p>
-                                </td>
-                                <td>
-                                    <div class="d-flex justify-content-center align-items-center">
-                                        <input type="number" name="quantity_{{ item.id }}" class="form-control text-center w-75" value="{{ item.quantity }}" min="1" max="10" style="border-color: red; color: red;" onchange="updateTotal({{ item.product.price }}, this.value, {{ item.id }})">
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="text-black">{{ item.size }}</p>
-                                </td>
-                                <td>
-                                    <p class="text-black font-weight-bold" id="total_{{ item.id }}">₹{{ item.product.price|multiply:item.quantity }}</p>
-                                </td>
-                                <td>
-                                    <form method="POST" action="{% url 'remove_from_cart' item.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger btn-sm ">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <h4 class="text-muted">Your cart is empty.</h4>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  <div class="container">
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="site-blocks-table">
+          <table class="table table-bordered table-responsive-md">
+            <thead>
+              <tr>
+                <th class="product-thumbnail">Image</th>
+                <th class="product-name">Product</th>
+                <th class="product-price">Price</th>
+                <th class="product-quantity">Quantity</th>
+                <th class="product-size">Size</th>
+                <th class="product-total">Total</th>
+                <th class="product-remove">Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+              <tr>
+                <td class="product-thumbnail">
+                  <img
+                    src="{{ item.product.image.url }}"
+                    alt="{{ item.product.title }}"
+                    class="img-fluid rounded shadow"
+                  />
+                </td>
+                <td class="product-name">
+                  <h5 class="text-black">{{ item.product.title }}</h5>
+                </td>
+                <td>
+                  <p class="text-black font-weight-bold">
+                    ₹{{ item.product.price }}
+                  </p>
+                </td>
+                <td>
+                  <div class="d-flex justify-content-center align-items-center">
+                    <input
+                      type="number"
+                      name="quantity_{{ item.id }}"
+                      class="form-control text-center w-75"
+                      value="{{ item.quantity }}"
+                      min="1"
+                      max="10"
+                      style="border-color: red; color: red"
+                      onchange="updateTotal({{ item.product.price }}, this.value, {{ item.id }})"
+                    />
+                  </div>
+                </td>
+                <td>
+                  <p class="text-black">{{ item.size }}</p>
+                </td>
+                <td>
+                  <p
+                    class="text-black font-weight-bold"
+                    id="total_{{ item.id }}"
+                  >
+                    ₹{{ item.product.price|multiply:item.quantity }}
+                  </p>
+                </td>
+                <td>
+                  <form
+                    method="POST"
+                    action="{% url 'remove_from_cart' item.id %}"
+                  >
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-center">
+                  <h4 class="text-muted">Your cart is empty.</h4>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="row mb-5">
-                    <div class="col-md-6">
-                        <a href="{% url 'shop' %}" class="btn btn-outline-danger btn-sm btn-block">
-                            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 pl-5">
-                <div class="row justify-content-end">
-                    <div class="col-md-7">
-                        <div class="row">
-                            <div class="col-md-12 text-right border-bottom mb-5">
-                                <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <span class="text-black">Subtotal</span>
-                            </div>
-                            <div class="col-md-6 text-right">
-                                <strong class="text-black" id="subtotal">₹0.00</strong>
-                            </div>
-                        </div>
-                        <div class="row mb-5">
-                            <div class="col-md-6">
-                                <span class="text-black">Total</span>
-                            </div>
-                            <div class="col-md-6 text-right">
-                                <strong class="text-black" id="total">₹0.00</strong>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button class="btn btn-danger btn-lg py-3 btn-block" onclick="window.location='checkout.html'">
-                                    <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="row mb-5">
+          <div class="col-md-6">
+            <a
+              href="{% url 'shop' %}"
+              class="btn btn-outline-danger btn-sm btn-block"
+            >
+              <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 pl-5">
+        <div class="row justify-content-end">
+          <div class="col-md-7">
+            <div class="row">
+              <div class="col-md-12 text-right border-bottom mb-5">
+                <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <span class="text-black">Subtotal</span>
+              </div>
+              <div class="col-md-6 text-right">
+                <strong class="text-black" id="subtotal">₹0.00</strong>
+              </div>
+            </div>
+            <div class="row mb-5">
+              <div class="col-md-6">
+                <span class="text-black">Total</span>
+              </div>
+              <div class="col-md-6 text-right">
+                <strong class="text-black" id="total">₹0.00</strong>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <a
+                  href="{% url 'checkout' %}"
+                  class="btn btn-outline-danger btn-sm btn-block"
+                >
+                  <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
+                </a>
+                {% comment %}
+                <button
+                  class="btn btn-danger btn-lg py-3 btn-block"
+                  onclick="window.location='checkout.html'"
+                >
+                  <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
+                </button>
+                {% endcomment %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    function updateTotal(price, quantity, itemId) {
-        const total = price * quantity;
-        document.getElementById('total_' + itemId).innerText = '₹' + total.toFixed(2);
-        updateSubtotal();
-    }
+  function updateTotal(price, quantity, itemId) {
+    const total = price * quantity;
+    document.getElementById("total_" + itemId).innerText =
+      "₹" + total.toFixed(2);
+    updateSubtotal();
+  }
 
-    function updateSubtotal() {
-        let subtotal = 0;
-        const totalElements = document.querySelectorAll('[id^="total_"]');
-        totalElements.forEach(function(totalElem) {
-            const totalValue = parseFloat(totalElem.innerText.replace('₹', '').replace(',', ''));
-            subtotal += totalValue;
-        });
-        document.getElementById('subtotal').innerText = '₹' + subtotal.toFixed(2);
-        document.getElementById('total').innerText = '₹' + subtotal.toFixed(2); // Adjust if needed for discounts/taxes
-    }
+  function updateSubtotal() {
+    let subtotal = 0;
+    const totalElements = document.querySelectorAll('[id^="total_"]');
+    totalElements.forEach(function (totalElem) {
+      const totalValue = parseFloat(
+        totalElem.innerText.replace("₹", "").replace(",", "")
+      );
+      subtotal += totalValue;
+    });
+    document.getElementById("subtotal").innerText = "₹" + subtotal.toFixed(2);
+    document.getElementById("total").innerText = "₹" + subtotal.toFixed(2); // Adjust if needed for discounts/taxes
+  }
 
-    document.addEventListener("DOMContentLoaded", updateSubtotal); // Initialize subtotal on page load
+  document.addEventListener("DOMContentLoaded", updateSubtotal); // Initialize subtotal on page load
 </script>
 
 {% endblock %}

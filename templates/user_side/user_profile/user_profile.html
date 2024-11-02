@@ -1,0 +1,263 @@
+{% extends "user_side/base.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+  .profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .profile-header {
+    background: linear-gradient(135deg, #d33c3c 0%, #ff6b6b 100%);
+    border-radius: 20px;
+    padding: 40px;
+    color: white;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 20px rgba(211, 60, 60, 0.2);
+  }
+
+  .profile-header-content {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .profile-image-container {
+    position: relative;
+  }
+
+  .profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+  }
+
+  .profile-image:hover {
+    transform: scale(1.05);
+  }
+
+  .profile-info {
+    flex-grow: 1;
+  }
+
+  .profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-contact {
+    display: flex;
+    gap: 20px;
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .profile-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .profile-details {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .details-section {
+    margin-bottom: 30px;
+  }
+
+  .section-title {
+    color: #d33c3c;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .detail-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+  }
+
+  .detail-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .detail-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+
+  .detail-value {
+    color: #2d3436;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .profile-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+  }
+
+  .btn-profile {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-back {
+    background-color: #f8f9fa;
+    color: #d33c3c;
+    border: 2px solid #d33c3c;
+  }
+
+  .btn-back:hover {
+    background-color: #d33c3c;
+    color: white;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+  }
+
+  @media (max-width: 768px) {
+    .profile-header-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .profile-contact {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-image {
+      width: 120px;
+      height: 120px;
+    }
+
+    .profile-name {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-header-content">
+      <div class="profile-image-container">
+        <img
+          src="{% static 'user_assets/images/user_pro.png' %}"
+          alt="Profile Picture"
+          class="profile-image"
+        />
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
+        <div class="profile-contact">
+          <div class="profile-contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>{{ user.email }}</span>
+          </div>
+          <div class="profile-contact-item">
+            <i class="fas fa-phone"></i>
+            <span>{{ user_mobile }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-details">
+    {% if user_address %}
+    <div class="details-section">
+      <h2 class="section-title">
+        <i class="fas fa-map-marker-alt"></i>
+        Address Information
+      </h2>
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label">Full Name</div>
+          <div class="detail-value">{{ user_address.name }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Pincode</div>
+          <div class="detail-value">{{ user_address.pincode }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Locality</div>
+          <div class="detail-value">{{ user_address.locality }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">City</div>
+          <div class="detail-value">{{ user_address.city }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">District</div>
+          <div class="detail-value">{{ user_address.district }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">State</div>
+          <div class="detail-value">{{ user_address.state }}</div>
+        </div>
+      </div>
+
+      <div class="detail-item" style="margin-top: 20px">
+        <div class="detail-label">Complete Address</div>
+        <div class="detail-value">{{ user_address.address }}</div>
+        {% if user_address.landmark %}
+        <div class="detail-label" style="margin-top: 10px">Landmark</div>
+        <div class="detail-value">{{ user_address.landmark }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i
+        class="fas fa-home fa-3x"
+        style="color: #d33c3c; margin-bottom: 15px"
+      ></i>
+      <h3>No Address Information Available</h3>
+      <p>Please add your address details to complete your profile.</p>
+    </div>
+    {% endif %}
+
+    <div class="profile-actions">
+      <a href="{% url 'user_app:profile' %}" class="btn-profile btn-back">
+        <i class="fas fa-arrow-left"></i>
+        Back to Profile Edit
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

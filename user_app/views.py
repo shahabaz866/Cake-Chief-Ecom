@@ -5,18 +5,97 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 import re
 
-# Create your views here.
-@login_required(login_url='home:signin')
-def userProfile(request):
-    user = request.user
-    print(user)
-    
-    try:
-        mobile = UserMobile.objects.filter(user=user)
-    except UserMobile.DoesNotExist:
-        mobile = None
 
-    return render(request,'user_side/user_profile/profile.html',{'user': user,'mobile': mobile})
+@login_required
+def profile_view(request):
+    user = request.user
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        phone_number = request.POST.get('phone')
+
+        # Update user details
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+
+        # Update or create phone number
+        UserMobile.objects.update_or_create(user=user, defaults={'mobile_number': phone_number})
+
+        # Handle address fields
+        name = request.POST.get('name')
+        pincode = request.POST.get('pincode')
+        locality = request.POST.get('locality')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        district = request.POST.get('district')
+        state = request.POST.get('state')
+        landmark = request.POST.get('landmark')
+
+        # Check if the required fields are not empty before updating
+        if name and pincode and locality and address and city and district and state:
+            # Update or create user address
+            UserAddress.objects.update_or_create(
+                user=user,
+                defaults={
+                    'name': name,
+                    'pincode': pincode,
+                    'locality': locality,
+                    'address': address,
+                    'city': city,
+                    'district': district,
+                    'state': state,
+                    'landmark': landmark,
+                }
+            )
+            messages.success(request, "Profile updated successfully!")
+        else:
+            messages.error(request, "Please fill in all required fields for address.")
+
+      
+    try:
+        user_mobile = UserMobile.objects.get(user=user).mobile_number
+    except UserMobile.DoesNotExist:
+        user_mobile = ''
+
+    try:
+        user_address = UserAddress.objects.get(user=user)
+    except UserAddress.DoesNotExist:
+        user_address = None
+
+  
+
+    context = {
+        'user': user,
+        'user_mobile': user_mobile,
+        'user_address': user_address,
+        
+    }
+    return render(request, 'user_side/user_profile/profile.html', context)
+
+@login_required
+def user_show_view(request):
+    user = request.user
+    try:
+        user_mobile = UserMobile.objects.get(user=user).mobile_number
+    except UserMobile.DoesNotExist:
+        user_mobile = ''
+
+    try:
+        user_address = UserAddress.objects.get(user=user)
+    except UserAddress.DoesNotExist:
+        user_address = None
+
+    context = {
+        'user': user,
+        'user_mobile': user_mobile,
+        'user_address': user_address,
+    }
+    return render(request, 'user_side/user_profile/user_profile.html', context)
+
+
 
 # @login_required(login_url='home:signin')
 # def user_address(request):
