@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import UserAddress
-from .models import UserMobile
+from .models import Address
+from .models import UserContact
 # Register your models here.
 
-admin.site.register(UserAddress)
-admin.site.register(UserMobile)
+admin.site.register(Address)
+admin.site.register(UserContact)

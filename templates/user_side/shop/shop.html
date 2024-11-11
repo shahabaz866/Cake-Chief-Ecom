@@ -6,6 +6,7 @@
 
 {% load humanize %}
 <style>
+  
   .move-down {
     margin-top: 57px; /* Adjust the value as needed */
   }
@@ -34,7 +35,7 @@
 
 .search-input:focus {
     outline: none;
-    border-color: #D33C3C;
+    border-color:#b52a2a;
     box-shadow: 0 3px 8px rgba(211, 60, 60, 0.1);
 }
 
@@ -43,7 +44,7 @@
     right: 5px;
     top: 50%;
     transform: translateY(-50%);
-    background: #D33C3C;
+    background:#b52a2a;
     border: none;
     width: 35px;
     height: 35px;
@@ -143,15 +144,16 @@
 
 .category-header {
     padding: 1rem;
-    border-bottom: 1px solid #eee;
-    background-color: #f8f9fa;
+    border-bottom: 1px solid #b52a2a;
+    background-color:#b52a2a;
+    border-radius: 8px;
 }
 
 .category-title {
     font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #333;
+    color: #ffff;
     margin: 0;
 }
 
@@ -201,18 +203,180 @@
 }
 
 /* Custom icons for each category */
-.icon-wedding {
-    content: "💒";
+/* Category Icon Base Styles */
+[class^="icon-"] {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 12px;
+    transition: all 0.3s ease;
 }
-.icon-birthday {
-    content: "🎂";
+
+/* Wedding Category */
+.icon-Wedding::before {
+    content: "👰";
+    background: linear-gradient(45deg, #fff5f7, #ffd1dc);
+    box-shadow: 0 2px 10px rgba(255, 182, 193, 0.3);
 }
-.icon-anniversary {
+.icon-Wedding:hover::before {
     content: "💑";
+    transform: scale(1.1);
 }
-.icon-kids {
+
+/* Birthday Category */
+.icon-Birthday::before {
+    content: "🎂";
+    background: linear-gradient(45deg, #f0f9ff, #ccf2fe);
+    box-shadow: 0 2px 10px rgba(135, 206, 250, 0.3);
+}
+.icon-Birthday:hover::before {
+    content: "🎉";
+    transform: scale(1.1);
+}
+
+/* Anniversary Category */
+.icon-Anniversary::before {
+    content: "💑";
+    background: linear-gradient(45deg, #fff0f7, #ffd6e7);
+    box-shadow: 0 2px 10px rgba(255, 182, 193, 0.3);
+}
+.icon-Anniversary:hover::before {
+    content: "💝";
+    transform: scale(1.1);
+}
+
+/* Kids Category */
+.icon-Kids::before {
+    content: "👶";
+    background: linear-gradient(45deg, #f0fff4, #c6f6d5);
+    box-shadow: 0 2px 10px rgba(72, 187, 120, 0.3);
+}
+.icon-Kids:hover::before {
     content: "🎈";
+    transform: scale(1.1);
 }
+
+/* Fruit Category */
+.icon-Fruit::before {
+    content: "🍓";
+    background: linear-gradient(45deg, #fff5f5, #fed7d7);
+    box-shadow: 0 2px 10px rgba(245, 101, 101, 0.3);
+}
+.icon-Fruit:hover::before {
+    content: "🍎";
+    transform: scale(1.1);
+}
+
+/* Fondant Category */
+.icon-Fondant::before {
+    content: "🍰";
+    background: linear-gradient(45deg, #fff5f7, #fed7e2);
+    box-shadow: 0 2px 10px rgba(246, 173, 85, 0.3);
+}
+.icon-Fondant:hover::before {
+    content: "🧁";
+    transform: scale(1.1);
+}
+
+/* Red Velvet Category */
+.icon-RedVelvet::before {
+    content: "🍫";
+    background: linear-gradient(45deg, #742f37, #5c1f28);
+    box-shadow: 0 2px 10px rgba(116, 47, 55, 0.3);
+}
+.icon-RedVelvet:hover::before {
+    content: "❤️";
+    transform: scale(1.1);
+}
+
+/* Chocolate Category */
+.icon-Chocolate::before {
+    content: "🍫";
+    background: linear-gradient(45deg, #795548, #5d4037);
+    box-shadow: 0 2px 10px rgba(121, 85, 72, 0.3);
+}
+.icon-Chocolate:hover::before {
+    content: "🎂";
+    transform: scale(1.1);
+}
+
+/* Premium Category */
+.icon-Premium::before {
+    content: "👑";
+    background: linear-gradient(45deg, #ffd700, #ffa500);
+    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+}
+.icon-Premium:hover::before {
+    content: "✨";
+    transform: scale(1.1);
+}
+
+/* Animation for all category icons */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Common hover effects for all icons */
+[class^="icon-"]:hover {
+    animation: pulse 1s infinite;
+    cursor: pointer;
+}
+
+/* Additional styles for the category container */
+.category-link {
+    background: white;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin: 5px 0;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.category-link:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(to right, white, #f8f9fa);
+}
+
+/* Category count badge */
+.category-count {
+    background: #f8f9fa;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.category-link:hover .category-count {
+    background: #e9ecef;
+    color: #333;
+}
+
+/* Active category styles */
+.category-link.active {
+    background: linear-gradient(to right, #ff6b6b, #ff8787);
+    color: white;
+}
+
+.category-link.active .category-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+
 .hover-shadow:hover {
   transform: translateY(-3px);
   box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
@@ -257,7 +421,7 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid #fff;
-  background:  #D33C3C;
+  background: #b52a2a;
   top: -6px;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -291,7 +455,7 @@
 }
 
 .btn:hover {
-  color:  #D33C3C;
+  color: #b52a2a;
   background:#D33C3C;
 
 }
@@ -315,7 +479,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #D33C3C;
+  background-color:#b52a2a;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -330,7 +494,7 @@
 
 .cart-count {
   background-color: white;
-  color: #D33C3C;
+  color:#b52a2a;
   border-radius: 50%;
   padding: 2px 6px;
   font-size: 0.8rem;
@@ -376,7 +540,7 @@
 #dropdownMenuReference:active,
 #dropdownMenuOffset:focus,
 #dropdownMenuOffset:active {
-    background-color:  #D33C3C !important;
+    background-color: #b52a2a !important;
     box-shadow: none !important; /* Removes the outline shadow */
 }
 
@@ -387,9 +551,9 @@
 
 {% endblock  %}
 <div class="cart-container">
-  <a href="{% url "cart" %}" class="cart-button">
+  <a href="{% url "cart_app:cart" %}" class="cart-button">
     <i class="fas fa-shopping-cart"></i>
-    {% comment %} <span class="cart-count" id="cart-count">0</span> {% endcomment %}
+  {% comment %} <span class="cart-count" id="cart-count">0</span> {% endcomment %}
   </a>
 </div>
 <!-- Breadcrumb Navigation -->
@@ -481,11 +645,11 @@
                               </a>
                           </h5>
                           {% if product.stock <= 0 %}
-                              <span class="badge badge-danger">Out of Stock</span>
+                              <span class="text-danger">Out of Stock</span>
                           {% else %}
-                              <span class="badge badge-success">In Stock</span>
+                              <span class="text-success ">In Stock</span>
                           {% endif %}
-                          <p class="card-text text-muted small">{{ product.description|truncatechars:100 }}</p>
+                          {% comment %} <p class="card-text text-muted small">{{ product.description|truncatechars:100 }}</p> {% endcomment %}
                           <div class="mt-auto">
                               <div class="d-flex justify-content-between align-items-center">
                                   <span class="h5 mb-0">
@@ -546,16 +710,17 @@
               <h3 class="category-title">Categories</h3>
           </div>
           <ul class="category-list">
-            {% for category in categories %}
-            <li class="category-item">
-                <a href="{% url 'shop_by_category' category.id %}" class="category-link">
-                    <span class="category-icon icon-{{ category.id }}">{{ category.icon }}</span>
-                    <span class="category-name">{{ category.name }}</span>
-                    <span class="category-count">({{ category.products.count }})</span>
-                </a>
-            </li>
-            {% endfor %}
-              
+              {% for category in categories %}
+              <li class="category-item">
+                  <a href="{% url 'shop_by_category' category.id %}" class="category-link">
+                      <!-- Apply icon class using the category name -->
+                      <span class="category-icon icon-{{ category.name|title }}"></span>
+                      <span class="category-name">{{ category.name }}</span>
+                      <span class="category-count">({{ category.products.count }})</span>
+                  </a>
+              </li>
+              {% endfor %}
+          </ul>
       </div>
 
 

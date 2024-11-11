@@ -25,7 +25,6 @@ urlpatterns = [
     path('delete_flavour/<int:id>/', views.delete_flavour, name='delete_flavour'),
     path('unblock_flavour/<int:id>/', views.unblock_flavour, name='unblock_flavour'),
 
-    path('sample_crp/', views.image_cropper, name='image_cropper'),
 
 
 

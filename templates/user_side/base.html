@@ -20,6 +20,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
 
 
 <style>
@@ -157,35 +160,25 @@ display: flex;
 justify-content: space-around;
 }
 }
-.alert-container {
-margin-top: 20px;
-padding: 10px;
+
+.toastify {
+  padding: 12px 20px;
+  color: white;
+  display: inline-block;
+  box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12);
+  background-color: #333;
+  position: fixed;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  max-width: calc(50% - 20px);
+  z-index: 2147483647;
 }
 
-.alert {
-padding: 15px;
-margin-bottom: 20px;
-border-radius: 5px;
-}
-
-.alert-success {
-background-color: #d4edda;
-color: #155724;
-}
-
-.alert-error, .alert-danger {
-background-color: #f8d7da;
-color: #721c24;
-}
-
-.alert-info {
-background-color: #d1ecf1;
-color: #0c5460;
-}
-
-.alert-warning {
-background-color: #fff3cd;
-color: #856404;
+.toastify.on {
+  opacity: 1;
 }
 .user-dropdown {
 position: relative;
@@ -240,7 +233,7 @@ color: #666;
 position: absolute;
 top: -8px;
 right: -8px;
-background-color: #D33C3C;
+background-color:#b52a2a;
 color: white;
 border-radius: 50%;
 padding: 0.25rem 0.5rem;
@@ -297,7 +290,7 @@ display: none;
 }
 
 .count {
-background-color:  #D33C3C !important;
+background-color: #b52a2a !important;
 color: white !important;
 border-radius: 50%; /* Make it look like a badge */
 padding: 2px 6px; /* Adjust padding for a circular shape */
@@ -314,7 +307,7 @@ color:#000000;
 opacity: 0.8; /* Optional: adds a subtle hover effect */
 }
 .bg-footer {
-background-color: #D33C3C;
+background-color:#b52a2a;
 color: #ffffff;
 }
 
@@ -352,13 +345,13 @@ margin-bottom: 0.75rem;
 }
 
 .footer-list a {
-color:  #D33C3C;
+color: #b52a2a;
 text-decoration: none;
 transition: color 0.3s ease;
 }
 
 .footer-list a:hover {
-color: #D33C3C;
+color:#b52a2a;
 }
 
 .promo-card {
@@ -412,11 +405,11 @@ transition: color 0.3s ease;
 }
 
 .contact-item a:hover {
-color: #D33C3C;
+color:#b52a2a;
 }
 
 .newsletter-text {
-color: #D33C3C;
+color:#b52a2a;
 margin-bottom: 1rem;
 }
 
@@ -473,16 +466,16 @@ grid-template-columns: 1fr;
 }
 }
 .site-footer a:hover {
-  color: #D33C3C !important;
+  color:#b52a2a !important;
 }
 .site-navbar .site-navigation .site-menu .active > a {
-  color: #D33C3C !important;
+  color:#b52a2a !important;
 }
 .site-navbar .site-navigation .site-menu  a:hover {
-  color: #D33C3C !important;
+  color:#b52a2a !important;
 }
 .site-navbar .site-navigation .site-menu  a:hover {
-  color: #D33C3C;
+  color:#b52a2a;
 }
 
 .custom-alert {
@@ -501,9 +494,9 @@ grid-template-columns: 1fr;
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 
                 <div style="flex: 1; display: flex; align-items: center;">
-                  <form action="" class="site-block-top-search" style="display: flex; align-items: center;">
+                  {% comment %} <form action="" class="site-block-top-search" style="display: flex; align-items: center;">
                     <input type="text" class="form-control border-0" placeholder="Search" style="margin-left: 5px;">
-                  </form>
+                  </form> {% endcomment %}
                 </div>
 
                 
@@ -527,6 +520,10 @@ grid-template-columns: 1fr;
                             <i class="fas fa-user-circle"></i>
                             Profile
                           </a>
+                         <a href="{% url "order_app:order_list" %}" class="dropdown-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Orders 
+                          </a> 
                           <a href="#" class="dropdown-item">
                             <i class="fas fa-cog"></i>
                             Settings
@@ -543,9 +540,9 @@ grid-template-columns: 1fr;
                             <i class="icon far fa-heart"></i>
                         </a>
                       </li>
-                      {% if  user.is_authenticated %}
+                      {% if user.is_authenticated and not user.username == 'demo_user' %}
                       <li class="icon-item">
-                        <a href="{% url "cart" %}" class="icon-link site-cart">
+                        <a href="{% url "cart_app:cart" %}" class="icon-link site-cart">
                             <i class="icon fas fa-shopping-cart"></i>
                           {% comment %} <span class="count" stl>2</span> {% endcomment %}
                         </a>
@@ -554,7 +551,7 @@ grid-template-columns: 1fr;
                       {% endif %}
                       {% if not user.is_authenticated %}
                       <li style="margin-left: 30px;">
-                        <a href="{% url 'login' %}" class="login-signup-btn" style="text-decoration: none; padding: 8px 15px; background-color: #D33C3C; color: #fff; border-radius: 5px; font-size: 14px; margin: 0;">Login / Signup</a>
+                        <a href="{% url 'login' %}" class="login-signup-btn" style="text-decoration: none; padding: 8px 15px; background-color:#b52a2a; color: #fff; border-radius: 5px; font-size: 14px; margin: 0;">Login / Signup</a>
                       </li>
                       {% endif %}
                        <li class="icon-item d-inline-block d-md-none">
@@ -589,24 +586,9 @@ grid-template-columns: 1fr;
   {% comment %} <li><a href="#">New Arrivals</a></li> {% endcomment %}
   <li><a href="{% url "contact" %}">Contact</a></li>
   <li> 
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert 
-    {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %}
-    alert-dismissible fade show custom-alert" role="alert">  
-            {{ message }}
-        </div>
-    {% endfor %}
-    <script>
-        // Dismiss alert messages after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => alert.classList.remove('show'));
-        }, 5000); // 5000 ms = 5 seconds
-    </script>
-{% else %}
-    
-{% endif %}</li>
+   
+  
+  </li>
 </ul>
 
 </div>
@@ -705,19 +687,8 @@ grid-template-columns: 1fr;
       <script src="{% static 'user_assets/js/aos.js' %}"></script>
       <script src="{% static 'user_assets/js/main.js' %}"></script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
-  
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if there are any messages inside the modal to show it
-            if (document.querySelectorAll('.bd-example-modal-sm .alert').length > 0) {
-                var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
-                messageModal.show();
-            }
-        });
-    </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -735,6 +706,45 @@ grid-template-columns: 1fr;
         }
       });
     });
+  </script>
+  <script>
+    function showToast(message, type) {
+      let backgroundColor = "#000";
+      switch(type) {
+        case 'success':
+        backgroundColor = "#0BDA51"; 
+        break;
+      case 'error':
+        backgroundColor = "#D33C3C";
+        break;
+      case 'warning':
+        backgroundColor = "#FFB347"; 
+        break;
+      case 'info':
+        backgroundColor = "#9B6A6C";
+        break;
+      }
+  
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        style: {
+          background: backgroundColor,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          borderRadius: "8px",
+          fontWeight: "500",
+        },
+      }).showToast();
+    }
+  
+    // For Django messages
+    {% if messages %}
+      {% for message in messages %}
+        showToast("{{ message }}", "{{ message.tags }}");
+      {% endfor %}
+    {% endif %}
   </script>
 </body>
 

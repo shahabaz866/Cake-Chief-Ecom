@@ -33,6 +33,7 @@ class Size(models.Model):
 
 
 class Product(models.Model):
+
     id = models.AutoField(primary_key=True) 
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE, null=True)
     flavour = models.ForeignKey(Flavour, related_name='products', on_delete=models.CASCADE, null=True)
@@ -113,6 +114,21 @@ class ProductImages(models.Model):
         # Save the new image back to the same path
         new_img.save(self.image.path)
 
+
+class Variant(models.Model):
+    WEIGHT_CHOICES=[
+         ('0.5kg', '0.5 kg'),
+        ('1kg', '1 kg'),
+        ('1.5kg', '1.5 kg'),
+        ('2kg', '2 kg'),
+    ]
+
+    product =models.ForeignKey(Product,on_delete=models.CASCADE, related_name='variants')
+    weight = models.CharField(max_length=10, choices=WEIGHT_CHOICES)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.weight} - ${self.price}"
 
 
 

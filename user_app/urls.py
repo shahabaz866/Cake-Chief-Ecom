@@ -1,17 +1,14 @@
 from django.urls import path
 from . import views
 
-
 app_name = 'user_app'
+
 urlpatterns = [
-    path('profile/', views.profile_view, name='profile'),
-    path('profile/show/', views.user_show_view, name='user_show'),
-    
- 
-
-    # path('delete_user_address/<int:id>', views.delete_user_address, name='delete_user_address'),
-    # path('replacement_order/<int:id>', views.replacement_order, name='replacement_order'),
-    # path('add_address_checkout/', views.add_address_checkout, name='add_address_checkout'),
-
-    ]
-
+    path('profile/', views.user_show_view, name='user_show'),
+    path('profile/edit/', views.edit_profile_view, name='edit_profile'),
+    path('addresses/', views.address_list_view, name='address_list'),
+    path('address/add/', views.add_address_view, name='add_address'),  # For adding an address
+    path('address/edit/<int:address_id>/', views.edit_address_view, name='edit_address'),  # For editing an address
+    path('address/delete/<int:address_id>/', views.delete_address, name='delete_address'),
+    path('address/set-default/<int:address_id>/', views.set_default_address, name='set_default_address'),
+]

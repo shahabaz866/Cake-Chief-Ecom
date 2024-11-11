@@ -1,0 +1,241 @@
+{% extends 'user_side/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .order-status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: capitalize;
+        transition: all 0.3s ease;
+    }
+    
+    .badge.bg-pending { 
+        background-color: #ffeeba; 
+        color: #856404;
+    }
+    .badge.bg-processing { 
+        background-color: #bee5eb; 
+        color: #0c5460;
+    }
+    .badge.bg-shipped { 
+        background-color: #b8daff; 
+        color: #004085;
+    }
+    .badge.bg-delivered { 
+        background-color: #c3e6cb; 
+        color: #155724;
+    }
+    .badge.bg-cancelled { 
+        background-color: #f5c6cb; 
+        color: #721c24;
+    }
+
+    .order-card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .order-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .product-image-container:hover {
+        transform: scale(1.05);
+    }
+
+    .tracking-info {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .order-summary {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+    .bg-danger-dark {
+        background-color: #b52a2a !important; /* Darker red */
+    }
+</style>
+
+<div class="container my-5 animate-fade-in">
+    <div class="row g-4">
+        <!-- Order Details Card -->
+        <div class="col-lg-8">
+            <div class="order-card card">
+                <div class="card-header bg-danger-dark text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Order #{{ order.id }}</h3>
+                        <span class="order-status-badge badge bg-{{ order.order_status|lower }}">
+                            {{ order.order_status }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <div>
+                                    <h6 class="text-muted mb-1">Order Date</h6>
+                                    <p class="mb-0 fw-bold">{{ order.created_at|date:"F j, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%">Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order_items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.product.image %}
+                                            <div class="product-image-container me-3">
+                                                <img src="{{ item.product.image.url }}" 
+                                                     alt="{{ item.product.title }}"
+                                                     class="rounded-3"
+                                                     style="width: 80px; height: 80px; object-fit: cover;">
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ item.product.title }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ item.price }}</td>
+                                    <td>₹{{ order.total_amount }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="order-summary">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-6">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Subtotal:</span>
+                                    <span>₹{{ order.total_amount }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Shipping:</span>
+                                    <span>₹0.00</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total:</strong>
+                                    <strong>₹{{ order.total_amount }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{% url 'order_app:cancel_order' order_id=order.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            Cancel Order
+                        </button>
+                    </form>
+              
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping Details Card -->
+        <div class="col-lg-4">
+            <div class="order-card card">
+                <div class="card-header bg-secondary text-white py-3" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shipping-fast me-2"></i>
+                        Shipping Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+    <h6 class="text-muted mb-2">Delivery Address</h6>
+    {% if default_address %}
+    <p class="mb-0">
+            {{ default_address.name }}<br>
+            {{ default_address.address }}<br>
+            {{ default_address.locality }}<br>
+            {{ default_address.city }}, {{ default_address.state }} - {{ default_address.pincode }}<br>
+            {% if order.user_address.landmark %}
+                Landmark: {{ default_address.landmark }}<br>
+            {% endif %}
+        </p>
+    {% else %}
+        <p class="mb-0">No delivery address provided.</p>
+    {% endif %}
+</div>
+
+{% comment %}                     
+                    <div class="tracking-info">
+                        <h6 class="mb-2">
+                            <i class="fas fa-truck me-2"></i>
+                            Tracking Information
+                        </h6> 
+                       <p class="mb-2">Tracking Number:</p>
+                        <div class="bg-white p-2 rounded">
+                            <code class="text-primary">{{ order.tracking_number }}</code>
+                        </div>
+
+                        <br>
+                     <a href="{% url 'order_app:status_page' order_id=order.id %}" class="btn btn-outline-danger btn-sm btn-block">
+                            <i class="fas fa-shopping-bag me-2"></i>Tracking
+                          </a> 
+ </div>  {% endcomment %}
+                    
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,19 @@
-{% extends "user_side/base.html" %} {% block title %}Cart{% endblock %} {% load
-static %} {% load cart_filters %} {% block content %}
+{% extends "user_side/base.html" %}
+{% block title %}Cart{% endblock %}
+{% load static %}
+{% load cart_filters %}
+{% block extra_css %}
+<style>
+  .quantity-control h3 {
+    color:#b52a2a !important; /* Forces the color to be red */
+    margin: 0;
+  }
+  
+</style>
+
+{% endblock  %}
+{% block content %}
+
 <div class="bg-light py-3">
   <div class="container">
     <div class="row">
@@ -24,7 +38,7 @@ static %} {% load cart_filters %} {% block content %}
                 <th class="product-price">Price</th>
                 <th class="product-quantity">Quantity</th>
                 <th class="product-size">Size</th>
-                <th class="product-total">Total</th>
+                {% comment %} <th class="product-total">Total</th> {% endcomment %}
                 <th class="product-remove">Remove</th>
               </tr>
             </thead>
@@ -32,50 +46,46 @@ static %} {% load cart_filters %} {% block content %}
               {% for item in cart_items %}
               <tr>
                 <td class="product-thumbnail">
-                  <img
-                    src="{{ item.product.image.url }}"
-                    alt="{{ item.product.title }}"
-                    class="img-fluid rounded shadow"
-                  />
+                  <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="img-fluid rounded shadow" />
                 </td>
                 <td class="product-name">
                   <h5 class="text-black">{{ item.product.title }}</h5>
                 </td>
-                <td>
-                  <p class="text-black font-weight-bold">
-                    ₹{{ item.product.price }}
-                  </p>
-                </td>
+                <td><p class="text-black font-weight-bold">₹{{ item.product.price }}</p></td>
+                <style>
+                  .quantity-control{
+                    text-decoration: none; /* Removes underline */
+
+                  }
+                  .quantity-control h3 {
+                    color:#b52a2a !important; /* Forces the color to be red */
+                    margin: 0;
+                  }
+                </style>
+                
                 <td>
                   <div class="d-flex justify-content-center align-items-center">
-                    <input
-                      type="number"
-                      name="quantity_{{ item.id }}"
-                      class="form-control text-center w-75"
-                      value="{{ item.quantity }}"
-                      min="1"
-                      max="10"
-                      style="border-color: red; color: red"
-                      onchange="updateTotal({{ item.product.price }}, this.value, {{ item.id }})"
-                    />
+                    <a href="#" class="quantity-control" data-action="minus" data-item-id="{{ item.id }}"><h3>-</h3></a>
+                
+                    <div id="quantity-{{ item.id }}" class="detail-qty border radius m-auto">
+                      <span>{{ item.quantity }}</span>
+                    </div>
+                
+                    <a href="#" class="quantity-control" data-action="plus" data-item-id="{{ item.id }}"><h3>+</h3></a>
                   </div>
                 </td>
+                
                 <td>
-                  <p class="text-black">{{ item.size }}</p>
-                </td>
-                <td>
-                  <p
-                    class="text-black font-weight-bold"
-                    id="total_{{ item.id }}"
-                  >
-                    ₹{{ item.product.price|multiply:item.quantity }}
+                  <p class="text-black">
+                    {% for size in item.product.sizes.all %}
+                      {{ size.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
                   </p>
                 </td>
-                <td>
-                  <form
-                    method="POST"
-                    action="{% url 'remove_from_cart' item.id %}"
-                  >
+                {% comment %} {% comment %} <td><p class="text-black font-weight-bold" id="total_{{ item.id }}">₹{{ item.product.price|multiply:item.quantity }}</p></td> {% endcomment %}
+                
+                <td> 
+                  <form method="POST" action="{% url 'cart_app:remove_from_cart' item.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-sm">
                       <i class="fas fa-trash-alt"></i>
@@ -98,60 +108,27 @@ static %} {% load cart_filters %} {% block content %}
 
     <div class="row">
       <div class="col-md-6">
-        <div class="row mb-5">
-          <div class="col-md-6">
-            <a
-              href="{% url 'shop' %}"
-              class="btn btn-outline-danger btn-sm btn-block"
-            >
-              <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
-            </a>
-          </div>
-        </div>
+        <a href="{% url 'shop' %}" class="btn btn-outline-danger btn-sm btn-block">
+          <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+        </a>
       </div>
       <div class="col-md-6 pl-5">
         <div class="row justify-content-end">
           <div class="col-md-7">
-            <div class="row">
-              <div class="col-md-12 text-right border-bottom mb-5">
-                <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
-              </div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <span class="text-black">Subtotal</span>
-              </div>
-              <div class="col-md-6 text-right">
-                <strong class="text-black" id="subtotal">₹0.00</strong>
-              </div>
-            </div>
-            <div class="row mb-5">
-              <div class="col-md-6">
-                <span class="text-black">Total</span>
-              </div>
-              <div class="col-md-6 text-right">
-                <strong class="text-black" id="total">₹0.00</strong>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-12">
-                <a
-                  href="{% url 'checkout' %}"
-                  class="btn btn-outline-danger btn-sm btn-block"
-                >
-                  <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
-                </a>
-                {% comment %}
-                <button
-                  class="btn btn-danger btn-lg py-3 btn-block"
-                  onclick="window.location='checkout.html'"
-                >
-                  <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
-                </button>
-                {% endcomment %}
-              </div>
-            </div>
+         <div class="border-bottom mb-5">
+              <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
+            </div> 
+             <div class="row mb-3">
+              <div class="col-md-6"><span class="text-black">Total</span></div>
+              <div class="col-md-6 text-right"><strong class="text-black" id="total-price">₹{{cart_total}}</strong></div>
+            </div> 
+            {% comment %} <div class="row mb-5">
+              <div class="col-md-6"><span class="text-black">Total</span></div>
+              <div class="col-md-6 text-right"><strong class="text-black" id="total-price">₹{{cart_total}}</strong></div>
+            </div>  {% endcomment %}
+            <a href="{% url 'cart_app:checkout' %}" class="btn btn-outline-danger btn-sm btn-block">
+              <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
+            </a>
           </div>
         </div>
       </div>
@@ -159,28 +136,39 @@ static %} {% load cart_filters %} {% block content %}
   </div>
 </div>
 
-<script>
-  function updateTotal(price, quantity, itemId) {
-    const total = price * quantity;
-    document.getElementById("total_" + itemId).innerText =
-      "₹" + total.toFixed(2);
-    updateSubtotal();
-  }
 
-  function updateSubtotal() {
-    let subtotal = 0;
-    const totalElements = document.querySelectorAll('[id^="total_"]');
-    totalElements.forEach(function (totalElem) {
-      const totalValue = parseFloat(
-        totalElem.innerText.replace("₹", "").replace(",", "")
-      );
-      subtotal += totalValue;
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.quantity-control').click(function(e){
+            e.preventDefault();
+            var action = $(this).data('action');
+            var itemId = $(this).data('item-id');
+        
+            var url = action === 'plus' ? "{% url 'cart_app:quantity_plus' 0 %}".replace('0', itemId) : "{% url 'cart_app:quantity_minus' 0 %}".replace('0', itemId);
+        
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data: { 'item_id': itemId },
+                success: function(response){
+                    if (response.error) {
+                        Swal.fire(response.error);
+                        return;
+                    }
+                    $('#quantity-' + itemId + ' span').text(response.quantity);
+                    $('#total-price').text('₹' + parseFloat(response.total_price).toFixed(1));
+                    $('#subtotal-' + itemId).text('₹'+ response.item_subtotal);
+                    updateSubtotal();
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
     });
-    document.getElementById("subtotal").innerText = "₹" + subtotal.toFixed(2);
-    document.getElementById("total").innerText = "₹" + subtotal.toFixed(2); // Adjust if needed for discounts/taxes
-  }
-
-  document.addEventListener("DOMContentLoaded", updateSubtotal); // Initialize subtotal on page load
 </script>
 
 {% endblock %}

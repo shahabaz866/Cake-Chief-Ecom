@@ -313,11 +313,11 @@
 
   /* Stock Status Variants */
   .stock-indicator[data-status="in-stock"] .stock-text {
-    color: #d33c3c;
+    color:#b52a2a;
   }
 
   .stock-indicator[data-status="in-stock"] .stock-bar {
-    background-color: #d33c3c;
+    background-color:#b52a2a;
   }
 
   .stock-indicator[data-status="low-stock"] .stock-text {
@@ -490,6 +490,13 @@
               {{ product.description }}
             </p>
           </div>
+          <h3>Variants:</h3>
+<ul>
+    {% for variant in variants %}
+        <li>{{ variant.weight }} - ${{ variant.price }}</li>
+    {% endfor %}
+</ul>
+          
 
           <!-- Cake Specifications -->
           <div class="cake-specs mb-4">
@@ -598,7 +605,7 @@
             <div class="action-buttons">
               <a
                 id="addToCartLink"
-                href="{% url 'add_cart' product.id %}?quantity=1"
+                href="{% url 'cart_app:add_cart' product.id  %}?quantity=1"
                 class="btn btn-primary btn-lg add-to-cart w-75"
               >
                 <i class="fas fa-shopping-cart me-2"></i>Add to Cart
@@ -780,7 +787,7 @@
   function updateCartLink() {
     const quantity = document.getElementById("quantityInput").value;
     const addToCartLink = document.getElementById("addToCartLink");
-    addToCartLink.href = `{% url 'add_cart' product.id %}?quantity=${quantity}`;
+    addToCartLink.href = `{% url 'cart_app:add_cart' product.id %}?quantity=${quantity}`;
   }
 
   function incrementQuantity() {

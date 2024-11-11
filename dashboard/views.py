@@ -11,6 +11,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import re 
+from django.utils.html import format_html
 
 
 def is_superuser(user):
@@ -80,7 +81,7 @@ def product_list(request):
 def add_products(request):
     
     if request.method == 'POST':
-        # Get form data
+        
         title = request.POST.get('product_name')
         stock = request.POST.get('quantity')
         description = request.POST.get('description')
@@ -90,10 +91,10 @@ def add_products(request):
         flavour_id = request.POST.get('flavour')
         selected_sizes = request.POST.getlist('sizes')
         
-        # Initialize error flag
+        
         has_errors = False
 
-        # Validate product name
+       
         if not title:
             messages.error(request, "Product name is required.")
             has_errors = True
@@ -226,6 +227,7 @@ def edit_product(request, product_id):
         price = request.POST.get('price')
         category_id = request.POST.get('category')
         flavour_id = request.POST.get('flavour')
+        selected_sizes = request.POST.getlist('sizes')
 
      
 
@@ -272,6 +274,10 @@ def edit_product(request, product_id):
         if 'main_image' in request.FILES:
             product.image = request.FILES['main_image']
 
+         # Update selected sizes
+        if selected_sizes:
+            product.sizes.set(selected_sizes)  
+
         product.save()
 
         # Update additional images
@@ -285,15 +291,18 @@ def edit_product(request, product_id):
         messages.success(request, "Product updated successfully!")
         return redirect('product_list')
 
-    # Get all categories and flavours
+    # Get all categories and flavours,sizes
     categories = Category.objects.all()
     flavours = Flavour.objects.all()
+    sizes = Size.objects.all()
 
     context = {
         'product': product,
         'product_images': product_images,
         'categories': categories,
         'flavours': flavours,
+        'sizes': sizes,
+        'selected_sizes': product.sizes.all(),
     }
     return render(request, 'admin/product_management/edit_product.html', context)
 
@@ -304,6 +313,7 @@ def delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     product.is_active = False
     product.save()
+    messages.error(request, "product blocked succesfully")
    
     return redirect('product_list') 
 
@@ -314,6 +324,8 @@ def unblock_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     product.is_active = True
     product.save()
+    messages.success(request, "product unblocked succesfully")
+
     
 
     return redirect('product_list')
@@ -424,7 +436,7 @@ def delete_category(request, id):
     category = get_object_or_404(Category, id=id)
     category.is_active = False
     category.save()
-    messages.success(request, f"Category '{category.name}' has been blocked successfully.")
+    messages.error(request,format_html(f"Category '{category.name}' has been blocked successfully."))
     return redirect('category_list')
 
 # Update unblock_category view to add success message
@@ -433,7 +445,7 @@ def unblock_category(request, id):
     category = get_object_or_404(Category, id=id)
     category.is_active = True
     category.save()
-    messages.success(request, f"Category '{category.name}' has been unblocked successfully.")
+    messages.success(request, format_html(f"Category '{category.name}' has been unblocked successfully."))
     return redirect('category_list')
 
 #-------------------- flavour_list-------------------
@@ -508,5 +520,3 @@ def unblock_flavour(request, id):
     flavour.save()  
     return redirect('flavour_list')
 
-def image_cropper(request):
-    return render(request, 'admin/product_management/sample_crp.html')

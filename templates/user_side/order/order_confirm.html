@@ -1,0 +1,306 @@
+{% extends 'user_side/base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+
+<!-- Custom CSS -->
+<style>
+    :root {
+        --primary-color:#b52a2a;
+        --primary-light: #fdf2f2;
+        --primary-dark: #b33333;
+    }
+    
+    .bg-custom-primary {
+        background-color: var(--primary-color) !important;
+    }
+    
+    .text-custom-primary {
+        color: var(--primary-color) !important;
+    }
+    
+    .border-custom-primary {
+        border-color: var(--primary-color) !important;
+    }
+    
+    .btn-custom-primary {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+    }
+    
+    .btn-custom-primary:hover {
+        background-color: var(--primary-dark);
+        color: white;
+    }
+    
+    .btn-outline-custom-primary {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    .btn-outline-custom-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .order-status-pill {
+        font-size: 0.85rem;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+    }
+    
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(211, 60, 60, 0.1) !important;
+    }
+    
+    .custom-icon-bg {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+    
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+
+<!-- Main Container -->
+<div class="min-vh-100 bg-light py-5">
+    <div class="container">
+        <!-- Order Success Banner -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden hover-lift">
+                    <div class="card-body p-0">
+                        <!-- Top Color Bar -->
+                        <div class="bg-custom-primary p-1"></div>
+                        
+                        <div class="p-5 text-center">
+                            <div class="mb-4">
+                                <!-- Animated Success Icon -->
+                                <div class="d-inline-flex justify-content-center align-items-center custom-icon-bg rounded-circle p-3 mb-3" 
+                                     style="width: 90px; height: 90px;">
+                                    <i class="fas fa-check-circle text-custom-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <h1 class="display-6 fw-bold text-custom-primary mb-2">Order Confirmed!</h1>
+                                <p class="text-muted mb-0">Thank you for shopping with us,  <strong >{{ user.first_name }}!</strong ></p>
+                                <p class="text-muted">Your order confirmation has been sent to <strong >{{ user.email }}</p></strong >
+                            </div>
+                            
+                            
+                            <!-- Order Status Pills -->
+                            <div class="d-flex justify-content-center gap-4 flex-wrap">
+                                <div class="px-4 py-3 bg-white rounded-4 shadow-sm">
+                                    <p class="text-muted small mb-1">Order Number</p>
+                                    <p class="fw-bold text-custom-primary mb-0">ORD-{{ order.id }}</p>
+                                </div>
+                                <div class="px-4 py-3 bg-white rounded-4 shadow-sm">
+                                    <p class="text-muted small mb-1">Order Date</p>
+                                    <p class="fw-bold text-custom-primary mb-0">{{ order.created_at|date:"F j, Y" }}</p>
+                                </div>
+                                <div class="px-4 py-3 bg-white rounded-4 shadow-sm">
+                                    <p class="text-muted small mb-1">Payment Status</p>
+                                    <div class="order-status-pill {% if order.is_paid %}bg-custom-primary text-white{% else %}bg-warning{% endif %}">
+                                        {{ payment_status }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Order Items -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg rounded-4 hover-lift mb-4">
+                    <div class="card-header bg-white border-0 py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="custom-icon-bg p-2 rounded-circle me-3">
+                                <i class="bi bi-geo-alt text-custom-primary"></i>
+                            </div>
+                            <h5 class="mb-0">Order Items</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        {% for item in order_items %}
+                        <div class="row align-items-center {% if not forloop.last %}border-bottom{% endif %} py-4">
+                            <div class="col-auto">
+                                {% if item.product.image %}
+                                <div class="rounded-4 border p-2" style="width: 200px; height: 150px;">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" 
+                                         class="img-fluid rounded-3" style="object-fit: cover; width: 100%; height: 100%;">
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col">
+                                <h6 class="fw-bold mb-2">{{ item.product.title }}</h6>
+
+                                <div class="d-flex gap-3">
+                                    {% comment %} <span class="badge bg-custom bg-opacity-10 text-custom-primary">
+                                        Size: {{ item.sizes }}
+                                    </span> {% endcomment %}
+                                    <span class="badge bg-custom bg-opacity-10 text-custom-primary" style="font-size: 1rem;">
+                                        Qty: {{ item.quantity }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-auto text-end">
+                                {% comment %} <p class="fw-bold text-custom-primary mb-1">₹{{ subtotal|floatformat:2 }}</p> {% endcomment %}
+                                <p class="text-muted small mb-0"><strong>₹{{ item.price|floatformat:2 }} each</p></strong>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Order Summary & Shipping Details -->
+                <div class="row g-4">
+                    <!-- Shipping Address -->
+                    <div class="col-md-7">
+                        <div class="card border-0 shadow-lg rounded-4 hover-lift h-100">
+                            <div class="card-header bg-white border-0 py-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="custom-icon-bg p-2 rounded-circle me-3">
+                                        <i class="bi bi-geo-alt text-custom-primary"></i>
+                                    </div>
+                                    <h5 class="mb-0">Shipping Address</h5>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="custom-icon-bg rounded-circle p-2 me-3">
+                                        <i class="bi bi-person text-custom-primary"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-0">{{ user.first_name }} {{ user.last_name }}</h6>
+                                </div>
+                                {% if default_address %}
+
+                                <div class="ps-5">
+                                    <address class="mb-3">
+                                        {{ default_address.address }}<br>
+                                        
+                                        {{ default_address.city }}, {{ default_address.state }} {{ default_address.pincode }}
+                                    </address>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-telephone-fill text-custom-primary me-2"></i>
+                                        <span>{{ primary_mobile_number  }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-envelope-fill text-custom-primary me-2"></i>
+                                        <span>{{ user.email }}</span>
+                                    </div>
+                                </div>
+                                {% comment %} {% if order.order_notes %}
+                                <div class="mt-4 pt-3 border-top">
+                                    <p class="text-muted small mb-1">Order Notes:</p>
+                                    <p class="mb-0">{{ order.order_notes }}</p>
+                                </div>
+                                {% endif %} {% endcomment %}
+                            </div>
+                        </div>
+                    </div>
+                        {% else %}
+                            <p>No default address found. Please add an address.</p>
+                        {% endif %}
+
+                    <!-- Order Summary -->
+                    <div class="col-md-5">
+                        <div class="card border-0 shadow-lg rounded-4 hover-lift">
+                            <div class="card-header bg-white border-0 py-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="custom-icon-bg p-2 rounded-circle me-3">
+                                        <i class="bi bi-receipt text-custom-"></i>
+                                    </div>
+                                    <h5 class="mb-0">Order Summary</h5>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="bg-light rounded-4 p-4 mb-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Subtotal</span>
+                                        <span>₹{{ order.total_amount|floatformat:2 }}</span>
+                                    </div>
+                                    <hr class="my-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="h6 fw-bold mb-0">Total Amount</span>
+                                        <span class="h4 fw-bold text-custom-primary mb-0">₹{{ order.total_amount|floatformat:2 }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-custom- bg-opacity-10 rounded-4 p-4">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-credit-card text-custom-primary me-2"></i>
+                                        <span class="fw-semibold">Payment Method</span>
+                                    </div>
+                                    <p class="mb-0 ps-4">{{ order.get_payment_method_display }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if order.payment_method == 'upi' and not order.is_paid %}
+            <!-- UPI Payment Instructions -->
+            <div class="col-lg-8">
+                <div class="card border-custom-primary border-2 shadow-lg rounded-4 hover-lift">
+                    <div class="card-header bg-custom-primary bg-opacity-10 border-0 py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white p-2 rounded-circle me-3">
+                                <i class="bi bi-exclamation-circle text-custom-primary"></i>
+                            </div>
+                            <h5 class="mb-0 text-custom-primary">Complete Your Payment</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert bg-custom-primary bg-opacity-10 border-0 rounded-4 mb-0">
+                            <p class="mb-0">Please complete your UPI payment to process your order.</p>
+                            <!-- Add your UPI payment details/QR code here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="col-lg-8 text-center mt-4">
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{% url 'home' %}" class="btn btn-outline-custom-primary rounded-pill px-4 py-2">
+                        <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                    </a>
+                    <button onclick="window.print()" class="btn btn-custom-primary rounded-pill px-4 py-2">
+                        <i class="bi bi-printer-fill me-2"></i>Print Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Track Order Button -->
+<div class="position-fixed bottom-0 end-0 m-4 no-print">
+    <button class="btn btn-custom-primary rounded-circle shadow-lg p-3" 
+            data-bs-toggle="tooltip" data-bs-placement="left" title="Track Order">
+        <i class="bi bi-truck"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

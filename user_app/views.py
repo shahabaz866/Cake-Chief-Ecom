@@ -1,13 +1,39 @@
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import UserAddress,UserMobile
-from django.contrib.auth.models import User
 from django.contrib import messages
-import re
+from django.views.decorators.cache import never_cache
+from .models import Address, UserContact
 
-
+@never_cache
 @login_required
-def profile_view(request):
+def user_show_view(request):
+    user = request.user
+    try:
+        user_mobile = UserContact.objects.get(
+            user=user, 
+            contact_type='PRIMARY'
+        ).mobile_number
+    except UserContact.DoesNotExist:
+        user_mobile = ''
+
+    addresses = Address.objects.filter(
+        user=user,
+        is_active=True
+    ).order_by('-is_default')
+    
+    default_address = addresses.filter(is_default=True).first()
+
+    context = {
+        'user': user,
+        'user_mobile': user_mobile,
+        'addresses': addresses,
+        'default_address': default_address,
+    }
+    return render(request, 'user_side/user_profile/user_profile.html', context)
+
+@never_cache
+@login_required
+def edit_profile_view(request):
     user = request.user
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
@@ -15,303 +41,154 @@ def profile_view(request):
         email = request.POST.get('email')
         phone_number = request.POST.get('phone')
 
+        if not phone_number.isdigit() or len(phone_number) != 10:
+            messages.error(request, "Please enter a valid 10-digit phone number.")
+            return redirect('user_app:edit_profile')
+
         # Update user details
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
         user.save()
 
-        # Update or create phone number
-        UserMobile.objects.update_or_create(user=user, defaults={'mobile_number': phone_number})
+        # Update or create primary phone number
+        UserContact.objects.update_or_create(
+            user=user,
+            defaults={
+                'mobile_number': phone_number,
+                'contact_type': 'PRIMARY'
+            }
+        )
 
-        # Handle address fields
-        name = request.POST.get('name')
-        pincode = request.POST.get('pincode')
-        locality = request.POST.get('locality')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        district = request.POST.get('district')
-        state = request.POST.get('state')
-        landmark = request.POST.get('landmark')
+        messages.success(request, "Profile updated successfully!")
+        return redirect('user_app:user_show')
 
-        # Check if the required fields are not empty before updating
-        if name and pincode and locality and address and city and district and state:
-            # Update or create user address
-            UserAddress.objects.update_or_create(
-                user=user,
-                defaults={
-                    'name': name,
-                    'pincode': pincode,
-                    'locality': locality,
-                    'address': address,
-                    'city': city,
-                    'district': district,
-                    'state': state,
-                    'landmark': landmark,
-                }
-            )
-            messages.success(request, "Profile updated successfully!")
-        else:
-            messages.error(request, "Please fill in all required fields for address.")
-
-      
     try:
-        user_mobile = UserMobile.objects.get(user=user).mobile_number
-    except UserMobile.DoesNotExist:
+        user_mobile = UserContact.objects.get(
+            user=user,
+            contact_type='PRIMARY'
+        ).mobile_number
+    except UserContact.DoesNotExist:
         user_mobile = ''
-
-    try:
-        user_address = UserAddress.objects.get(user=user)
-    except UserAddress.DoesNotExist:
-        user_address = None
-
-  
 
     context = {
         'user': user,
         'user_mobile': user_mobile,
-        'user_address': user_address,
-        
     }
-    return render(request, 'user_side/user_profile/profile.html', context)
+    return render(request, 'user_side/user_profile/edit_profile.html', context)
 
+@never_cache
 @login_required
-def user_show_view(request):
-    user = request.user
-    try:
-        user_mobile = UserMobile.objects.get(user=user).mobile_number
-    except UserMobile.DoesNotExist:
-        user_mobile = ''
-
-    try:
-        user_address = UserAddress.objects.get(user=user)
-    except UserAddress.DoesNotExist:
-        user_address = None
-
-    context = {
-        'user': user,
-        'user_mobile': user_mobile,
-        'user_address': user_address,
-    }
-    return render(request, 'user_side/user_profile/user_profile.html', context)
-
-
-
-# @login_required(login_url='home:signin')
-# def user_address(request):
-#     user = request.user
-#     addresses = UserAddress.objects.filter(user=user)
+def address_list_view(request):
+    addresses = Address.objects.filter(
+        user=request.user,
+        is_active=True
+    ).order_by('-is_default')
     
-#     return render(request,'user_details/user_address.html', {'user': user, 'addresses': addresses} )
+    return render(request, 'user_side/user_profile/user_profile.html', {
+        'addresses': addresses
+    })
 
-# @login_required(login_url='home:signin')
-# def add_user_address(request):
-#     if request.method == 'POST':
-#         user = request.user
-#         name = request.POST.get('name')
-#         locality = request.POST.get('locality')
-#         pincode = request.POST.get('pincode')
-#         address = request.POST.get('address')
-#         city = request.POST.get('city')
-#         district = request.POST.get('district')
-#         state = request.POST.get('state')
-#         landmark = request.POST.get('landmark')
+@never_cache
+@login_required
+def add_address_view(request):
+    if request.method == 'POST':
+        data = {
+            'name': request.POST.get('name'),
+            'address_type': request.POST.get('address_type', 'HOME'),
+            'pincode': request.POST.get('pincode'),
+            'locality': request.POST.get('locality'),
+            'address': request.POST.get('address'),
+            'city': request.POST.get('city'),
+            'district': request.POST.get('district'),
+            'state': request.POST.get('state'),
+            'landmark': request.POST.get('landmark'),
+            'is_default': request.POST.get('is_default') == 'on'
+        }
 
-#         user_address = UserAddress(
-#             user=user,
-#             name=name,
-#             pincode=pincode,
-#             address=address,
-#             city=city,
-#             district=district,
-#             state=state,
-#             landmark=landmark,
-#             locality = locality
-#         )
-#         # Save the instance to the database
-#         user_address.save()
-#         return redirect('user_profile:user_address')
-#     return render(request,'user_details/add_user_address.html')
+        # Validate required fields
+        required_fields = ['name', 'pincode', 'locality', 'address', 'city', 'district', 'state']
+        if not all(data[field] for field in required_fields):
+            messages.error(request, "Please fill in all required fields.")
+            return redirect('user_app:add_address')
 
-# @login_required(login_url='home:signin')
-# def add_user_mobile(request):
-#     if request.method == 'POST':
-#         user = request.user
-#         mobile = request.POST.get('mobile')
+        if not data['pincode'].isdigit() or len(data['pincode']) != 6:
+            messages.error(request, "Please enter a valid 6-digit pincode.")
+            return redirect('user_app:add_address')
+        
+        # Add the user to the data dictionary
+        data['user'] = request.user  # Associate the address with the logged-in user
 
-#         # Ensure the mobile number contains exactly 10 digits
-#         if not mobile.isdigit() or len(mobile) != 10:
-#             # The mobile number does not meet the required format
-#             error_message = 'Invalid mobile number format. Please enter a 10-digit number.'
-#             messages.error(request, error_message)
-#             return render(request, 'user_details/add_user_mobile.html', {'error_message': error_message})
+        # Create new address
+        Address.objects.create(**data)
 
-#         # Create a new UserMobile object with the user and mobile number
-#         user_mobile = UserMobile(
-#             user=user,
-#             mobile_number=mobile
-#         )
+        messages.success(request, "Address added successfully!")
+        return redirect('user_app:user_show')  # Redirect to address list or another relevant page
 
-#         # Save the UserMobile object to the database
-#         user_mobile.save()
-
-#         # Redirect to the user profile page after saving the mobile number
-#         return redirect('user_profile:user_profile')
-
-#     # If the request method is not POST, render the add_user_mobile.html template
-#     return render(request, 'user_details/add_user_mobile.html')
-
-# @login_required(login_url='home:signin')
-# def add_user_firstname(request):
-#     if request.method == 'POST':
-#         user = request.user
-#         firstname = request.POST.get('firstname').strip()  # Remove leading and trailing whitespaces
-
-#         # Validate if firstname is not empty or just whitespace
-#         if not firstname:
-#             error_message = 'Please enter a valid first name.'
-#             messages.error(request, error_message)
-#             return redirect('user_profile:add_user_firstname')  # Redirect to the same page to display the error message
-
-#         # Update user details
-#         user.first_name = firstname
-
-#         # Save the changes
-#         user.save()
-
-#         return redirect('user_profile:user_profile')
-
-#     # If the request method is not POST, render the add_user_firstname.html template
-#     return render(request, 'user_details/add_user_firstname.html')
-
-# @login_required(login_url='home:signin')
-# def add_user_lastname(request):
-#     if request.method == 'POST':
-#         user = request.user
-#         lastname = request.POST.get('lastname').strip()  # Remove leading and trailing whitespaces
-
-#         # Validate if lastname is not empty or just whitespace
-#         if not lastname:
-#             error_message = 'Please enter a valid last name.'
-#             messages.error(request, error_message)
-#             return redirect('user_profile:add_user_lastname')  # Redirect to the same page to display the error message
-
-#         # Update user details
-#         user.last_name = lastname
-
-#         # Save the changes
-#         user.save()
-
-#         return redirect('user_profile:user_profile')
-
-#     # If the request method is not POST, render the add_user_lastname.html template
-#     return render(request, 'user_details/add_user_lastname.html')
-
-# @login_required(login_url='home:signin')
-# def delete_user_address(request,id):
-#     address=UserAddress.objects.get(id=id)
-#     address.delete()
-#     return redirect('user_profile:user_address')
+    return render(request, 'user_side/address/add_address.html', {
+        'address': None  # No address is passed because it's for adding
+    })
 
 
-# @login_required(login_url='home:signin')
-# def edit_user_mobile(request):
-#     user = request.user
-#     user_mobile = UserMobile.objects.get(user=user)
-#     if request.method == 'POST':
-#         user = request.user
-#         mobile = request.POST.get('mobile')
+@never_cache
+@login_required
+def edit_address_view(request, address_id):
+    address = get_object_or_404(Address, id=address_id)
 
-#         # Ensure the mobile number contains exactly 10 digits
-#         if not mobile.isdigit() or len(mobile) != 10:
-#             # The mobile number does not meet the required format
-#             error_message = 'Invalid mobile number format. Please enter a 10-digit number.'
-#             messages.error(request, error_message)
-#             return redirect('user_profile:edit_user_mobile')  # Redirect to the same page to display the error message
+    if request.method == 'POST':
+        data = {
+            'name': request.POST.get('name'),
+            'address_type': request.POST.get('address_type', 'HOME'),
+            'pincode': request.POST.get('pincode'),
+            'locality': request.POST.get('locality'),
+            'address': request.POST.get('address'),
+            'city': request.POST.get('city'),
+            'district': request.POST.get('district'),
+            'state': request.POST.get('state'),
+            'landmark': request.POST.get('landmark'),
+            'is_default': request.POST.get('is_default') == 'on'
+        }
 
-#         # Check if the user already has a mobile number, and update it if exists
-#         try:
-#             user_mobile = UserMobile.objects.get(user=user)
-#             user_mobile.mobile_number = mobile
-#         except UserMobile.DoesNotExist:
-#             # If the user does not have a mobile number, create a new UserMobile object
-#             user_mobile = UserMobile(user=user, mobile_number=mobile)
+        # Validate required fields
+        required_fields = ['name', 'pincode', 'locality', 'address', 'city', 'district', 'state']
+        if not all(data[field] for field in required_fields):
+            messages.error(request, "Please fill in all required fields.")
+            return redirect('user_app:edit_address', address_id=address.id)
 
-#         # Save the UserMobile object to the database
-#         user_mobile.save()
+        if not data['pincode'].isdigit() or len(data['pincode']) != 6:
+            messages.error(request, "Please enter a valid 6-digit pincode.")
+            return redirect('user_app:edit_address', address_id=address.id)
 
-#         return redirect('user_profile:user_profile')
+        # Update existing address
+        for key, value in data.items():
+            setattr(address, key, value)
+        address.save()
 
-#     # If the request method is not POST, render the edit_user_mobile.html template
-#     return render(request, 'user_details/edit_user_mobile.html',{'mobile':user_mobile})
+        messages.success(request, "Address updated successfully!")
+        return redirect('user_app:user_show')  # Redirect to address list or another relevant page
 
-# @login_required(login_url='home:signin')
-# def edit_user_firstname(request):
-#     user = request.user
+    return render(request, 'user_side/address/edit_address.html', {
+        'address': address  # Pass the existing address to the template
+    })
 
-#     if request.method == 'POST':
-#         firstname = request.POST.get('firstname', '').strip()
+@never_cache
+@login_required
+def delete_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    address.is_active = False
+    address.save()
+    messages.success(request, "Address deleted successfully!")
+    return redirect('user_app:user_show')
 
-#         # Check if firstname is not just a space
-#         if not firstname:
-#             messages.error(request, 'Please enter a valid first name.')
-#             return redirect('user_profile:edit_user_firstname')
+@never_cache
+@login_required
+def set_default_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    # The model's save method will handle removing default status from other addresses
+    address.is_default = True
+    address.save()
+    messages.success(request, "Default address updated successfully!")
+    return redirect('user_app:user_show')
 
-#         # Update user details
-#         user.first_name = firstname
 
-#         # Save the changes
-#         user.save()
-#         return redirect('user_profile:user_profile')
 
-#     return render(request, 'user_details/edit_user_firstname.html', {'firstname': user.first_name})
-
-# @login_required(login_url='home:signin')
-# def edit_user_lastname(request):
-#     user = request.user
-
-#     if request.method == 'POST':
-#         lastname = request.POST.get('lastname', '').strip()
-
-#         # Check if lastname is not just a space
-#         if not lastname:
-#             messages.error(request, 'Please enter a valid last name.')
-#             return redirect('user_profile:edit_user_lastname')
-
-#         # Update user details
-#         user.last_name = lastname
-
-#         # Save the changes
-#         user.save()
-#         return redirect('user_profile:user_profile')
-
-#     return render(request, 'user_details/edit_user_lastname.html', {'lastname': user.last_name})
-
-# @login_required(login_url='home:signin')
-# def add_address_checkout(request):
-#     if request.method == 'POST':
-#         user = request.user
-#         name = request.POST.get('name')
-#         locality = request.POST.get('locality')
-#         pincode = request.POST.get('pincode')
-#         address = request.POST.get('address')
-#         city = request.POST.get('city')
-#         district = request.POST.get('district')
-#         state = request.POST.get('state')
-#         landmark = request.POST.get('landmark')
-
-#         user_address = UserAddress(
-#             user=user,
-#             name=name,
-#             pincode=pincode,
-#             address=address,
-#             city=city,
-#             district=district,
-#             state=state,
-#             landmark=landmark,
-#             locality = locality
-#         )
-#         # Save the instance to the database
-#         user_address.save()
-#         return redirect('cart_management:cart_checkout')
-#     return render(request,'user_details/add_user_address.html')

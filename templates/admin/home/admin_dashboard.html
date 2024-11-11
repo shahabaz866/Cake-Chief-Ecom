@@ -22,6 +22,28 @@
     <link rel="stylesheet" href="{% static 'admin_assets/plugins/fontawesome/css/fontawesome.min.css' %}">
     <link rel="stylesheet" href="{% static 'admin_assets/plugins/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'admin_assets/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        .toastify {
+            padding: 12px 20px;
+            color: white;
+            display: inline-block;
+            box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12);
+            background-color: #333;
+            position: fixed;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            max-width: calc(50% - 20px);
+            z-index: 2147483647;
+        }
+        
+        .toastify.on {
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body>
@@ -35,7 +57,7 @@
 
             <div class="header-left active">
                 <a href="index.html" class="logo">
-                    <h2 style="color: #D33C3C;">Cake Chief</h2>
+                    <h2 style="color:#b52a2a;">Cake Chief</h2>
                 </a>
                 <a href="index.html" class="logo-small">
                    
@@ -166,6 +188,14 @@
                                 </a>
                             </li>
                                 
+                            </ul>
+                        </li>
+                        <li class="submenu">
+                            <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/users1.svg' %}" alt="img">
+                                <span>order</span> <span class="menu-arrow"></span>
+                            </a>
+                            <ul class="submenu-content">
+                                <li><a href="{% url 'order_app:admin_order_list' %}">User List</a></li>
                             </ul>
                         </li>
                         
@@ -528,10 +558,46 @@
 <script src="{% static 'admin_assets/js/moment.min.js' %}"></script>
 <script src="{% static 'admin_assets/js/bootstrap-datetimepicker.min.js' %}"></script>
 
-<script src="{% static 'admin_assets/plugins/sweetalert/sweetalert2.all.min.js' %}"></script>
-<script src="{% static 'admin_assets/plugins/sweetalert/sweetalerts.min.js' %}"></script>
+
 
 <script src="{% static 'admin_assets/js/script.js' %}"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    function showToast(message, type) {
+      let backgroundColor = "#000";
+      switch(type) {
+        case 'success':
+          backgroundColor = "#28a745";
+          break;
+        case 'error':
+          backgroundColor = "#dc3545";
+          break;
+        case 'warning':
+          backgroundColor = "#ffc107";
+          break;
+        case 'info':
+          backgroundColor = "#17a2b8";
+          break;
+      }
+  
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        style: {
+          background: backgroundColor,
+        },
+      }).showToast();
+    }
+  
+    // For Django messages
+    {% if messages %}
+      {% for message in messages %}
+        showToast("{{ message }}", "{{ message.tags }}");
+      {% endfor %}
+    {% endif %}
+  </script>
 </body>
 
 </html>

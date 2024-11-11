@@ -1,155 +1,366 @@
-{% extends "user_side/base.html" %}
-{% block title %}Checkout{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #dc3545;
+        --secondary-color: #6c757d;
+        --background-color: #f8f9fa;
+        --border-color: #dee2e6;
+        --text-color: #212529;
+      }
 
-{% load static %}
-{% load cart_filters %}
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+      }
 
-{% block content %}
-<div class="bg-light py-3">
+      .breadcrumb {
+        background: var(--background-color);
+        padding: 1rem 0;
+      }
+
+      .breadcrumb a {
+        color: var(--secondary-color);
+        text-decoration: none;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem 0;
+      }
+
+      @media (min-width: 768px) {
+        .checkout-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .section-title {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .address-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+      }
+
+      .address-default-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+      }
+
+      .detail-item {
+        margin-bottom: 0.5rem;
+      }
+
+      .detail-label {
+        font-weight: 600;
+        color: var(--secondary-color);
+      }
+
+      .address-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .btn-secondary {
+        background: var(--secondary-color);
+        color: white;
+      }
+
+      .order-summary {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+      }
+
+      .product-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+      }
+
+      .product-table th,
+      .product-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .payment-options {
+        margin-bottom: 1.5rem;
+      }
+
+      .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.25rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+      }
+
+      .payment-option:hover {
+        background: var(--background-color);
+      }
+
+      .place-order-btn {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.125rem;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 0.5rem;
+      }
+
+      .empty-state i {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    {% load cart_filters %}
+    <div class="breadcrumb">
+      <div class="container">
+        <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+        <span class="mx-2">/</span>
+        <a href="{% url 'cart_app:cart' %}">Cart</a>
+        <span class="mx-2">/</span>
+        <strong>Checkou</strong>
+      </div>
+    </div>
+
     <div class="container">
-        <div class="row">
-            <div class="col-md-12 mb-0">
-                <a href="{% url 'home' %}">Home</a> <span class="mx-2 mb-0">/</span>
-                <a href="{% url 'cart' %}">Cart</a> <span class="mx-2 mb-0">/</span>
-                <strong class="text-black">Checkout</strong>
+      <form method="POST" class="row" action="{% url 'cart_app:checkout' %}">
+        {% csrf_token %}
+
+        <div class="checkout-grid">
+          <!-- Billing Details -->
+          <div class="billing-section">
+            <h2 class="section-title">
+              <i class="fas fa-map-marker-alt"></i>
+              Delivery Address
+            </h2>
+            {% if addresses %}
+
+            <div class="address-list">
+              {% for address in addresses %}
+              <!-- If addresses exist -->
+              <div class="address-card">
+                {% if address.is_default %}
+                <span class="address-default-badge">Default</span>
+                {% endif %}
+                <span class="address-type"
+                  >{{ address.get_address_type_display }}</span
+                >
+
+                <div class="detail-item">
+                  <div class="detail-label">Full Name</div>
+                  <div class="detail-value">{{ address.name }}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Complete Address</div>
+                  <div class="detail-value">
+                    {{ address.address }}<br />
+                    {{ address.locality }}, {{ address.city }}<br />
+                    {{ address.district }}, {{ address.state }} - {{ address.pincode }}
+                  </div>
+                </div>
+                {% if address.landmark %}
+                <div class="detail-item">
+                  <div class="detail-label">Landmark</div>
+                  <div class="detail-value">{{ address.landmark }}</div>
+                </div>
+                {% endif %}
+                <div class="address-actions">
+                  <a
+                    href="{% url 'user_app:edit_address' address.id %}"
+                    class="btn btn-secondary"
+                  >
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  {% if not address.is_default %}
+                  <a
+                    href="{% url 'user_app:set_default_address' address.id %}"
+                    class="btn btn-secondary"
+                  >
+                    <i class="fas fa-check"></i> Set Default
+                  </a>
+                  <a
+                    href="{% url 'user_app:delete_address' address.id %}"
+                    class="btn-address btn-delete"
+                    onclick="return confirm('Are you sure you want to delete this address?')"
+                  >
+                    <i class="fas fa-trash"></i> Delete
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+
+              <!-- Add New Address Button -->
+              <a
+                href="{% url 'user_app:add_address' %}"
+                class="btn btn-primary"
+              >
+                <i class="fas fa-plus"></i> Add New Address
+              </a>
             </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-home fa-3x" style="color:#b52a2a; margin-bottom: 15px"></i>
+                <h3>No Address Information Available</h3>
+                <p>Please add your address details to complete your profile.</p>
+                <a
+                href="{% url 'user_app:add_address' %}"
+                class="btn btn-primary"
+              >
+                <i class="fas fa-plus"></i> Add New Address
+              </a>
+            </div>
+            {% endif %}
+
+
+          </div>
+
+          <!-- Order Summary -->
+          <div class="order-section">
+            <h2 class="section-title">
+              <i class="fas fa-shopping-cart"></i>
+              Order Summary
+            </h2>
+
+            <div class="order-summary">
+              <table class="product-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                  <tr>
+                    <td>{{ item.product.title }} <strong class="mx-2">x</strong> {{ item.quantity }}</td>
+                    <td id="total_{{ item.id }}">₹{{ item.product.price|multiply:item.quantity }}</td>
+                </tr>
+                {% endfor %}
+                  <tr>
+                    <td><strong>Subtotal</strong></td>
+                    <td id="cartSubtotal">₹{{ cart_total }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Total</strong></td>
+                    <td  id="orderTotal">₹{{ cart_total }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="payment-options">
+                <h3 class="section-title">Payment Method</h3>
+                <label class="payment-option">
+                  <input type="radio" name="payment" value="upi" required />
+                  <span>
+                    <strong>UPI Payment</strong>
+                    <div>Pay securely using UPI</div>
+                  </span>
+                </label>
+                <label class="payment-option">
+                  <input type="radio" name="payment" value="cod" required />
+                  <span>
+                    <strong>Cash on Delivery</strong>
+                    <div>Pay when your order arrives</div>
+                  </span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary place-order-btn">
+                <i class="fas fa-shopping-bag"></i>
+                Place Order
+              </button>
+            </div>
+          </div>
         </div>
+      </form>
     </div>
-</div>
 
-<div class="site-section">
-    <div class="container">
-        <form method="POST" class="row">
-            {% csrf_token %}
-            <!-- Billing Details -->
-            <div class="col-md-6 mb-5 mb-md-0">
-                <h2 class="h3 mb-3 text-black">Billing Details</h2>
-                <div class="p-3 p-lg-5 border">
-                    <div class="form-group row mb-3">
-                        <div class="col-md-6">
-                            <label for="firstName" class="text-black">First Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="firstName" name="firstName" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="lastName" class="text-black">Last Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="lastName" name="lastName" required>
-                        </div>
-                    </div>
+    <script>
+      function updateOrderTotals() {
+        const totalElements = document.querySelectorAll('[id^="total_"]');
+        let subtotal = 0;
 
-                    <div class="form-group mb-3">
-                        <label for="email" class="text-black">Email Address <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
+        totalElements.forEach((element) => {
+          const value = parseFloat(
+            element.innerText.replace("₹", "").replace(",", "")
+          );
+          subtotal += value;
+        });
 
-                    <div class="form-group mb-3">
-                        <label for="phone" class="text-black">Phone <span class="text-danger">*</span></label>
-                        <input type="tel" class="form-control" id="phone" name="phone" required>
-                    </div>
+        document.getElementById(
+          "cartSubtotal"
+        ).innerText = `₹${subtotal.toFixed(2)}`;
+        document.getElementById("orderTotal").innerText = `₹${subtotal.toFixed(
+          2
+        )}`;
+      }
 
-                    <div class="form-group mb-3">
-                        <label for="address" class="text-black">Address <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="address" name="address" placeholder="Street address" required>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <input type="text" class="form-control" placeholder="Apartment, suite, unit etc. (optional)">
-                    </div>
-
-                    <div class="form-group row mb-3">
-                        <div class="col-md-6">
-                            <label for="city" class="text-black">City <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="city" name="city" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="state" class="text-black">State <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="state" name="state" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group row mb-3">
-                        <div class="col-md-6">
-                            <label for="pincode" class="text-black">Pincode <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="pincode" name="pincode" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label for="orderNotes" class="text-black">Order Notes</label>
-                        <textarea name="orderNotes" id="orderNotes" cols="30" rows="5" class="form-control" placeholder="Write your notes here..."></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order Summary -->
-            <div class="col-md-6">
-                <div class="row mb-5">
-                    <div class="col-md-12">
-                        <h2 class="h3 mb-3 text-black">Your Order</h2>
-                        <div class="p-3 p-lg-5 border">
-                            <table class="table site-block-order-table mb-5">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in cart_items %}
-                                    <tr>
-                                        <td>{{ item.product.title }} <strong class="mx-2">x</strong> {{ item.quantity }}</td>
-                                        <td>₹{{ item.product.price|multiply:item.quantity }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    <tr>
-                                        <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-                                        <td class="text-black" id="cartSubtotal">₹{{ cart.total }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-                                        <td class="text-black font-weight-bold" id="orderTotal">₹{{ cart.total }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <!-- Payment Options -->
-                            <div class="border p-3 mb-3">
-                                <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank" role="button" aria-expanded="false" aria-controls="collapsebank">Payment Options</a></h3>
-
-                                <div class="collapse" id="collapsebank">
-                                    <div class="py-2">
-                                        {% comment %} <div class="form-check mb-2">
-                                            <input class="form-check-input" type="radio" name="payment" id="upi" value="upi" required>
-                                            <label class="form-check-label" for="upi">UPI Payment</label>
-                                        </div> {% endcomment %}
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="radio" name="payment" id="cod" value="cod" required>
-                                            <label class="form-check-label" for="cod">Cash on Delivery</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <button class="btn btn-danger btn-lg py-3 btn-block" type="submit">
-                                    <i class="fas fa-shopping-bag me-2"></i>Place Order
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    function updateOrderSummary() {
-        // Get subtotal from cart page or calculate it here
-        const subtotal = parseFloat(localStorage.getItem('cartSubtotal')) || 0;
-        document.getElementById('cartSubtotal').innerText = '₹' + subtotal.toFixed(2);
-        document.getElementById('orderTotal').innerText = '₹' + subtotal.toFixed(2); // Add logic for shipping/tax if needed
-    }
-
-    document.addEventListener("DOMContentLoaded", updateOrderSummary);
-</script>
-{% endblock %}
+      document.addEventListener("DOMContentLoaded", updateOrderTotals);
+    </script>
+  </body>
+</html>

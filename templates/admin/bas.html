@@ -17,12 +17,34 @@
            
             background-color: #f9f9f9; 
         }
+        .toastify {
+            padding: 12px 20px;
+            color: white;
+            display: inline-block;
+            box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12);
+            background-color: #333;
+            position: fixed;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            max-width: calc(50% - 20px);
+            z-index: 2147483647;
+        }
+        
+        .toastify.on {
+            opacity: 1;
+        }
         </style>
     <link rel="stylesheet" href="{% static 'admin_assets/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'admin_assets/css/dataTables.bootstrap4.min.css' %}">
     <link rel="stylesheet" href="{% static 'admin_assets/plugins/select2/css/select2.min.css' %}">
     <link rel="stylesheet" href="{% static 'admin_assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/cropper.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+
 </head>
 
 <body>
@@ -32,7 +54,7 @@
 
             <div class="header-left active">
                 <a href="index.html" class="logo">
-                    <h2 style="color: #D33C3C;">Cake Chief</h2>
+                    <h2 style="color:#b52a2a;">Cake Chief</h2>
                 </a>
                 
                 <a id="toggle_btn" href="javascript:void(0);">
@@ -52,106 +74,7 @@
 
 
 
-                <li class="nav-item dropdown">
-                    <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
-                        <img src="{% static 'admin_assets/img/icons/notification-bing.svg' %}" alt="img">
-                         <span class="badge rounded-pill">4</span>
-                    </a>
-                    <div class="dropdown-menu notifications">
-                        <div class="topnav-dropdown-header">
-                            <span class="notification-title">Notifications</span>
-                            <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
-                        </div>
-                        <div class="noti-content">
-                            <ul class="notification-list">
-                                <li class="notification-message">
-                                    <a href="activities.html">
-                                        <div class="media d-flex">
-                                            <span class="avatar flex-shrink-0">
-                                                <img alt="" src="{% static 'admin_assets/img/profiles/avatar-02.jpg' %}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">John Doe</span> added
-                                                    new task <span class="noti-title">Patient appointment booking</span>
-                                                </p>
-                                                <p class="noti-time"><span class="notification-time">4 mins ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="notification-message">
-                                    <a href="activities.html">
-                                        <div class="media d-flex">
-                                            <span class="avatar flex-shrink-0">
-                                                <img alt="" src="{% static 'admin_assets/img/profiles/avatar-03.jpg' %}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">Tarah Shropshire</span>
-                                                    changed the task name <span class="noti-title">Appointment booking
-                                                        with payment gateway</span></p>
-                                                <p class="noti-time"><span class="notification-time">6 mins ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="notification-message">
-                                    <a href="activities.html">
-                                        <div class="media d-flex">
-                                            <span class="avatar flex-shrink-0">
-                                                <img alt="" src="{% static 'admin_assets/img/profiles/avatar-06.jpg' %}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">Misty Tison</span>
-                                                    added <span class="noti-title">Domenic Houston</span> and <span
-                                                        class="noti-title">Claire Mapes</span> to project <span
-                                                        class="noti-title">Doctor available module</span></p>
-                                                <p class="noti-time"><span class="notification-time">8 mins ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="notification-message">
-                                    <a href="activities.html">
-                                        <div class="media d-flex">
-                                            <span class="avatar flex-shrink-0">
-                                                <img alt="" src="{% static 'admin_assets/img/profiles/avatar-17.jpg' %}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">Rolland Webber</span>
-                                                    completed task <span class="noti-title">Patient and Doctor video
-                                                        conferencing</span></p>
-                                                <p class="noti-time"><span class="notification-time">12 mins ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="notification-message">
-                                    <a href="activities.html">
-                                        <div class="media d-flex">
-                                            <span class="avatar flex-shrink-0">
-                                                <img alt="" src="{% static 'admin_assets/img/profiles/avatar-13.jpg' %}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">Bernardo Galaviz</span>
-                                                    added new task <span class="noti-title">Private chat module</span>
-                                                </p>
-                                                <p class="noti-time"><span class="notification-time">2 days ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="topnav-dropdown-footer">
-                            <a href="activities.html">View all Notifications</a>
-                        </div>
-                    </div>
-                </li>
+                
 
                 <li class="nav-item dropdown has-arrow main-drop">
                     <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
@@ -210,13 +133,15 @@
                                 <span>Product</span> <span class="menu-arrow"></span>
                             </a>
                             <ul class="submenu-content">
+                                <li><a href=""> sample</a></li>
                                 <li><a href="{% url 'product_list' %}">Product List</a></li>
                                 <li><a href="{% url 'add_products' %}">Add Product</a></li>
                                 <li><a href="{% url 'category_list' %}">Category List</a></li>
                                 <li><a href="{% url 'add_category' %}">Add Category</a></li>
                                 <li><a href="{% url 'flavour_list' %}">Flavour List</a></li>
                                 <li><a href="{% url 'add_flavour' %}">Add Flavour</a></li>
-                                <li><a href="{% url 'image_cropper' %}">Crop Image</a></li>
+                                
+                        
                             </ul>
                         </li>
                         
@@ -228,6 +153,15 @@
                                 <li><a href="{% url 'user_management' %}">User List</a></li>
                             </ul>
                         </li>
+                        <li class="submenu">
+                            <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/users1.svg' %}" alt="img">
+                                <span>order</span> <span class="menu-arrow"></span>
+                            </a>
+                            <ul class="submenu-content">
+                                <li><a href="{% url 'order_app:admin_order_list' %}">User List</a></li>
+                            </ul>
+                        </li>
+        
         
                         <li class="submenu">
                             <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/time.svg' %}" alt="img">
@@ -266,24 +200,7 @@
                                 <li><a href="error-404.html">404 Error</a></li>
                                 <li><a href="error-500.html">500 Error</a></li>
                             </ul>
-                            {% if messages %}
-    {% for message in messages %}
-    <div class="alert 
-    {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %}
-    alert-dismissible fade show custom-alert" role="alert">  
-            {{ message }}
-        </div>
-    {% endfor %}
-    <script>
-        // Dismiss alert messages after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => alert.classList.remove('show'));
-        }, 5000); // 5000 ms = 5 seconds
-    </script>
-{% else %}
-    
-{% endif %}
+                            
                         </li>
                     </ul>
                 </div>
@@ -361,6 +278,44 @@
             });
         });
     </script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        function showToast(message, type) {
+          let backgroundColor = "#000";
+          switch(type) {
+            case 'success':
+              backgroundColor = "#28a745";
+              break;
+            case 'error':
+              backgroundColor = "#dc3545";
+              break;
+            case 'warning':
+              backgroundColor = "#ffc107";
+              break;
+            case 'info':
+              backgroundColor = "#17a2b8";
+              break;
+          }
+      
+          Toastify({
+            text: message,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            style: {
+              background: backgroundColor,
+            },
+          }).showToast();
+        }
+      
+        // For Django messages
+        {% if messages %}
+          {% for message in messages %}
+            showToast("{{ message }}", "{{ message.tags }}");
+          {% endfor %}
+        {% endif %}
+      </script>
     
 </body>
 

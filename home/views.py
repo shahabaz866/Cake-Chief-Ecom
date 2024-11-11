@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.utils.html import format_html
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate, logout
@@ -176,18 +177,20 @@ def size_filter(request, size_id):
 
 def new_arrivals(request):
     new_arrivals = Product.objects.order_by('-added_on')[:10]  # Get the latest 10 cakes
-    return render(request, 'your_template.html', {'new_arrivals': new_arrivals})
+    return render(request, 'user_side/shop/shop.html', {'new_arrivals': new_arrivals})
 @never_cache
 @login_required(login_url='login')
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     additional_images = ProductImages.objects.filter(product=product)
     is_out_of_stock = product.stock <= 0
+    variants = product.variants.first() 
 
     context = {
         'product': product,
         'aditional_img': additional_images,
         'is_out_of_stock': is_out_of_stock,
+        'variants':variants
     }
 
     return render(request, 'user_side/shop/single_product.html', context)
@@ -222,7 +225,7 @@ def LogingPage(request):
                     user = authenticate(request, username=getName, password=getPass)
                     if user is not None:
                         login(request, user)
-                        messages.success(request, f"Successfully logged in as '{user.username}'")
+                        messages.success(request,format_html("Successfully logged in as {}",user.username))
                         return redirect('dashboard' if user.is_superuser else 'home')
                     else:
                         messages.error(request, "Invalid username or password.")

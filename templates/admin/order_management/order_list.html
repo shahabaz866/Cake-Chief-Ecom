@@ -1,0 +1,158 @@
+{% extends 'admin/bas.html' %}
+
+{% block title %}Order Management{% endblock %}
+
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="content">
+        <!-- Header Section -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div class="page-title">
+                <h4>Order Management</h4>
+                <h6>Manage your orders</h6>
+            </div>
+        </div>
+
+        <!-- Messages Modal -->
+        <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mySmallModalLabel">Messages</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No messages to display.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Form -->
+        <div class="card mb-4" id="filter_inputs">
+            <div class="card-body">
+                <form method="get" class="search-form">
+                    <div class="form-row d-flex gap-3 align-items-center">
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Search orders..." class="form-control">
+                        <select name="status" class="form-select">
+                            <option value="">All Status</option>
+                            {% for status_code, status_label in status_choices %}
+                                <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>{{ status_label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table datanew">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.user.email }}</td>
+                                    <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ order.order_status }}">
+                                            {{ order.get_order_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>₹{{ order.total_amount }}</td>
+                                    <td>
+                                    <form method="POST" action="{% url 'order_app:update_order_status' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <input type="hidden" name="new_status" value="PROCESSING">
+                                        {% if order.order_status != 'PROCESSING' %}
+                                            <button type="submit" class="button change-status" style="background-color: green;">
+                                                Confirmed
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="button change-status" style="background-color: red;">
+                                                Confirm
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No orders found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.paginator.num_pages > 1 %}
+            <div class="pagination d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination">
+                        {% if orders.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo; first</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ orders.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">previous</a></li>
+                        {% endif %}
+                        <li class="page-item disabled"><span class="page-link">Page {{ orders.number }} of {{ orders.paginator.num_pages }}</span></li>
+                        {% if orders.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ orders.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">next</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ orders.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">last &raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if there are any messages inside the modal to show it
+        const modalAlerts = document.querySelectorAll('.bd-example-modal-sm .alert');
+        if (modalAlerts.length > 0) {
+            var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
+            messageModal.show();
+        }
+    });
+</script>
+<script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+    crossorigin="anonymous">
+</script>
+
+
+
+    
+{% endblock %}
