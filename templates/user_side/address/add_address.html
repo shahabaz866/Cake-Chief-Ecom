@@ -3,88 +3,19 @@
 {% load static %}
 
 <style>
-  .profile-bg {
-    background: linear-gradient(135deg,#b52a2a 0%, #FF6B6B 100%);
-    min-height: 100vh;
-    padding: 2rem 1rem;
-  }
-
-  .glass-effect {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  }
-
-  .input-field {
-    transition: all 0.3s ease;
-    border: 2px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    width: 100%;
-    background: #f9fafb;
-  }
-
-  .input-field:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    background: white;
-  }
-
-  .form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #4b5563;
-    font-size: 0.95rem;
-  }
-
-  .btn {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    font-weight: 600;
-    padding: 0.875rem 2rem;
-    border-radius: 12px;
-    letter-spacing: 0.025em;
-  }
-
-  .btn-submit {
-    background:#b52a2a;
-    color: white;
-    border: none;
-  }
-
-  .btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-  }
-
-  .btn-cancel {
-    background: #f3f4f6;
-    color: #4b5563;
-  }
-
-  .btn-cancel:hover {
-    background: #e5e7eb;
-    transform: translateY(-2px);
-  }
-
-  .card-header {
-    padding: 2.5rem 2rem;
-    text-align: center;
-    background: linear-gradient(to right, #f8fafc, #f1f5f9);
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  .form-section {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .input-group {
-    margin-bottom: 1.5rem;
-  }
+  .profile-bg { background: linear-gradient(135deg,#b52a2a 0%, #FF6B6B 100%); min-height: 100vh; padding: 2rem 1rem; }
+  .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); }
+  .input-field { transition: all 0.3s ease; border: 2px solid #e5e7eb; border-radius: 10px; padding: 0.75rem 1rem; font-size: 1rem; width: 100%; background: #f9fafb; }
+  .input-field:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); background: white; }
+  .form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4b5563; font-size: 0.95rem; }
+  .btn { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; padding: 0.875rem 2rem; border-radius: 12px; letter-spacing: 0.025em; }
+  .btn-submit { background:#b52a2a; color: white; border: none; }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3); }
+  .btn-cancel { background: #f3f4f6; color: #4b5563; }
+  .btn-cancel:hover { background: #e5e7eb; transform: translateY(-2px); }
+  .card-header { padding: 2.5rem 2rem; text-align: center; background: linear-gradient(to right, #f8fafc, #f1f5f9); border-bottom: 1px solid #e5e7eb; }
+  .form-section { max-width: 800px; margin: 0 auto; padding: 2rem; }
+  .input-group { margin-bottom: 1.5rem; }
 </style>
 
 <div class="profile-bg">
@@ -92,59 +23,59 @@
     <div class="glass-effect rounded-2xl overflow-hidden">
       <!-- Header Section -->
       <div class="card-header">
-        <h1 class="text-3xl font-bold text-gray-900 mb-3">
-          Add Address
-        </h1>
-        <p class="text-gray-600">
-          Provide your address details
-        </p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">Add Address</h1>
+        <p class="text-gray-600">Provide your address details</p>
       </div>
 
       <!-- Form Section -->
-      <form method="post" enctype="multipart/form-data" action="{% url 'user_app:add_address' %}" class="form-section">
+      <form id="addressForm" method="post" enctype="multipart/form-data" action="{% url 'user_app:add_address' %}" class="form-section">
         {% csrf_token %}
 
         <!-- Address Information -->
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
           <div class="input-group">
             <label class="form-label">Name</label>
-            <input type="text" name="name" required class="input-field" />
+            <input type="text" name="name" value="{{ data.name }}" required class="input-field" />
+          </div>
+          <div class="input-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" name="phone_number" value="{{ data.phone_number }}" required class="input-field" />
           </div>
           <div class="input-group">
             <label class="form-label">Pincode</label>
-            <input type="text" name="pincode" required class="input-field" />
+            <input type="text" name="pincode" value="{{ data.pincode }}" required class="input-field" />
           </div>
           <div class="input-group">
             <label class="form-label">Locality</label>
-            <input type="text" name="locality" required class="input-field" />
+            <input type="text" name="locality" value="{{ data.locality }}" required class="input-field" />
           </div>
           <div class="input-group">
             <label class="form-label">Address</label>
-            <input type="text" name="address" required class="input-field" />
+            <input type="text" name="address" value="{{ data.address }}" required class="input-field" />
           </div>
           <div class="input-group">
             <label class="form-label">City</label>
-            <input type="text" name="city" required class="input-field" />
+            <input type="text" name="city" value="{{ data.city }}" required class="input-field" />
           </div>
           <div class="input-group">
             <label class="form-label">District</label>
-            <input type="text" name="district" required class="input-field" />
+            <input type="text" name="district" value="{{ data.district }}" required class="input-field" />
           </div>
           <div class="input-group">
             <label class="form-label">State</label>
-            <input type="text" name="state" required class="input-field" />
+            <input type="text" name="state" value="{{ data.state }}" required class="input-field" />
           </div>
           <div class="input-group">
             <label class="form-label">Landmark</label>
-            <input type="text" name="landmark" class="input-field" />
+            <input type="text" name="landmark" value="{{ data.landmark }}" class="input-field" />
           </div>
           <!-- Address Type Dropdown -->
           <div class="input-group">
             <label class="form-label">Address Type</label>
             <select name="address_type" class="input-field" required>
-              <option value="home">Home</option>
-              <option value="office">Work</option>
-              <option value="other">Other</option>
+              <option value="home" {% if data.address_type == 'home' %}selected{% endif %}>Home</option>
+              <option value="office" {% if data.address_type == 'office' %}selected{% endif %}>Work</option>
+              <option value="other" {% if data.address_type == 'other' %}selected{% endif %}>Other</option>
             </select>
           </div>
         </div>

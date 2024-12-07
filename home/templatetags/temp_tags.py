@@ -1,6 +1,9 @@
 from django import template
 
+
+
 register = template.Library()
+
 @register.filter(name='temp_tags')
 
 def tags(list_data,tag_size):

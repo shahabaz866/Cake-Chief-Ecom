@@ -1,0 +1,465 @@
+{% extends "user_side/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* static/css/wishlist.css */
+.wishlist-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.wishlist-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.wishlist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.wishlist-item {
+    display: flex;
+    padding: 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background-color: white;
+    transition: background-color 0.2s;
+}
+
+.wishlist-item:hover {
+    background-color: #f8f9fa;
+}
+
+.item-image {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    margin-right: 20px;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.item-details {
+    flex-grow: 1;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.item-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+}
+
+.price-section {
+    text-align: right;
+}
+
+.current-price {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    display: block;
+}
+
+.original-price {
+    font-size: 14px;
+    color: #999;
+    text-decoration: line-through;
+    display: block;
+}
+
+.discount {
+    font-size: 14px;
+    color: #00a65a;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
+    color: #e5e5e5;
+    font-size: 14px;
+}
+
+.star.filled {
+    color: #ffc107;
+}
+
+.reviews {
+    font-size: 14px;
+    color: #666;
+    margin-left: 5px;
+}
+
+.availability {
+    margin-top: 8px;
+}
+
+.in-stock {
+    color: #00a65a;
+    font-size: 14px;
+}
+
+.out-of-stock {
+    color: #dc3545;
+    font-size: 14px;
+}
+
+.empty-wishlist {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+}
+
+@media (max-width: 600px) {
+    .wishlist-item {
+        flex-direction: column;
+    }
+    
+    .item-image {
+        width: 100%;
+        height: 200px;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .item-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .price-section {
+        text-align: left;
+    }
+}
+
+/* Add these styles to your existing CSS */
+
+.item-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.remove-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background-color: transparent;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    background-color: #fff1f1;
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.remove-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-content h3 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.modal-content p {
+    margin: 0 0 20px 0;
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-actions button,
+.modal-actions a {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn {
+    background-color: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    color: #666;
+}
+
+.cancel-btn:hover {
+    background-color: #eee;
+}
+
+.confirm-btn {
+    background-color: #ff4444;
+    border: 1px solid #ff4444;
+    color: white;
+}
+
+.confirm-btn:hover {
+    background-color: #ff2020;
+}
+
+/* Make wishlist item relative for absolute positioning of remove button */
+.wishlist-item {
+    position: relative;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .modal-content {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    .modal-actions button,
+    .modal-actions a {
+        padding: 12px 16px;
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* Animation for remove button */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.remove-btn {
+    animation: fadeIn 0.3s ease;
+}
+.item-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.add-to-cart-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #45a049;
+}
+
+.cart-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.remove-form {
+    display: inline;
+}
+
+</style>
+<!-- Styles for wishlist (remain unchanged) -->
+
+<div class="wishlist-container">
+    <h1 class="wishlist-title">My Wishlist ({{ wishlist|length }})</h1>
+    
+    <div class="wishlist-items">
+        {% for item in wishlist %}
+        <div class="wishlist-item">
+            <div class="item-image">
+                <a href="{% url 'product_detail' item.product.id %}">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}">
+                </a>
+            </div>
+            <div class="item-details">
+                
+                <div class="item-header">
+                    <h3 class="item-title">{{ item.product.title }}</h3>
+                    {% comment %} <div class="price-section">
+                        <span class="current-price" style=" margin-top: 50px;">₹{{  item.price.first }}</span>
+                        {% if item.original_price %}
+                        <span class="original-price">₹{{ variant.price }}</span>
+                        {% endif %}
+                        {% if item.discount_percentage %}
+                        <span class="discount">{{ item.discount_percentage }}% off</span>
+                        {% endif %}
+                    </div> {% endcomment %}
+                </div>
+                
+                {% comment %} {% if item.rating %}
+                <div class="rating">
+                    <div class="stars">
+                        {% for i in "12345" %}
+                        <span class="star {% if forloop.counter <= item.rating %}filled{% endif %}">★</span>
+                        {% endfor %}
+                    </div>
+                    <span class="reviews">({{ item.reviews_count }})</span>
+                </div>
+                {% endif %} {% endcomment %}
+                
+                <div class="availability">
+                    {% if item.product.is_active %}
+                    <span class="in-stock">In Stock</span>
+                    {% else %}
+                    <span class="out-of-stock">Price Not Available</span>
+                    {% endif %}
+                </div>
+                <div class="item-actions">
+                    {% if item.product.is_active %}
+                    <form method="POST" action="{% url 'cart_app:add_cart' item.product.id %}" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                        <button type="submit" class="add-to-cart-btn">
+                            <svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 20C9 21.1 8.1 22 7 22C5.9 22 5 21.1 5 20C5 18.9 5.9 18 7 18C8.1 18 9 18.9 9 20ZM21 20C21 21.1 20.1 22 19 22C17.9 22 17 21.1 17 20C17 18.9 17.9 18 19 18C20.1 18 21 18.9 21 20ZM3 4H5L5.4 6M7 11H19L21 6H5.4M7 11L5.4 6M7 11L4.7 2H2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Add to Cart</span>
+                        </button>
+                    </form>
+                    {% endif %}
+                    
+                    <!-- Remove Button -->
+                    <button class="remove-btn" onclick="showConfirmModal({{ item.product.id }}, {{ item.variant.id|default:0 }})">
+                        <svg class="remove-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Remove</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-wishlist">Your wishlist is empty</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal for Confirm Remove -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3>Remove from Wishlist</h3>
+        <p>Are you sure you want to remove this item from your wishlist?</p>
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="hideConfirmModal()">Cancel</button>
+            <a id="confirmRemove" href="" class="confirm-btn">Remove</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showConfirmModal(productId, variantId) {
+        const modal = document.getElementById('confirmModal');
+        const confirmBtn = document.getElementById('confirmRemove');
+    
+        // Update the href with both productId and variantId
+        confirmBtn.href = "{% url 'wishlist_app:remove_from_wishlist' 0 0 %}"
+            .replace('0/0', `${productId}/${variantId}`);
+        
+        modal.classList.add('show');
+    }
+    
+
+    function hideConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        modal.classList.remove('show');
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('confirmModal');
+        if (event.target == modal) {
+            hideConfirmModal();
+        }
+    }
+</script>
+{% endblock %}

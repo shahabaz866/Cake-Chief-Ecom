@@ -18,6 +18,11 @@ urlpatterns = [
     
     path('order-confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
     
+    path('varify_payment/', views.verify_payment , name="varify_payment"),
+
+    path('apply-coupon/', views.apply_coupon, name='apply_coupon'),
+    
+    path('remove-coupon/', views.remove_coupon, name='remove_coupon')
     
 
 

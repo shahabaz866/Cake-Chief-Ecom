@@ -532,11 +532,12 @@ grid-template-columns: 1fr;
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                           </a>
+                       
                         </div>
                       </li>
                       {% endif %}
                       <li class="icon-item">
-                        <a href="#" class="icon-link">
+                        <a href="{% url "wishlist_app:wishlist" %}" class="icon-link">
                             <i class="icon far fa-heart"></i>
                         </a>
                       </li>

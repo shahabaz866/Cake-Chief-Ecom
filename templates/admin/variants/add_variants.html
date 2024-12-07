@@ -1,0 +1,41 @@
+{% extends 'admin/bas.html' %}
+
+{% block title %}add vaiant{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h2>Add Variant for {{ product.title }}</h2>
+    
+    <div class="form-group">
+        <label for="variant_name">Variant Name</label>
+        <input type="text" name="variant_name" id="variant_name" value="{{ variant_title }}" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="quantity">Stock Quantity</label>
+        <input type="number" name="quantity" id="quantity" value="{{ stock }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="price">Price</label>
+        <input type="text" name="price" id="price" value="{{ price }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="sizes">Sizes</label>
+        <select name="sizes" id="sizes" multiple>
+            {% for size in sizes %}
+                <option value="{{ size.id }}" {% if size.id in selected_sizes %} selected {% endif %}>{{ size.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit">Add Variant</button>
+</form>
+
+{% endblock content %}

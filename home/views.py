@@ -13,7 +13,8 @@ from django.db.models import Q
 import re
 import random
 import time
-from dashboard.models import Product, ProductImages, Flavour, Category,Size
+from dashboard.models import Product, ProductImages, Flavour, Category,Size,Variant
+from django.db.models import Max
 
 
 @never_cache
@@ -48,6 +49,7 @@ def SignupPage(request):
         elif pass1 != pass2:
             messages.error(request, "Entered passwords do not match!")
         elif not validate_password(pass1):
+    
             messages.error(request, "Password must be 6-10 characters long, include uppercase and lowercase letters, numbers, and special characters.")
         elif User.objects.filter(username=uname).exists():
             messages.error(request, "Username already taken.")
@@ -96,6 +98,8 @@ def about(request):
 def shoplist(request, flavor_id=None, category_id=None, size_id=None):
     query = request.GET.get('q')
     sort_option = request.GET.get('sort', 'latest')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
     flavours = Flavour.objects.all()
     categories = Category.objects.all()
     sizes = Size.objects.all()
@@ -115,7 +119,7 @@ def shoplist(request, flavor_id=None, category_id=None, size_id=None):
         products = products.filter(sizes__id=size_id)
 
     if query:
-        products = products.filter(
+        products = products.prefetch_related('variants').filter(
             Q(title__icontains=query) | 
             Q(category__name__icontains=query) |
             Q(flavour__name__icontains=query) |
@@ -124,19 +128,32 @@ def shoplist(request, flavor_id=None, category_id=None, size_id=None):
         if not products.exists():
             messages.error(request, "No products match your search criteria.")
 
+    if min_price or max_price:
+        try:
+            min_price = float(min_price) if min_price else 0
+            max_price = float(max_price) if max_price else Product.objects.aggregate(Max('price'))['price__max']
+
+            if min_price and max_price:
+                products = products.filter(price__gte=min_price, price__lte=max_price)
+            elif min_price:
+                products = products.filter(price__gte=min_price)
+            elif max_price:
+                products = products.filter(price__lte=max_price)
+        except (ValueError, TypeError):
+            messages.error(request, "Please enter valid price values.")
+
     # Simplified sort mapping
     sort_mapping = {
         'name_asc': 'title',
         'name_desc': '-title',
         'price_low': 'price',
         'price_high': '-price',
-        'new_arrivals': '-added_on',  # Assuming you have an 'added_on' field
-        'latest': '-created_at',       # Assuming you have a 'created_at' field
-        'relevance': None  # Default, keep the original order
+        'new_arrivals': '-added_on', 
+        'latest': '-created_at',
     }
 
     # Apply sorting
-    sort_field = sort_mapping.get(sort_option, '-created_at')  # Default to latest if option not recognized
+    sort_field = sort_mapping.get(sort_option, '-created_at')  
     products = products.order_by(sort_field)
 
     # Set up the paginator
@@ -158,6 +175,8 @@ def shoplist(request, flavor_id=None, category_id=None, size_id=None):
         'sort_option': sort_option,
         'sizes': sizes,
         'selected_size_id': size_id,
+        'min_price': min_price,
+        'max_price': max_price,
     }
 
     return render(request, "user_side/shop/shop.html", context)
@@ -175,22 +194,22 @@ def size_filter(request, size_id):
 
     return render(request, 'user_side/shop/shop.html', context)  
 
-def new_arrivals(request):
-    new_arrivals = Product.objects.order_by('-added_on')[:10]  # Get the latest 10 cakes
-    return render(request, 'user_side/shop/shop.html', {'new_arrivals': new_arrivals})
+
+
 @never_cache
 @login_required(login_url='login')
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     additional_images = ProductImages.objects.filter(product=product)
-    is_out_of_stock = product.stock <= 0
-    variants = product.variants.first() 
+    # variants = product.variants.first()
+    # is_out_of_stock = variants.stock <= 0
+
 
     context = {
         'product': product,
         'aditional_img': additional_images,
-        'is_out_of_stock': is_out_of_stock,
-        'variants':variants
+        # 'is_out_of_stock': is_out_of_stock,
+        # 'variants':variants
     }
 
     return render(request, 'user_side/shop/single_product.html', context)

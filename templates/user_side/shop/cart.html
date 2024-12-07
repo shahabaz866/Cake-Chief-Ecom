@@ -8,10 +8,20 @@
     color:#b52a2a !important; /* Forces the color to be red */
     margin: 0;
   }
-  
-</style>
 
-{% endblock  %}
+  .coupon-section {
+    margin-top: 20px;
+  }
+  .coupon-section .form-control {
+    width: auto;
+    max-width: 250px; /* Adjust size as needed */
+    display: inline-block;
+  }
+  .coupon-section .btn {
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %}
 {% block content %}
 
 <div class="bg-light py-3">
@@ -38,7 +48,7 @@
                 <th class="product-price">Price</th>
                 <th class="product-quantity">Quantity</th>
                 <th class="product-size">Size</th>
-                {% comment %} <th class="product-total">Total</th> {% endcomment %}
+                <th class="product-price">Total</th>
                 <th class="product-remove">Remove</th>
               </tr>
             </thead>
@@ -51,40 +61,25 @@
                 <td class="product-name">
                   <h5 class="text-black">{{ item.product.title }}</h5>
                 </td>
-                <td><p class="text-black font-weight-bold">₹{{ item.product.price }}</p></td>
-                <style>
-                  .quantity-control{
-                    text-decoration: none; /* Removes underline */
-
-                  }
-                  .quantity-control h3 {
-                    color:#b52a2a !important; /* Forces the color to be red */
-                    margin: 0;
-                  }
-                </style>
-                
+                <td><p class="text-black font-weight-bold">₹{{ item.price }}</p></td>
                 <td>
                   <div class="d-flex justify-content-center align-items-center">
-                    <a href="#" class="quantity-control" data-action="minus" data-item-id="{{ item.id }}"><h3>-</h3></a>
-                
+                    <a href="#" style="text-decoration: none;" class="quantity-control" data-action="minus" data-item-id="{{ item.id }}"><h3>-</h3></a>
                     <div id="quantity-{{ item.id }}" class="detail-qty border radius m-auto">
                       <span>{{ item.quantity }}</span>
                     </div>
-                
-                    <a href="#" class="quantity-control" data-action="plus" data-item-id="{{ item.id }}"><h3>+</h3></a>
+                    <a href="#" style="text-decoration: none;" class="quantity-control" data-action="plus" data-item-id="{{ item.id }}"><h3>+</h3></a>
                   </div>
                 </td>
-                
                 <td>
-                  <p class="text-black">
-                    {% for size in item.product.sizes.all %}
-                      {{ size.name }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                  </p>
+                  <p class="text-black">{{ item.variant.weight }}</p>
                 </td>
-                {% comment %} {% comment %} <td><p class="text-black font-weight-bold" id="total_{{ item.id }}">₹{{ item.product.price|multiply:item.quantity }}</p></td> {% endcomment %}
+                <td>
+                  
+                    <strong class="text-black" id="cart-subtotal">₹{{ cart_subtotal|floatformat:2 }}</strong>
                 
-                <td> 
+                </td>
+                <td>
                   <form method="POST" action="{% url 'cart_app:remove_from_cart' item.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-sm">
@@ -106,6 +101,35 @@
       </div>
     </div>
 
+    <!-- Coupon Section -->
+    <div class="row coupon-section">
+      <div class="col-md-12">
+        <form method="POST" action="{% url 'cart_app:apply_coupon' %}">
+          {% csrf_token %}
+          <div class="input-group mb-2">
+            <input type="text" class="form-control form-control-sm" placeholder="Enter Coupon Code" name="coupon_code" required>
+            <div class="input-group-append">
+              <button class="btn btn-outline-danger btn-sm" type="submit">Apply</button>
+            </div>
+          </div>
+        </form>
+        {% if coupon %}
+        <div class="d-flex justify-content-between align-items-center mt-2">
+           
+            <span class="text-success">
+              <strong>{{ coupon.code }}</strong> applied! 
+              (₹{{ discount }} off)
+            </span>
+            <form method="POST" action="{% url 'cart_app:remove_coupon' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+
     <div class="row">
       <div class="col-md-6">
         <a href="{% url 'shop' %}" class="btn btn-outline-danger btn-sm btn-block">
@@ -114,61 +138,91 @@
       </div>
       <div class="col-md-6 pl-5">
         <div class="row justify-content-end">
-          <div class="col-md-7">
-         <div class="border-bottom mb-5">
-              <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
-            </div> 
-             <div class="row mb-3">
-              <div class="col-md-6"><span class="text-black">Total</span></div>
-              <div class="col-md-6 text-right"><strong class="text-black" id="total-price">₹{{cart_total}}</strong></div>
-            </div> 
-            {% comment %} <div class="row mb-5">
-              <div class="col-md-6"><span class="text-black">Total</span></div>
-              <div class="col-md-6 text-right"><strong class="text-black" id="total-price">₹{{cart_total}}</strong></div>
-            </div>  {% endcomment %}
-            <a href="{% url 'cart_app:checkout' %}" class="btn btn-outline-danger btn-sm btn-block">
-              <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
-            </a>
-          </div>
+            <div class="col-md-7">
+                <div class="border-bottom mb-5">
+                    <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6"><span class="text-black">Subtotal</span></div>
+                    <div class="col-md-6 text-right">
+                        <strong class="text-black" id="cart-subtotal">₹{{ cart_subtotal|floatformat:2 }}</strong>
+                    </div>
+                    <div class="col-md-6"><span class="text-black">Tax (3%)</span></div>
+                    <div class="col-md-6 text-right">
+                        <strong class="text-black" id="tax">₹{{ tax|floatformat:2 }}</strong>
+                    </div>
+                    <div class="col-md-6"><span class="text-black">Delivery Charge</span></div>
+                    <div class="col-md-6 text-right">
+                        <strong class="text-black" id="delivery-charge">₹{{ delivery_charge|floatformat:2 }}</strong>
+                    </div>
+                    <div class="col-md-6"><span class="text-black">Packaging Charge</span></div>
+                    <div class="col-md-6 text-right">
+                        <strong class="text-black" id="packaging-charge">₹{{ packaging_charge|floatformat:2 }}</strong>
+                    </div>
+                    <div class="col-md-6"><span class="text-black">Discount</span></div>
+                    <div class="col-md-6 text-right">
+                        <strong class="text-black">₹{{ discount|floatformat:2 }}</strong>
+                    </div>
+                    <hr>
+               
+                    <div class="col-md-6"><span class="text-black font-weight-bold">Grand Total</span></div>
+                    <div class="col-md-6 text-right">
+                        <strong class="text-black font-weight-bold" id="grand-total">₹{{ grand_total|floatformat:2 }}</strong>
+                    </div>
+                </div>
+                <a href="{% url 'cart_app:checkout' %}" class="btn btn-outline-danger btn-sm btn-block">
+                    <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
+                </a>
+            </div>
         </div>
       </div>
     </div>
+
   </div>
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script type="text/javascript">
-    $(document).ready(function(){
-        $('.quantity-control').click(function(e){
-            e.preventDefault();
-            var action = $(this).data('action');
-            var itemId = $(this).data('item-id');
-        
-            var url = action === 'plus' ? "{% url 'cart_app:quantity_plus' 0 %}".replace('0', itemId) : "{% url 'cart_app:quantity_minus' 0 %}".replace('0', itemId);
-        
-            $.ajax({
-                type: 'GET',
-                url: url,
-                data: { 'item_id': itemId },
-                success: function(response){
-                    if (response.error) {
-                        Swal.fire(response.error);
-                        return;
-                    }
-                    $('#quantity-' + itemId + ' span').text(response.quantity);
-                    $('#total-price').text('₹' + parseFloat(response.total_price).toFixed(1));
-                    $('#subtotal-' + itemId).text('₹'+ response.item_subtotal);
-                    updateSubtotal();
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                }
-            });
-        });
-    });
+  $(document).ready(function(){
+      $('.quantity-control').click(function(e){
+          e.preventDefault();
+          var action = $(this).data('action'); // Either 'plus' or 'minus'
+          var itemId = $(this).data('item-id'); // Item ID from data attribute
+          
+          var url = action === 'plus' 
+              ? "{% url 'cart_app:quantity_plus' 0 %}".replace('0', itemId) 
+              : "{% url 'cart_app:quantity_minus' 0 %}".replace('0', itemId);
+
+          $.ajax({
+              type: 'GET',
+              url: url,
+              data: {
+                  'item_id': itemId,
+              },
+              success: function(response) {
+                console.log(response);
+                  if (response.error) {
+                      Swal.fire(response.error); 
+                      return;
+                  }
+
+                  $('#quantity-' + itemId + ' span').text(response.quantity);
+                  $('#subtotal-' + itemId).text('₹' + response.item_subtotal.toFixed(2));
+
+                  $('#cart-subtotal').text('₹' + response.cart_subtotal.toFixed(2));
+                  $('#tax').text('₹' + response.tax.toFixed(2));
+                  $('#delivery-charge').text('₹' + response.delivery_charge.toFixed(2));
+                  $('#packaging-charge').text('₹' + response.packaging_charge.toFixed(2));
+                  $('#grand-total').text('₹' + response.grand_total.toFixed(2));
+              },
+              error: function(xhr) {
+                  console.error(xhr.responseText);
+              }
+          });
+      });
+  });
 </script>
 
 {% endblock %}

@@ -275,7 +275,7 @@
                                 <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label>Product Name</label>
-                                        <input type="text" placeholder="Enter product Name" name="product_name" required class="form-control">
+                                        <input type="text" placeholder="Enter product Name" name="product_name" required class="form-control" >
                                     </div>
                                 </div>
         
@@ -302,7 +302,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 col-sm-6 col-12">
+                                {% comment %} <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label>Size</label>
                                         <select name="sizes" class="select form-control" multiple required>
@@ -312,15 +312,15 @@
                                             {% endfor %}
                                         </select>
                                     </div>
-                                </div>
+                                </div> {% endcomment %}
                                 
         
-                                <div class="col-lg-3 col-sm-6 col-12">
+                                {% comment %} <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label>Quantity</label>
                                         <input type="number" name="quantity" class="form-control" placeholder="0" required>
                                     </div>
-                                </div>
+                                </div> {% endcomment %}
         
                                 <div class="col-lg-12">
                                     <div class="form-group">
@@ -329,19 +329,62 @@
                                     </div>
                                 </div>
         
-                                <div class="col-lg-3 col-sm-6 col-12">
+                                {% comment %} <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label>Price</label>
                                         <input type="number" name="price" step="0.01" class="form-control" placeholder="0" required>
                                     </div>
-                                </div>
+                                </div> {% endcomment %}
+
+                                
+                                <!-- Variants Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Product Variants</h5>
+                <button type="button" class="btn btn-sm btn-primary" id="addVariant">
+                    <i class="bi bi-plus-lg"></i> Add Variant
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="variantsContainer">
+                    <div class="variant-item border rounded p-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">weight</label>
+                                <select class="form-select" name="varient_weight[]">
+                                    <option value="0.5kg" {% if varient.weight == '0.5kg' %}selected{% endif %}>0.5kg</option>
+                                    <option value="1kg" {% if varient.weight == '1kg' %}selected{% endif %}>1kg</option>
+                                    <option value="1.5kg" {% if varient.weight == '1.5kg' %}selected{% endif %}>1.5kg</option>
+                                    <option value="2kg" {% if varient.weight == '2kg' %}selected{% endif %}>2kg</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Price</label>
+                                <input type="number" class="form-control" name="varient_price[]" value="{{ varient.price }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Stock</label>
+                                <input type="number" class="form-control" name="varient_stock[]" value="{{ varient.stock }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="button" class="btn btn-danger d-block w-100 remove-variant">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
                                 <!-- Main Product Image -->
                                 <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label>Main Product Image:</label>
                                         <input type="file" id="mainImageInput" name="main_product_image" accept="image/*" class="form-control" required>
-                                        <div class="image-uploads">
+                                        <div id="mainImagePreview" class="mt-2" style="width: 200px;">
+                                            <!-- Image preview will be displayed here -->
                                         </div>
                                     </div>
                                 </div>
@@ -521,7 +564,7 @@ class ImageUploadHandler {
 
             const preview = document.getElementById(config.previewId);
             if (preview) {
-                preview.innerHTML = `<img src="${URL.createObjectURL(croppedFile)}" alt="Cropped Image" style="width: 100px; height: auto;">`;
+                preview.innerHTML = `<img src="${URL.createObjectURL(croppedFile)}" alt="Cropped Image" style="width: 200px; height: auto;">`;
                 preview.style.display = 'block';
             }
 
@@ -586,7 +629,56 @@ class ImageUploadHandler {
 document.addEventListener('DOMContentLoaded', () => {
     new ImageUploadHandler();
 });
+
+
+
         </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const variantsContainer = document.getElementById('variantsContainer');
+                const addVariantBtn = document.getElementById('addVariant');
+            
+                addVariantBtn.addEventListener('click', function() {
+                    const variantHTML = `
+                        <div class="variant-item border rounded p-3 mb-3">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">weight</label>
+                                    <select class="form-select" name="varient_weight[]">
+                                        <option value="0.5kg">0.5kg</option>
+                                        <option value="1kg">1kg</option>
+                                        <option value="1.5kg">1.5kg</option>
+                                        <option value="2kg">2kg</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Price</label>
+                                    <input type="number" class="form-control" name="varient_price[]" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Stock</label>
+                                    <input type="number" class="form-control" name="varient_stock[]" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-danger d-block w-100 remove-variant">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    variantsContainer.insertAdjacentHTML('beforeend', variantHTML);
+                });
+            
+                // Event delegation for remove buttons
+                variantsContainer.addEventListener('click', function(e) {
+                    if (e.target.closest('.remove-variant')) {
+                        e.target.closest('.variant-item').remove();
+                    }
+                });
+            });
+            </script>
     
     
 

@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="{% static 'css/cropper.css' %}">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 </head>
 
@@ -133,21 +134,21 @@
                                 <span>Product</span> <span class="menu-arrow"></span>
                             </a>
                             <ul class="submenu-content">
-                                <li><a href=""> sample</a></li>
+                                
                                 <li><a href="{% url 'product_list' %}">Product List</a></li>
                                 <li><a href="{% url 'add_products' %}">Add Product</a></li>
                                 <li><a href="{% url 'category_list' %}">Category List</a></li>
                                 <li><a href="{% url 'add_category' %}">Add Category</a></li>
                                 <li><a href="{% url 'flavour_list' %}">Flavour List</a></li>
                                 <li><a href="{% url 'add_flavour' %}">Add Flavour</a></li>
-                                
+                               
                         
                             </ul>
                         </li>
                         
                         <li class="submenu">
                             <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/users1.svg' %}" alt="img">
-                                <span>People</span> <span class="menu-arrow"></span>
+                                <span>People</span><span class="menu-arrow"></span>
                             </a>
                             <ul class="submenu-content">
                                 <li><a href="{% url 'user_management' %}">User List</a></li>
@@ -158,7 +159,7 @@
                                 <span>order</span> <span class="menu-arrow"></span>
                             </a>
                             <ul class="submenu-content">
-                                <li><a href="{% url 'order_app:admin_order_list' %}">User List</a></li>
+                                <li><a href="{% url 'order_app:admin_order_list' %}">Order List</a></li>
                             </ul>
                         </li>
         
@@ -228,56 +229,34 @@
     <script src="{% static 'admin_assets/js/sidebar.js' %}"></script>
     <script src="{% static 'admin_assets/js/dropdown.js' %}"></script>
 
+  
     <script>
-        $(document).ready(function () {
-            $('.dropdown-toggle').dropdown();
-        });
-    </script>
-    
-
-    <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Ensure that all the JavaScript needed for the sidebar or other features works correctly
             feather.replace(); // Bootstrap feather icons
-        });
-        $(document).ready(function() {
-            $('.submenu a').on('click', function(e) {
-                e.preventDefault();
+    
+            // Handle submenu clicks for dropdown
+            $('.submenu > a').on('click', function(e) {
+                e.preventDefault(); // Prevent default anchor click
                 var $this = $(this);
-                var $submenu = $this.next('ul');
-                
+                var $submenu = $this.next('ul'); // Get the next <ul> element (submenu)
+    
                 if ($submenu.is(':visible')) {
+                    // If submenu is already visible, hide it
                     $submenu.slideUp();
                     $this.find('.menu-arrow').removeClass('active');
                 } else {
-                    // Close other open submenus
+                    // Hide all other submenus
                     $('.submenu ul').slideUp();
                     $('.menu-arrow').removeClass('active');
-                    // Open the clicked submenu
+                    // Show the clicked submenu
                     $submenu.slideDown();
                     $this.find('.menu-arrow').addClass('active');
                 }
             });
         });
-        
     </script>
-    <script>
-        $(document).ready(function() {
-            // Sidebar menu toggle
-            $('.submenu > a').click(function() {
-                var parentLi = $(this).parent('li');
-                var submenu = parentLi.find('ul.submenu-content');
-                
-                if (submenu.is(':visible')) {
-                    submenu.slideUp(200);
-                    parentLi.removeClass('open');
-                } else {
-                    submenu.slideDown(200);
-                    parentLi.addClass('open');
-                }
-            });
-        });
-    </script>
+    
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>

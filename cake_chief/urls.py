@@ -28,6 +28,7 @@ urlpatterns = [
     path('order_app/',include('order_app.urls')),
     path('cart_app/',include('cart_app.urls')),
     path('user_app/',include('user_app.urls')),
+    path('wishlist_app/',include('wishlist_app.urls')),
   
 
     

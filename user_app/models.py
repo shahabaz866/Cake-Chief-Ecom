@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.validators import RegexValidator
+from django.db.models import UniqueConstraint
+
 
 class Address(models.Model):
     ADDRESS_TYPE_CHOICES = [
@@ -12,6 +14,11 @@ class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     address_type = models.CharField(max_length=10, choices=ADDRESS_TYPE_CHOICES, default='HOME')
     name = models.CharField(max_length=255)
+    phone_number = models.CharField(
+        max_length=10,
+        validators=[RegexValidator(r'^\d{10}$', message="Phone number must be 10 digits.")],
+        null=True
+    )
     pincode = models.CharField(
         max_length=6,
         validators=[RegexValidator(r'^\d{6}$', message="Pincode must be 6 digits.")]
@@ -36,10 +43,8 @@ class Address(models.Model):
         return f"{self.get_address_type_display()} - {self.address}, {self.city}"
 
     def save(self, *args, **kwargs):
-        # If this address is being set as default, remove default status from other addresses
         if self.is_default:
             Address.objects.filter(user=self.user, is_default=True).update(is_default=False)
-        # If this is the user's first address, make it default
         elif not self.pk and not Address.objects.filter(user=self.user).exists():
             self.is_default = True
         super().save(*args, **kwargs)
@@ -63,17 +68,16 @@ class UserContact(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        unique_together = ['user', 'mobile_number']
+        constraints = [
+            UniqueConstraint(fields=['user', 'mobile_number'], name='unique_user_mobile')
+        ]
 
     def __str__(self):
         return f"{self.mobile_number} ({self.get_contact_type_display()})"
 
     def save(self, *args, **kwargs):
-        # If this is primary contact, remove primary status from other contacts
+        # If setting this contact as primary, update any existing primary contacts to secondary
         if self.contact_type == 'PRIMARY':
-            UserContact.objects.filter(
-                user=self.user, 
-                contact_type='PRIMARY'
-            ).update(contact_type='SECONDARY')
+            UserContact.objects.filter(user=self.user, contact_type='PRIMARY').update(contact_type='SECONDARY')
         super().save(*args, **kwargs)
   

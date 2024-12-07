@@ -135,25 +135,7 @@
 <body>
     <form action="{% url 'SignupPage' %}" method="post">
         {% csrf_token %}
-        {% comment %} {% if messages %}
-        {% for message in messages %}
-        <div class="alert 
-        {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %}
-        alert-dismissible fade show" role="alert">      
-                  {{ message }}
-                
-            </div>
-        {% endfor %}
-        <script>
-            // Dismiss alert messages after 5 seconds
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => alert.classList.remove('show'));
-            }, 5000); // 5000 ms = 5 seconds
-        </script>
-    {% else %}
-        
-    {% endif %} {% endcomment %}
+       
 
         <div class="logo-container">
             <a href="{% url 'home' %}">

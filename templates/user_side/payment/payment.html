@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Confirmation</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #ffe5e5 0%, #fff5f5 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        line-height: 1.6;
+        color: #333;
+      }
+
+      .payment-container {
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(211, 60, 60, 0.15);
+        padding: 35px;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .payment-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background-color: #d33c3c;
+      }
+
+      .order-summary {
+        background-color: #fff0f0;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(211, 60, 60, 0.1);
+      }
+
+      .order-summary h3 {
+        color: #d33c3c;
+        margin-bottom: 20px;
+        font-weight: 700;
+        position: relative;
+        display: inline-block;
+      }
+
+      .order-summary h3::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #d33c3c;
+      }
+
+      .order-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .order-detail p {
+        font-weight: 500;
+        color: #666;
+      }
+
+      .order-detail span {
+        font-weight: 600;
+        color: #d33c3c;
+      }
+
+      .pay-button {
+        background-color: #d33c3c;
+        color: white;
+        border: none;
+        padding: 15px 25px;
+        border-radius: 10px;
+        font-size: 17px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .pay-button:hover {
+        background-color: #ab2a2a;
+        transform: translateY(-3px);
+        box-shadow: 0 7px 15px rgba(211, 60, 60, 0.3);
+      }
+
+      .pay-button:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 10px rgba(211, 60, 60, 0.2);
+      }
+
+      .pay-button svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      @media (max-width: 600px) {
+        .payment-container {
+          margin: 20px;
+          padding: 25px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="payment-container">
+      <div class="order-summary">
+        <h3>Order Summary</h3>
+        <div class="order-detail">
+          <p>Order ID:</p>
+          <span>{{ order.id }}</span>
+        </div>
+        <div class="order-detail">
+          <p>Total Amount:</p>
+          <span>₹{{ grand_total }}</span>
+        </div>
+      </div>
+
+      <button id="rzp-button" class="pay-button">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path
+            d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+          ></path>
+        </svg>
+        Pay Now
+      </button>
+    </div>
+
+    <script>
+      var options = {
+        key: "{{ razorpay_key_id }}",
+        amount:{{ grand_total }},
+        currency: "INR",
+        name: "Cake Chief",
+        description: "Order #{{ order.id }}",
+        order_id: "{{ razorpay_order_id }}",
+        handler: function (response) {
+          console.log("response data:",response);
+          fetch("{% url 'cart_app:checkout' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+
+            body: JSON.stringify(response),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                window.location.href = "{% url 'order_app:success' %}";
+              } else {
+                alert("Payment verification failed!");
+              }
+            })
+            .catch((error) => {
+
+                
+              alert("Something went wrong!");
+            });
+        },
+        theme: {
+          color: "#D33C3C",
+        },
+      };
+
+      var rzp = new Razorpay(options);
+      document.getElementById("rzp-button").onclick = function (e) {
+        e.preventDefault();
+        rzp.open();
+      };
+      console.log("Razorpay Key ID:", "{{ razorpay_key_id }}");
+      console.log("Grand Total:", "{{ grand_total|floatformat:0 }}");
+      console.log("Order ID:", "{{ order.id }}");
+      console.log("Razorpay Order ID:", "{{ razorpay_order_id }}");
+    </script>
+  </body>
+</html>

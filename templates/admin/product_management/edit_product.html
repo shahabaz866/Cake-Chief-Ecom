@@ -1,135 +1,228 @@
 {% extends 'admin/bas.html' %}
 
 {% block title %}Edit Product{% endblock %}
+
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .card {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+    .page-title {
+        margin-bottom: 2rem;
+    }
+    .variant-section {
+        border-top: 1px solid #dee2e6;
+        margin-top: 2rem;
+        padding-top: 2rem;
+    }
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    .image-container {
+        position: relative;
+        display: inline-block;
+        margin: 1rem;
+    }
+</style>
 {% endblock %}
+
 {% block content %}
 {% load static %}
 
 <div class="page-wrapper">
-    <div class="content">
-        <div class="page-header">
+    <div class="content container-fluid py-4">
+        <div class="page-header mb-4">
             <div class="page-title">
-                <h4>Product Edit</h4>
-                <h6>Update your product</h6>
+                <h4 class="mb-2">Edit Product</h4>
+                <h6 class="text-muted">Update your product details and variants</h6>
             </div>
         </div>
 
         <div class="card">
             <div class="card-body">
-                <form method="POST" enctype="multipart/form-data" action="{% url 'edit_product' product.id %}">
+                <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {% csrf_token %}
-                    <!-- Product Name -->
-                    <div class="col-lg-6 col-sm-6 col-12">
-                        <div class="form-group">
-                            <label>Product Name:</label>
-                            <input type="text" name="product_name" class="form-control" value="{{ product.title }}">
+                    
+                    <!-- Product Basic Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="product_name" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="product_name" name="product_name" value="{{ product.title }}" required>
                         </div>
-                    </div>
-                    <!-- Quantity -->
-                    <div class="col-lg-6 col-sm-6 col-12">
-                        <div class="form-group">
-                            <label>Quantity:</label>
-                            <input type="number" name="quantity" class="form-control" value="{{ product.stock }}">
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category" required>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if category.id == product.category.id %} selected {% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
-                    </div>
-                    <!-- Description -->
-                    <div class="col-lg-6 col-sm-6 col-12">
-                        <div class="form-group">
-                            <label>Description:</label>
-                            <textarea name="description" class="form-control">{{ product.description }}</textarea>
-                        </div>
-                    </div>
-                    <!-- Price -->
-                    <div class="col-lg-6 col-sm-6 col-12">
-                        <div class="form-group">
-                            <label>Price:</label>
-                            <input type="text" name="price" class="form-control" value="{{ product.price }}">
-                        </div>
-                    </div>
-                   <!-- Main Image -->
-                   <div class="col-lg-12">
-                    <div class="form-group">
-                        <label>Main Image:</label>
-                        <div>
-                            <img src="{{ product.image.url }}" alt="Main image" width="150">
-                        </div>
-                        <input type="file" name="main_image" class="form-control mt-2">
-                    </div>
-                </div>
 
-                <!-- Additional Images -->
-                <div class="col-lg-12">
-                    <label>Additional Images:</label>
-                    <div class="form-group">
-                        <div class="row">
-                            {% for img in product_images %}
-                                <div class="col-md-4">
-                                    <img src="{{ img.image.url }}" alt="Additional image" width="100">
-                                    <input type="file" name="extra_image_{{ forloop.counter }}" class="form-control mt-2">
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" type="checkbox" name="remove_image_{{ forloop.counter }}" value="True">
-                                        <label class="form-check-label" for="remove_image_{{ forloop.counter }}">
-                                            Remove this image
-                                        </label>
+                        <div class="col-md-6 mb-3">
+                            <label for="flavour" class="form-label">Flavour</label>
+                            <select class="form-select" id="flavour" name="flavour" required>
+                                {% for flavour in flavours %}
+                                <option value="{{ flavour.id }}" {% if flavour.id == product.flavour.id %} selected {% endif %}>
+                                    {{ flavour.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required>{{ product.description }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Image Section -->
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <h5 class="mb-3">Product Images</h5>
+                            
+                            <div class="mb-4">
+                                <label for="main_image" class="form-label">Main Image</label>
+                                <input type="file" class="form-control" id="main_image" name="main_image">
+                            </div>
+
+                            <!-- Existing Images -->
+                            <div class="row mb-3">
+                                {% for image in product_images %}
+                                <div class="col-md-3 mb-3">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <img src="{{ image.image.url }}" class="image-preview mb-2" alt="Product image {{ forloop.counter }}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="remove_image_{{ forloop.counter }}" id="remove_image_{{ forloop.counter }}">
+                                                    <label class="form-check-label" for="remove_image_{{ forloop.counter }}">Remove</label>
+                                                </div>
+                                                <input type="file" class="form-control form-control-sm" name="extra_image_{{ forloop.counter }}">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                {% endfor %}
+                            </div>
+
+                            {% comment %} <div class="mb-3">
+                                <label for="new_images" class="form-label">Add New Images</label>
+                                <input type="file" class="form-control" id="new_images" name="new_images" multiple>
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+
+                    <!-- Variants Section -->
+                    <div class="variant-section">
+                        <h5 class="mb-4">Product Variants</h5>
+                        
+                        {% if variants %}
+                        <div class="row mb-4">
+                            {% for variant in variants %}
+                            <div class="col-12 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label for="variant_weight_{{ variant.id }}" class="form-label">Weight</label>
+                                                <input type="text" class="form-control" id="variant_weight_{{ variant.id }}" name="variant_weight_{{ variant.id }}" value="{{ variant.weight }}" required>
+                                            </div>
+                                            
+                                            <div class="col-md-3 mb-3">
+                                                <label for="variant_price_{{ variant.id }}" class="form-label">Price</label>
+                                                <input type="text" class="form-control" id="variant_price_{{ variant.id }}" name="variant_price_{{ variant.id }}" value="{{ variant.price }}" required>
+                                            </div>
+                                            
+                                            <div class="col-md-3 mb-3">
+                                                <label for="variant_stock_{{ variant.id }}" class="form-label">Stock</label>
+                                                <input type="number" class="form-control" id="variant_stock_{{ variant.id }}" name="variant_stock_{{ variant.id }}" value="{{ variant.stock }}" required>
+                                            </div>
+                                            
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label d-block">&nbsp;</label>
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="delete_variant_{{ variant.id }}" id="delete_variant_{{ variant.id }}">
+                                                    <label class="form-check-label" for="delete_variant_{{ variant.id }}">Delete Variant</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             {% endfor %}
                         </div>
-                    </div>
-                </div>
+                        {% else %}
+                        <p class="text-muted mb-4">No variants exist for this product. Add new variants below:</p>
+                        {% endif %}
 
-                    <!-- Category -->
-                    <div class="col-lg-3 col-sm-6 col-12">
-                        <div class="form-group">
-                            <label>Category:</label>
-                            <select name="category" class="form-control">
-                                {% for category in categories %}
-                                    <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>{{ category.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Flavour -->
-                    <div class="col-lg-3 col-sm-6 col-12">
-                        <div class="form-group">
-                            <label>Flavour:</label>
-                            <select name="flavour" class="form-control">
-                                {% for flavour in flavours %}
-                                    <option value="{{ flavour.id }}" {% if flavour.id == product.flavour.id %}selected{% endif %}>{{ flavour.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Size -->
-                    <div class="col-lg-3 col-sm-6 col-12">
-                        <div class="form-group">
-                            <label>Size:</label>
-                            <select name="sizes" multiple class="form-control">
-                                {% for size in sizes %}
-                                    <option value="{{ size.id }}" {% if size in selected_sizes %}selected{% endif %}>{{ size.name }}</option>
-                                {% endfor %}
-                            </select>
+                        <!-- New Variant Form -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">Add New Variant</h6>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="new_variant_weight" class="form-label">Weight</label>
+                                        <input type="text" class="form-control" id="new_variant_weight" name="new_variant_weight[]" required>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label for="new_variant_price" class="form-label">Price</label>
+                                        <input type="text" class="form-control" id="new_variant_price" name="new_variant_price[]" required>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label for="new_variant_stock" class="form-label">Stock</label>
+                                        <input type="number" class="form-control" id="new_variant_stock" name="new_variant_stock[]" required>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Submit Button -->
-                    <div class="col-lg-12">
-                        <button type="submit" class="btn btn-primary">Update</button>
-                        <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>Save Product
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
 {% endblock %}

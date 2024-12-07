@@ -1,204 +1,262 @@
-{% extends 'user_side/base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #D33C3C;
+            --primary-color-light: #FF6B6B;
+            --primary-color-dark: #A52A2A;
+        }
 
-{% block content %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+        body {
+            background-color: #f9fafb;
+        }
 
-<style>
-    /* Simple, clean animations */
-    .fade-in { animation: fadeIn 0.5s ease-out; }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+        .bg-primary {
+            background-color: var(--primary-color);
+        }
 
-    /* Clean, accessible buttons */
-    .btn {
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-    }
+        .text-primary {
+            color: var(--primary-color);
+        }
 
-    .btn-primary {
-        background-color: #b52a2a;
-        color: white;
-        border: none;
-    }
+        .border-primary {
+            border-color: var(--primary-color);
+        }
 
-    .btn-primary:hover {
-        background-color: #9c2424;
-    }
+        .hover\:bg-primary-light:hover {
+            background-color: var(--primary-color-light);
+        }
 
-    .btn-outline {
-        background-color: white;
-        color: #b52a2a;
-        border: 1px solid #b52a2a;
-    }
+        .order-card {
+            transition: all 0.3s ease;
+        }
 
-    .btn-outline:hover {
-        background-color: #fff5f5;
-    }
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(211, 60, 60, 0.1);
+        }
 
-    /* Clean status badges */
-    .status-badge {
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-    }
+             /* Breadcrumb Specific Styles */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
 
-    /* Simple card styling */
-    .order-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        transition: border-color 0.2s ease;
-    }
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
 
-    .order-card:hover {
-        border-color: #b52a2a;
-    }
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none !important;
+            transition: color 0.3s ease;
+        }
 
-    /* Simplified scrollbar */
-    .items-list {
-        max-height: 200px;
-        overflow-y: auto;
-        list-style-type: none;
-    }
+        .breadcrumb-item a:hover {
+            color: var(--primary-color-dark);
+        }
 
-    .items-list::-webkit-scrollbar {
-        width: 8px;
-    }
+        .breadcrumb-item.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
 
-    .items-list::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-
-    .items-list::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 4px;
-    }
-</style>
-
-<div class="bg-gray-50 min-h-screen py-8">
-    <div class="container mx-auto px-4 max-w-5xl">
-        <!-- Simple Header -->
-        <header class="mb-8 fade-in text-center">
-            <h1 class="text-2xl font-semibold text-gray-800 mb-2">Your Orders</h1>
-            <p class="text-gray-600">View and manage your orders</p>
+        .breadcrumb-divider {
+            color: #9ca3af;
+            margin: 0 0.25rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+           <!-- Breadcrumb Navigation -->
+           <nav class="breadcrumb mb-6">
+            <div class="breadcrumb-item">
+                <a href="{% url 'home' %}" class="hover:underline">
+                    <i class="bi bi-house-fill mr-1"></i>
+                    Home
+                </a>
+                <span class="breadcrumb-divider">/</span>
+            </div>
+            <div class="breadcrumb-item">
+                <a href="#" class="hover:underline">
+                    <i class="bi bi-grid-fill mr-1"></i>
+                    My Account
+                </a>
+                <span class="breadcrumb-divider">/</span>
+            </div>
+            <div class="breadcrumb-item active">
+                <i class="bi bi-bag-fill mr-1"></i>
+                My Orders
+            </div>
+        </nav>
+        <!-- Page Header -->
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4" style="color: var(--primary-color)">My Orders</h1>
+            <p class="text-gray-600 text-lg">Track and manage your recent purchases</p>
         </header>
+        {% if orders_with_items %}
+
+        <!-- Orders Overview -->
+        <div class="grid md:grid-cols-3 gap-6 mb-10">
+            <!-- Total Orders Card -->
+            <div class="bg-white shadow-md rounded-xl p-6 text-center order-card">
+                <div class="mb-4">
+                    <i class="bi bi-bag-check-fill text-5xl" style="color: var(--primary-color)"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Total Orders</h3>
+                <p class="text-3xl font-bold" style="color: var(--primary-color)">{{ orders_with_items|length }}</p>
+            </div>
+            
+            <!-- Pending Orders Card -->
+            <div class="bg-white shadow-md rounded-xl p-6 text-center order-card">
+                <div class="mb-4">
+                    <i class="bi bi-clock-fill text-5xl text-yellow-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Pending Orders</h3>
+                <p class="text-3xl font-bold text-yellow-700">{{ pending_orders_count }}</p>
+            </div>
+            
+
+            <!-- Completed Orders Card -->
+            <div class="bg-white shadow-md rounded-xl p-6 text-center order-card">
+                <div class="mb-4">
+                    <i class="bi bi-check-circle-fill text-5xl text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Completed Orders</h3>
+                <p class="text-3xl font-bold text-green-700">{{ delivery_orders_count }}</p>
+            </div>
+
+        </div>
 
 
         <!-- Orders List -->
-        {% if orders_with_items %}
         <div class="space-y-6">
-            
-                <div class="stat-box rounded-2xl p-6 text-center ">
-                    <div class="flex items-center justify-center mb-3">
-                        <i class="bi bi-bag-check-fill text-2xl"></i>
-                    </div>
-                    <p class="text-sm text-white/90 mb-1">Total Orders</p>
-                    <p class="text-3xl font-bold">{{ orders_with_items|length }}</p>
-                </div>
-         
-            {% for order_with_items in orders_with_items %}
-            <div class="order-card p-6 fade-in text-center">
+            {% for order in orders_with_items %}
+            <!-- Single Order Card -->
+            <div class="bg-white shadow-md rounded-xl p-6 order-card">
                 <!-- Order Header -->
-                <div class="flex flex-wrap gap-4 items-start justify-between mb-6">
+                <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b">
                     <div>
-                        <!-- Order ID and Status -->
-                        <div class="flex items-center gap-3 mb-2">
-                            <h2 class="text-lg font-medium">Order #{{ order_with_items.order.id }}</h2>
-                            <span class="status-badge 
-                                {% if order_with_items.order.order_status == 'PROCESSING' %}bg-yellow-100 text-yellow-800
-                                {% elif order_with_items.order.order_status == 'SHIPPED' %}bg-blue-100 text-blue-800
-                                {% elif order_with_items.order.order_status == 'DELIVERED' %}bg-green-100 text-green-800
-                                {% elif order_with_items.order.order_status == 'CANCELLED' %}bg-red-100 text-red-800
-                                {% endif %}">
-                                {{ order_with_items.order.order_status }}
+                        <div class="flex items-center space-x-3 mb-2">
+                            <h2 class="text-xl font-semibold text-gray-900">
+                               #{{ order.order.id }}
+                            </h2>
+                            <span class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                {{ order.order.order_status }}
                             </span>
                         </div>
-                        <!-- Order Date -->
                         <p class="text-gray-600">
                             <i class="bi bi-calendar3 mr-2"></i>
-                            Ordered on {{ order_with_items.order.created_at|date:"F d, Y" }}
+                            {{ order.order.created_at|date:"F d, Y" }}
                         </p>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex flex-wrap gap-3">
-                        <form method="POST" action="{% url 'order_app:order_detail' order_id=order_with_items.order.id %}">
+                    <!-- Order Actions -->
+                    <div class="flex space-x-3">
+                        <form method="POST" action="{% url 'order_app:order_detail' order_id=order.order.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-eye"></i>
-                                View Details
+                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors">
+                                <i class="bi bi-eye mr-2"></i>View Details
                             </button>
                         </form>
-                        
-                        {% if order_with_items.order.order_status == 'PROCESSING' or order_with_items.order.order_status == 'SHIPPED' %}
-                        <form method="POST" action="{% url 'cancel_order' order_with_items.order.id %}" 
-                              onsubmit="return confirm('Are you sure you want to cancel this order?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline">
-                                <i class="bi bi-x-circle"></i>
-                                Cancel Order
-                            </button>
-                        </form>
-                        {% endif %}
+                        {% if order.order.order_status == 'PROCESSING' or order_with_items.order.order_status == 'SHIPPED' %}
+
+                        <form method="POST" action="{% url 'order_app:cancel_order' order.order.id %}" 
+                        onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-red-50 transition-colors">
+                            <i class="bi bi-x-circle mr-2"></i>Cancel Order
+                        </button>
+                    </form>
+                    {% endif %}
+
                     </div>
                 </div>
 
                 <!-- Order Details -->
-                <div class="grid md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+                <div class="grid md:grid-cols-2 gap-6">
                     <!-- Order Items -->
                     <div>
-                        <h3 class="text-sm font-medium text-gray-600 mb-3">Items in your order</h3>
-                        <ul class="items-list space-y-2 ">
-                            {% for item in order_with_items.items %}
-                            <li class="flex items-center gap-3 py-2">
-                                <span class="text-gray-600">{{ item.quantity }}×</span>
-                                <span class="text-gray-800">{{ item.product.title }}</span>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Items</h3>
+                        <ul class="space-y-3">
+                            {% for item in order.items %}
+                            <li class="flex justify-between items-center">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-gray-600 font-medium">{{ item.quantity }}×</span>
+                                    <span class="text-gray-800">{{ item.product.title }}</span>
+                                </div>
+                                <span class="text-gray-600">{{ item.price }}</span>
                             </li>
                             {% endfor %}
+
+                            {% comment %} <li class="flex justify-between items-center">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-gray-600 font-medium">1×</span>
+                                    <span class="text-gray-800">Smartphone Stand</span>
+                                </div>
+                                <span class="text-gray-600">₹499</span>
+                            </li> {% endcomment %}
                         </ul>
                     </div>
 
-                    <!-- Order Summary -->
+                    <!-- Order Total -->
                     <div class="md:text-right">
-                        <h3 class="text-sm font-medium text-gray-600 mb-3">Order Total</h3>
-                        <p class="text-2xl font-semibold text-gray-800">₹{{ order_with_items.order.total_amount }}</p>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Total</h3>
+                        <div class=" rounded-lg p-4">
+                            <p class="text-3xl font-bold" style="color: var(--primary-color)">₹{{ order.order.total_amount}}</p>
+                        </div>
                     </div>
+                    
                 </div>
             </div>
             {% endfor %}
-        </div>
-
-        {% else %}
-        <!-- Empty State -->
-        <div class="text-center bg-white rounded-lg p-8 fade-in">
-            <div class="inline-block p-3 bg-gray-100 rounded-full mb-4">
-                <i class="bi bi-bag text-4xl text-gray-500"></i>
+            {% else %}
+            <!-- Empty State (when no orders) -->
+            <div class="text-center bg-white rounded-lg p-8 fade-in">
+                <div class="inline-block p-3 bg-gray-100 rounded-full mb-4">
+                    <i class="bi bi-bag text-4xl text-gray-500"></i>
+                </div>
+                <h2 class="text-xl font-medium text-gray-800 mb-2">No Orders Yet</h2>
+                <p class="text-gray-600 mb-6">Start shopping to see your orders here</p>
+                <a href="{% url 'shop' %}" class="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors">
+                    <i class="bi bi-cart mr-2"></i>Browse Products
+                </a>
             </div>
-            <h2 class="text-xl font-medium text-gray-800 mb-2">No Orders Yet</h2>
-            <p class="text-gray-600 mb-6">Start shopping to see your orders here</p>
-            <a href="{% url 'shop' %}" class="btn btn-primary">
-                <i class="bi bi-cart"></i>
-                Browse Products
-            </a>
-        </div>
-        {% endif %}
-        <div class="d-flex justify-content-center align-items-center" >
-            <a href="{% url 'shop' %}" class="btn btn-primary">
-                Browse Products
-            </a>
+            
+            {% endif %}
+            
+            
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        // Optional: Toggle between order list and empty state
+        function toggleEmptyState() {
+            const orderList = document.querySelector('.space-y-6 > div:first-child');
+            const emptyState = document.getElementById('empty-state');
+            
+            // Uncomment and modify as needed for dynamic showing/hiding
+            // if (orderList.children.length === 0) {
+            //     orderList.style.display = 'none';
+            //     emptyState.style.display = 'block';
+            // } else {
+            //     orderList.style.display = 'block';
+            //     emptyState.style.display = 'none';
+            // }
+        }
+    </script>
+</body>
+</html>

@@ -50,10 +50,8 @@ INSTALLED_APPS = [
     'order_app',
     'cart_app',
     'user_app',
-    
-
-    
-     
+    'wishlist_app',    
+ 
 ]
 
 ACCOUNT_EMAIL_REQUIRED = True
@@ -113,6 +111,8 @@ DATABASES = {
     }
 }
 
+RAZORPAY_KEY_ID = 'rzp_test_blN5WtOvlsANBC'
+RAZORPAY_KEY_SECRET = 'cU2FoFBggCQl0724Y1DJaFNr'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -192,6 +192,6 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 SITE_ID = 1
-LOGIN_REDIRECT_URL = '/home/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 

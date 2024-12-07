@@ -364,8 +364,89 @@
   }
 
   //----------//
+
+
+  .variant-selection {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px 0;
+    max-width: 300px;
+}
+
+.variant-selection label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #D33C3C;
+}
+
+.variant-select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e1e1e1;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    {% comment %} background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat; {% endcomment %}
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+.variant-select:hover {
+    border-color: #D33C3C;
+}
+
+.variant-select:focus {
+    outline: none;
+    border-color: #D33C3C;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.variant-select option {
+    padding: 12px;
+}
+
+/* Add a subtle animation on hover */
+@keyframes subtle-bounce {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+    100% { transform: translateY(0); }
+}
+
+.variant-select:hover {
+    animation: subtle-bounce 0.3s ease;
+}
+
+/* For mobile devices */
+@media (max-width: 768px) {
+    .variant-select {
+        padding: 14px;  /* Larger touch target on mobile */
+        font-size: 16px;  /* Better readability on mobile */
+    }
+}
 </style>
 {% endblock %}
+<div class="bg-light py-3">
+  <div class="container">
+    <div class="row" >
+      <div class="col-md-12 mb-0">
+        <a href="{% url 'home' %}" style="color: #D33C3C; text-decoration: none;">
+          <i class="fas fa-home" ></i> Home
+      </a>        <span class="mx-2 mb-0">/</span>
+      <a href="{% url 'shop' %}" style="color: #D33C3C ; text-decoration: none;">
+         Shop
+    </a>        <span class="mx-2 mb-0">/</span>
+        <strong class="text-black">Product</strong>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="product-section">
   <div class="container">
@@ -421,15 +502,17 @@
 
             <button
               class="nav-button next-button"
-              onclick="slideImages('next')"
-            >
+              onclick="slideImages('next')" >
               <i class="fas fa-chevron-right"></i>
             </button>
           </div>
         </div>
       </div>
+      
 
       <div class="col-lg-6">
+        <form method='POST' action='{% url 'cart_app:add_cart' product.id  %}'>
+          {% csrf_token %} 
         <div class="product-info">
           <h1 class="product-title">{{ product.title }}</h1>
 
@@ -443,7 +526,7 @@
             {% if product.is_new %}
             <span class="badge bg-success me-2">New Flavor</span>
             {% endif %}
-             {% if product.stock <= 0 %}
+             {% if product.variants.first.stock <= 0 %}
             <span class="badge bg-danger me-2">Out of Stock</span>
 
             {% else %}
@@ -460,18 +543,34 @@
           </div>
 
           <div class="product-price mb-4">
-            <span class="current-price">₹{{ product.price }}</span>
-            <span class="serving-info text-muted">( 400-g )</span>
+            <span id="price_{{ product.id }}" class="current-price">₹{{ product.variants.first.price }}</span>
+            {% comment %} <input type="hidden" name = "variant_price" id="price_{{ product.id }}" value="{{ product.variants.first.price }}"> {% endcomment %}
+            <span class="serving-info text-muted" id="weight_{{ product.id }}">({{ product.variants.first.weight }})</span>
+        </div>
+        <div class="stock-indicator" data-stock="{{ product.variants.first.stock }}">
+          <div class="variant-selection">
+            <label for="variant-select">Choose Variant:</label>
+            <select id="variant-select" class="variant-select" onchange="handleVariantChange(this, {{ product.id }})" name="variant">
+              {% for variant in product.variants.all %}
+                  <option value="{{ variant.id }}" 
+                          data-stock="{{ variant.stock }}" 
+                          data-price="{{ variant.price }}" 
+                          data-weight="{{ variant.weight }}">
+                      {{ variant.weight }} - ₹{{ variant.price }}
+                  </option>
+              {% endfor %}
+            </select>
+{% comment %} <input type="hidden" id="variant-price-{{ product.id }}" name="variant_price" value="{{ product.variants.first.price }}"> {% endcomment %}
+        </div>
+          <div class="stock-status">
+              <span id="stock-text_{{ product.id }}" class="stock-text">In Stock</span>
+              <span id="stock-badge_{{ product.id }}" class="stock-badge"></span>
           </div>
-          <div class="stock-indicator" data-stock="{{ product.stock }}">
-            <div class="stock-status">
-              <span class="stock-text"></span>
-              <span class="stock-badge"></span>
-            </div>
-            <div class="stock-bar-container">
-              <div class="stock-bar"></div>
-            </div>
+          <div class="stock-bar-container">
+              <div id="stock-bar_{{ product.id }}" class="stock-bar" style="width: 100%;"></div>
           </div>
+      </div>
+
 
           <div
             class="product-description mb-4 p-3 rounded"
@@ -490,12 +589,8 @@
               {{ product.description }}
             </p>
           </div>
-          <h3>Variants:</h3>
-<ul>
-    {% for variant in variants %}
-        <li>{{ variant.weight }} - ${{ variant.price }}</li>
-    {% endfor %}
-</ul>
+         
+        
           
 
           <!-- Cake Specifications -->
@@ -528,22 +623,13 @@
               <span class="spec-label">Prepared Status:</span>
               <span class="spec-value">{{ product.created_at }}</span>
             </div>
-            {% comment %}
-            <div class="spec-item">
-              <i class="fas fa-snowflake"></i>
-              <span class="spec-label">Storage:</span>
-              <span class="spec-value">{{ product.storage_info }}</span>
-            </div>
-            {% endcomment %}
+       
 
             <div class="spec-item">
               <i class="fas fa-ruler-combined"></i>
               <span class="spec-label">Base Size:</span>
               <span class="spec-value">
-                {% for size in product.sizes.all %} {{ size.name }}
-                {% if not forloop.last %}, 
-                {% endif %}
-                 {% endfor %}
+                {{ product.variants.first.weight }}
               </span>
             </div>
           </div>
@@ -567,35 +653,8 @@
 
           <!-- Ordering Section -->
           <div class="ordering-section mb-4">
-            {% comment %}
-            <div class="quantity-selector mb-3">
-              <label class="form-label">Quantity:</label>
-              <div class="input-group">
-                <button
-                  class="btn btn-outline-secondary"
-                  onclick="decrementQuantity()"
-                >
-                  <i class="fas fa-minus"></i>
-                </button>
-                <input
-                  type="number"
-                  id="quantityInput"
-                  class="form-control text-center quantity-input"
-                  value="1"
-                  min="1"
-                  max="10"
-                  onchange="updateCartLink()"
-                />
-                <button
-                  class="btn btn-outline-secondary"
-                  onclick="incrementQuantity()"
-                >
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-            {% endcomment %}
-            {% if product.stock <= 0 %}
+          
+            {% if product.variants.stock <= 0 %}
             <span class="badge bg-danger me-2">Out of Stock</span>
 
             {% else %}
@@ -603,29 +662,31 @@
 
            
             <div class="action-buttons">
-              <a
+              {% comment %} <a
                 id="addToCartLink"
                 href="{% url 'cart_app:add_cart' product.id  %}?quantity=1"
                 class="btn btn-primary btn-lg add-to-cart w-75"
               >
                 <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-              </a>
+              </a> {% endcomment %}
+              <button type="submit" class="btn btn-primary btn-lg add-to-cart w-75">
+                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+              </button>
               {% endif %}
-              <a
-                href="your-wishlist-url"
-                class="btn btn-outline-danger btn-lg wishlist-btn"
-              >
+              <a href="{% url 'wishlist_app:add_to_wishlist' product.id variant.id|default:0  %}" class="btn btn-outline-danger btn-lg wishlist-btn">
                 <i class="far fa-heart"></i>
-              </a>
+            </a>
             </div>
           </div>
+        </form>
 
-          <!-- Additional Information -->
+         
         </div>
       </div>
     </div>
   </div>
 </div>
+
 
 <script>
   // Image Zoom Function
@@ -729,60 +790,119 @@
   }
 </script>
 <script>
-  // Stock Indicator Functionality
-  function initializeStockIndicators() {
-    const stockIndicators = document.querySelectorAll(".stock-indicator");
-
-    stockIndicators.forEach((indicator) => {
-      const stock = parseInt(indicator.dataset.stock);
-      const lowThreshold = 5;
-      const criticalThreshold = 2;
-
-      updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold);
-    });
+  // Unified function to handle variant changes
+  function handleVariantChange(selectElement, productId) {
+      updatePrice(selectElement, productId);
+      updateStockIndicatorOnChange(selectElement, productId);
+      updateHiddenInput(selectElement, productId); // Update the hidden input for variant price
   }
-
-  function updateStockIndicator(
-    indicator,
-    stock,
-    lowThreshold,
-    criticalThreshold
-  ) {
-    const textElement = indicator.querySelector(".stock-text");
-    const badgeElement = indicator.querySelector(".stock-badge");
-    const barElement = indicator.querySelector(".stock-bar");
-
-    let status, barWidth, text;
-
-    if (stock <= 0) {
-      status = "out-of-stock";
-      barWidth = 0;
-      text = "Out of Stock";
-    } else if (stock <= criticalThreshold) {
-      status = "critical-stock";
-      barWidth = 20;
-      text = `Only ${stock} left!`;
-      badgeElement.textContent = "Selling Fast!";
-    } else if (stock <= lowThreshold) {
-      status = "low-stock";
-      barWidth = 40;
-      text = `Low Stock - ${stock} remaining`;
-      badgeElement.textContent = "Selling Fast!";
-    } else {
-      status = "in-stock";
-      barWidth = 100;
-      text = `In Stock (${stock} available)`;
-    }
-
-    // Update elements
-    indicator.dataset.status = status;
-    textElement.textContent = text;
-    barElement.style.width = `${barWidth}%`;
+  
+  // Function to update price and weight
+  function updatePrice(selectElement, productId) {
+      // Get selected option
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
+      
+      // Get price and weight from the selected option's data attributes
+      const price = selectedOption.getAttribute("data-price");
+      const weight = selectedOption.getAttribute("data-weight");
+      
+      // Update the price and weight displayed
+      document.getElementById(`price_${productId}`).innerText = `₹${price}`;
+      document.getElementById(`weight_${productId}`).innerText = `(${weight})`;
   }
-
-  // Initialize when DOM is loaded
-  document.addEventListener("DOMContentLoaded", initializeStockIndicators);
+  
+  // New function to update the hidden input for variant price
+  function updateHiddenInput(selectElement, productId) {
+      // Get selected option
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
+      
+      // Get price from the selected option's data attribute
+      const price = selectedOption.getAttribute("data-price");
+      
+      // Update the hidden input value
+      const hiddenInput = document.getElementById(`variant-price-${productId}`);
+      if (hiddenInput) {
+          hiddenInput.value = price;
+      }
+  }
+  
+  // Function to update stock indicator based on selected variant
+  function updateStockIndicatorOnChange(selectElement, productId) {
+      // Get the parent stock-indicator div
+      const stockIndicator = selectElement.closest('.stock-indicator');
+      if (!stockIndicator) return;
+  
+      // Get selected option's stock
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
+      const newStock = parseInt(selectedOption.getAttribute("data-stock"), 10);
+  
+      const lowThreshold = 6;
+      const criticalThreshold = 3;
+  
+      // Update the stock indicator
+      updateStockIndicator(stockIndicator, newStock, lowThreshold, criticalThreshold);
+  }
+  
+  // Function to update stock indicator UI
+  function updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold) {
+      const textElement = indicator.querySelector(".stock-text");
+      const badgeElement = indicator.querySelector(".stock-badge");
+      const barElement = indicator.querySelector(".stock-bar");
+  
+      let status, barWidth, text;
+  
+      if (stock <= 0) {
+          status = "out-of-stock";
+          barWidth = 0;
+          text = "Out of Stock";
+          badgeElement.textContent = "";
+      } else if (stock <= criticalThreshold) {
+          status = "critical-stock";
+          barWidth = 10;
+          text = `Only ${stock} left!`;
+          badgeElement.textContent = "Selling Fast!";
+      } else if (stock <= lowThreshold) {
+          status = "low-stock";
+          barWidth = 20;
+          text = `Low Stock - ${stock} remaining`;
+          badgeElement.textContent = "Selling Fast!";
+      } else {
+          status = "in-stock";
+          barWidth = 50;
+          text = `In Stock (${stock} available)`;
+          badgeElement.textContent = "";
+      }
+  
+      // Update elements
+      indicator.dataset.status = status;
+      textElement.textContent = text;
+      barElement.style.width = `${barWidth}%`;
+  
+      // Optional: Update classes for styling based on status
+      indicator.classList.remove("out-of-stock", "critical-stock", "low-stock", "in-stock");
+      indicator.classList.add(status);
+  }
+  
+  // Initialize stock indicators when page is loaded
+  document.addEventListener("DOMContentLoaded", function () {
+      // Initialize the stock indicators for all product variants
+      const stockIndicators = document.querySelectorAll(".stock-indicator");
+  
+      stockIndicators.forEach((indicator) => {
+          const variantSelect = indicator.querySelector(".variant-select");
+          if (variantSelect) {
+              // Initialize stock based on the first variant
+              const initialOption = variantSelect.options[variantSelect.selectedIndex];
+              const initialStock = parseInt(initialOption.getAttribute("data-stock"), 10);
+              const lowThreshold = 5;
+              const criticalThreshold = 2;
+  
+              updateStockIndicator(indicator, initialStock, lowThreshold, criticalThreshold);
+          }
+      });
+  });
 </script>
+
 <script>
   function updateCartLink() {
     const quantity = document.getElementById("quantityInput").value;
@@ -805,6 +925,20 @@
       updateCartLink();
     }
   }
+  {% comment %} function updateWishlistLink(productId, variantId) {
+    const wishlistLink = document.querySelector(`#wishlist-link-${productId}`);
+    if (wishlistLink) {
+        wishlistLink.href = `/add_to_wishlist/${productId}/${variantId}/`;
+    }
+}
+
+// Example call
+document.getElementById('variant-select').addEventListener('change', function () {
+    const selectedVariantId = this.value;
+    updateWishlistLink(productId, selectedVariantId);
+}); {% endcomment %}
+
 </script>
+
 
 {% endblock %}

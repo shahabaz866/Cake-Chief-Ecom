@@ -543,11 +543,207 @@
     background-color: #b52a2a !important;
     box-shadow: none !important; /* Removes the outline shadow */
 }
+.price-filter-container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 400px;
+  margin: 20px auto;
+}
 
+.price-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
+.price-input-group {
+  display: flex;
+  gap: 10px;
+}
 
+.price-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.price-input-wrapper::before {
+  content: "₹";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.price-input {
+  width: 100%;
+  padding: 12px 12px 12px 25px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+  outline: none;
+}
+
+.price-input:focus {
+  border-color: #D33C3C;
+  box-shadow: 0 0 0 2px rgba(211, 60, 60, 0.1);
+}
+
+.price-input::placeholder {
+  color: #999;
+}
+
+.filter-button {
+  background-color: #D33C3C;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.filter-button:hover {
+  background-color: #b33232;
+}
+
+.filter-button:active {
+  transform: translateY(1px);
+}
+{% comment %} --------------- {% endcomment %}
+.product-actions {
+  display: flex;
+  justify-content: flex-end;  /* Move items to the end (right side) */
+  align-items: center;        /* Align items vertically */
+}
+
+.wishlist-btn {
+  display: flex;             /* Flexbox for centering the icon */
+  align-items: center;       /* Vertically align the icon */
+  justify-content: center;   /* Horizontally align the icon */
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.wish-btn i {
+  font-size: 24px;           /* Icon size */
+  color: #ff4444;            /* Red color for the heart */
+}
+.wish-btn:hover{
+background-color:#ffff;
+}
+
+.wishlist-btn:hover {
+  transform: scale(1.1);  
+  background-color: transparent;
+  /* Slightly enlarge the heart on hover */
+}
+
+.wishlist-btn:active {
+  transform: scale(0.95);    /* Shrink the heart when clicked */
+}
+{% comment %} --------------------------- {% endcomment %}
+/* Stock Indicator Styles */
+  .stock-indicator {
+    margin: 0.5rem 0;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .stock-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+  }
+
+  .stock-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .stock-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    display: none; /* Hidden by default, shown via JS */
+  }
+
+  .stock-bar-container {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  .stock-bar {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 300ms ease-in-out;
+  }
+
+  /* Stock Status Variants */
+  .stock-indicator[data-status="in-stock"] .stock-text {
+    color:#b52a2a;
+  }
+
+  .stock-indicator[data-status="in-stock"] .stock-bar {
+    background-color:#b52a2a;
+  }
+
+  .stock-indicator[data-status="low-stock"] .stock-text {
+    color: #d97706;
+  }
+
+  .stock-indicator[data-status="low-stock"] .stock-bar {
+    background-color: #d97706;
+  }
+
+  .stock-indicator[data-status="low-stock"] .stock-badge {
+    display: inline-block;
+    background-color: #fef3c7;
+    color: #d97706;
+  }
+
+  .stock-indicator[data-status="critical-stock"] .stock-text {
+    color: #dc2626;
+  }
+
+  .stock-indicator[data-status="critical-stock"] .stock-bar {
+    background-color: #dc2626;
+  }
+
+  .stock-indicator[data-status="critical-stock"] .stock-badge {
+    display: inline-block;
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  .stock-indicator[data-status="out-of-stock"] .stock-text {
+    color: #dc2626;
+  }
+
+  .stock-indicator[data-status="out-of-stock"] .stock-bar {
+    background-color: #dc2626;
+    width: 0 !important;
+  }
+
+  @media (max-width: 768px) {
+    .stock-indicator {
+      max-width: 100%;
+    }
+  }
 </style>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
 
 {% endblock  %}
 <div class="cart-container">
@@ -561,8 +757,9 @@
   <div class="container">
     <div class="row" >
       <div class="col-md-12 mb-0">
-        <a href="{% url "home" %}">Home</a>
-        <span class="mx-2 mb-0">/</span>
+        <a href="{% url 'home' %}" style="color: #D33C3C; text-decoration: none;">
+          <i class="fas fa-home" ></i> Home
+      </a>        <span class="mx-2 mb-0">/</span>
         <strong class="text-black">Shop</strong>
       </div>
     </div>
@@ -603,7 +800,6 @@
                   Sort By
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuReference">
-                    <a class="dropdown-item" href="?sort=relevance">Relevance</a>
                     <a class="dropdown-item" href="?sort=latest">Latest</a>
                     <a class="dropdown-item" href="?sort=name_asc">Name, A to Z</a>
                     <a class="dropdown-item" href="?sort=name_desc">Name, Z to A</a>
@@ -620,53 +816,74 @@
         
       
           <div class="row g-4">
-              {% for product in products %}
-              
-              <div class="col-sm-6 col-lg-3">
-                  <div class="card h-100 shadow-sm hover-shadow transition">
-                      <!-- Product Image -->
-                      <div class="position-relative">
-                          <a href="{% url 'product_detail' product.id %}">
-                              <img src="{{ product.image.url }}" 
-                                   class="card-img-top"
-                                   alt="{{ product.title }}"
-                                   style="object-fit: cover; height: 300px; ">
-                          </a>
-                          {% if product.on_sale %}
-                              <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale!</span>
-                          {% endif %}
-                      </div>
-                      
-                      <!-- Product Info -->
-                      <div class="card-body d-flex flex-column">
-                          <h5 class="card-title">
-                              <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-danger">
-                                  {{ product.title }}
-                              </a>
-                          </h5>
-                          {% if product.stock <= 0 %}
-                              <span class="text-danger">Out of Stock</span>
-                          {% else %}
-                              <span class="text-success ">In Stock</span>
-                          {% endif %}
-                          {% comment %} <p class="card-text text-muted small">{{ product.description|truncatechars:100 }}</p> {% endcomment %}
-                          <div class="mt-auto">
-                              <div class="d-flex justify-content-between align-items-center">
-                                  <span class="h5 mb-0">
-                                      {% if product.on_sale and product.sale_price %}
-                                          <del class="text-muted small">${{ product.price }}</del>
-                                          <span class="text-danger">${{ product.sale_price }}</span>
-                                      {% else %}
-                                      ₹{{ product.price }}
-                                      {% endif %}
-                                  </span>
-                                 
-                              </div>
-                          </div>
-                      </div>
+            {% for product in products %}
+            <div class="col-sm-6 col-lg-3">
+              <div class="card h-100 shadow-sm hover-shadow transition">
+                <div class="position-relative">
+                  <a href="{% url 'product_detail' product.id %}">
+                    <img src="{{ product.image.url }}" 
+                         class="card-img-top"
+                         alt="{{ product.title }}"
+                         style="object-fit: cover; height: 300px;">
+                  </a>
+                  {% if product.on_sale %}
+                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale!</span>
+                  {% endif %}
+                </div>
+            
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">
+                    <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-danger">
+                      {{ product.title }}
+                    </a>
+                  </h5>
+            
+                 <!-- Stock Indicator -->
+{% comment %} <div class="stock-indicator" 
+     data-status="{% if product.variants.first.stock > 10 %}in-stock{% elif product.variants.first.stock > 5 %}low-stock{% elif product.variants.first.stock > 0 %}critical-stock{% else %}out-of-stock{% endif %}">
+  <div class="stock-status">
+    {% if product.variants.first.stock > 0 %}
+      <span class="stock-text">{{ product.variants.first.stock }} in stock</span>
+      {% if product.variants.first.stock <= 10 %}
+        <span class="stock-badge">Low Stock</span>
+      {% endif %}
+    {% else %}
+      <span class="stock-text text-danger">Out of Stock</span>
+    {% endif %}
+  </div>
+  
+  {% if product.variants.first.stock > 0 %}
+    <div class="stock-bar-container">
+      <div class="stock-bar" style="width: {{ product.stock|floatformat:0 }}%;"></div>
+    </div>
+  {% endif %}
+</div> {% endcomment %}
+
+                  
+                  <!-- Price Information -->
+                  <div class="mt-auto">
+                    <span class="h5 mb-0">
+                      {% if product.on_sale and product.sale_price %}
+                        <del class="text-muted small">₹{{ product.price }}</del>
+                        <span class="text-danger">₹{{ product.sale_price }}</span>
+                      {% else %}
+                        ₹{{ product.variants.first.price }}
+                      {% endif %}
+                    </span>
                   </div>
+                  <a
+                  href="{% url 'wishlist_app:add_to_wishlist' product.id variant.id|default:0  %}"
+                  class="btn btn-outline-danger btn-lg wishlist-btn position-absolute top-0 start-0 m-2"
+                  data-product-id="{{ product.id }}"
+                >
+                  <i class="far fa-heart"></i>
+                </a>
+                
+                </div>
               </div>
-              {% endfor %}
+            </div>
+            {% endfor %}
+            
           </div>
       </div>
 
@@ -746,24 +963,32 @@
         
 
 
-    <form method="GET" action="">
-      <div class="category-container">
-          <div class="category-header">
-              <h3 class="category-title">Price Range</h3>
-          </div>
-          <div class="price-filter-content">
-              <div id="slider-range" class="price-slider mb-3"></div>
-              <div class="price-display">
-                  <input type="text" id="amount" class="price-display-text" disabled>
-              </div>
-              <!-- Hidden inputs for form submission -->
-              <input type="hidden" name="min_price" id="min_price">
-              <input type="hidden" name="max_price" id="max_price">
-          </div>
-          <button type="submit" class="btn btn-danger mt-3">Apply Filter</button>
-      </div>
-   </form>
 
+  <form method="GET" action="{% url 'shop' %}" class="price-filter-form">
+    <div class="price-input-group">
+        <div class="price-input-wrapper">
+            <input type="number" 
+                   name="min_price" 
+                   value="{{ min_price }}" 
+                   placeholder="Min Price" 
+                   class="price-input"
+                   min="0"
+                   step="0.01">
+        </div>
+        <div class="price-input-wrapper">
+            <input type="number" 
+                   name="max_price" 
+                   value="{{ max_price }}" 
+                   placeholder="Max Price" 
+                   class="price-input"
+                   min="0"
+                   step="0.01">
+        </div>
+    </div>
+    <button type="submit" class="filter-button mb-3 ">Apply Filter</button>
+</form>
+
+  
 
    
 
@@ -771,10 +996,10 @@
         
        <!-- Size Filter -->
        <div class="category-container" style="height:400px;">
-        <div class="category-header">
+          <div class="category-header">
             <h3 class="category-title">Sizes</h3>
-        </div>
-        <form method="GET" id="size-filter-form">
+          </div>
+          <form method="GET" id="size-filter-form">
             <ul class="category-list">
                 {% for size in sizes %}
                 <li class="category-item">
@@ -787,14 +1012,8 @@
                 </li>
                 {% endfor %}
             </ul>
-        </form>
-    </div>
-    
-
-        
-
-       
-        
+          </form>
+        </div> 
       </div>
     </div>
 
@@ -830,28 +1049,53 @@
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<script>
-  $(function() {
-      // Initialize the slider with a minimum and maximum range
-      $("#slider-range").slider({
-          range: true,
-          min: 0,         // Set minimum price range as per your requirement
-          max: 500,       // Set maximum price range as per your requirement
-          values: [50, 300], // Default slider start values
-          slide: function(event, ui) {
-              // Display selected range in the amount input
-              $("#amount").val("₹" + ui.values[0] + " - ₹" + ui.values[1]);
-              // Update hidden inputs for form submission
-              $("#min_price").val(ui.values[0]);
-              $("#max_price").val(ui.values[1]);
-          }
-      });
 
-      // Set initial values for display and hidden inputs
-      $("#amount").val("₹" + $("#slider-range").slider("values", 0) + " - ₹" + $("#slider-range").slider("values", 1));
-      $("#min_price").val($("#slider-range").slider("values", 0));
-      $("#max_price").val($("#slider-range").slider("values", 1));
-  });
-</script>
-
+{% comment %} <script>
+  function initializeStockIndicators() {
+    const stockIndicators = document.querySelectorAll(".stock-indicator");
+  
+    stockIndicators.forEach((indicator) => {
+      const stock = parseInt(indicator.dataset.stock);
+      const lowThreshold = 5;
+      const criticalThreshold = 2;
+  
+      updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold);
+    });
+  }
+  
+  function updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold) {
+    const textElement = indicator.querySelector(".stock-text");
+    const badgeElement = indicator.querySelector(".stock-badge");
+    const barElement = indicator.querySelector(".stock-bar");
+  
+    let status, barWidth, text;
+  
+    if (stock < 1) {
+      status = "out-of-stock";
+      barWidth = 0;
+      text = "Out of Stock";
+    } else if (stock <= criticalThreshold) {
+      status = "critical-stock";
+      barWidth = 20;
+      text = `Only ${stock} left!`;
+      badgeElement.textContent = "Selling Fast!";
+    } else if (stock <= lowThreshold) {
+      status = "low-stock";
+      barWidth = 50;
+      text = `Low Stock - ${stock} remaining`;
+      badgeElement.textContent = "Selling Fast!";
+    } else {
+      status = "in-stock";
+      barWidth = 100;
+      text = `In Stock (${stock} available)`;
+    }
+  
+    indicator.dataset.status = status;
+    textElement.textContent = text;
+    barElement.style.width = `${barWidth}%`;
+  }
+  
+  document.addEventListener("DOMContentLoaded", initializeStockIndicators);
+  
+</script> {% endcomment %}
 {% endblock  %}

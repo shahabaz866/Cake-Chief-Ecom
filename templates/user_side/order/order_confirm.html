@@ -73,6 +73,13 @@
 
 <!-- Main Container -->
 <div class="min-vh-100 bg-light py-5">
+   {% comment %} <!-- Countdown Timer Section -->
+<div class="text-center mt-5">
+    <div class="alert alert-success d-inline-block rounded-pill shadow-sm py-3 px-4" id="countdown">
+        Redirecting to the shop in <span id="countdown-timer">10</span> seconds...
+    </div>
+</div> {% endcomment %}
+
     <div class="container">
         <!-- Order Success Banner -->
         <div class="row justify-content-center mb-5">
@@ -154,8 +161,7 @@
                                 </div>
                             </div>
                             <div class="col-auto text-end">
-                                {% comment %} <p class="fw-bold text-custom-primary mb-1">₹{{ subtotal|floatformat:2 }}</p> {% endcomment %}
-                                <p class="text-muted small mb-0"><strong>₹{{ item.price|floatformat:2 }} each</p></strong>
+                                <p class="text-muted small mb-0"><strong>₹{{ order.subtotal |floatformat:2 }} each</p></strong>
                             </div>
                         </div>
                         {% endfor %}
@@ -227,12 +233,12 @@
                                 <div class="bg-light rounded-4 p-4 mb-3">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">Subtotal</span>
-                                        <span>₹{{ order.total_amount|floatformat:2 }}</span>
+                                        <span>₹{{ order.subtotal |floatformat:2 }}</span>
                                     </div>
                                     <hr class="my-3">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="h6 fw-bold mb-0">Total Amount</span>
-                                        <span class="h4 fw-bold text-custom-primary mb-0">₹{{ order.total_amount|floatformat:2 }}</span>
+                                        <span class="h4 fw-bold text-custom-primary mb-0">₹{{ order.total_amount |floatformat:2 }}</span>
                                     </div>
                                 </div>
                                 
@@ -274,12 +280,12 @@
             <!-- Action Buttons -->
             <div class="col-lg-8 text-center mt-4">
                 <div class="d-flex gap-3 justify-content-center">
-                    <a href="{% url 'home' %}" class="btn btn-outline-custom-primary rounded-pill px-4 py-2">
+                    <a href="{% url 'shop' %}" class="btn btn-outline-custom-primary rounded-pill px-4 py-2">
                         <i class="bi bi-arrow-left me-2"></i>Continue Shopping
                     </a>
-                    <button onclick="window.print()" class="btn btn-custom-primary rounded-pill px-4 py-2">
+                    {% comment %} <button onclick="window.print()" class="btn btn-custom-primary rounded-pill px-4 py-2">
                         <i class="bi bi-printer-fill me-2"></i>Print Order
-                    </button>
+                    </button> {% endcomment %}
                 </div>
             </div>
         </div>
@@ -303,4 +309,22 @@
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
 </script>
+{% comment %} <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let countdown = 10; // Countdown duration in seconds
+        const countdownTimer = document.getElementById("countdown-timer");
+
+        // Function to handle the countdown
+        const interval = setInterval(() => {
+            countdown -= 1;
+            countdownTimer.textContent = countdown;
+
+            if (countdown <= 0) {
+                clearInterval(interval); // Stop countdown
+                window.location.href = "{% url 'shop' %}"; // Redirect to shop page
+            }
+        }, 1000); // Update every second
+    });
+</script> {% endcomment %}
+
 {% endblock %}

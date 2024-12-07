@@ -52,6 +52,7 @@ class Product(models.Model):
     dietary_info = models.CharField(max_length=100, blank=True, null=True)  
     sizes = models.ManyToManyField(Size, related_name='products')
     added_on = models.DateTimeField(auto_now_add=True ,null=True)
+    
 
     def __str__(self):
         return self.title
@@ -126,9 +127,7 @@ class Variant(models.Model):
     product =models.ForeignKey(Product,on_delete=models.CASCADE, related_name='variants')
     weight = models.CharField(max_length=10, choices=WEIGHT_CHOICES)
     price = models.DecimalField(max_digits=6, decimal_places=2)
-
+    stock = models.IntegerField(default=0)  
+    sku = models.CharField(max_length=20, blank=True, null=True)  
     def __str__(self):
-        return f"{self.weight} - ${self.price}"
-
-
-
+        return f"{self.product.title} - {self.weight} - ${self.price}"

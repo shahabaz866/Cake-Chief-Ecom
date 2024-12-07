@@ -3,6 +3,10 @@
 {% load static %}
 
 <style>
+  :root{
+    --background-color: #f8f9fa;
+
+  }
   .profile-container {
     max-width: 900px;
     margin: 40px auto;
@@ -293,19 +297,56 @@
   background-color: #b33030;
   transform: translateY(-2px);
 }
+.breadcrumb {
+  background: var(--background-color);
+  padding: 1rem 0;
+}
+
+.breadcrumb a {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+{% comment %} -------------------------------------- {% endcomment %}
+.user-avatar {
+  width: 100px;
+  height: 100px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  margin: 0 auto 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #0066cc;
+  border: 2px solid #eee;
+}
 
 </style>
+<div class="breadcrumb">
+  <div class="container">
+    <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+    
+    <span class="mx-2">/</span>
+    <strong>profile</strong>
+  </div>
+</div>
 
 <div class="profile-container">
   <div class="profile-header">
     <div class="profile-header-content">
       <div class="profile-image-container">
-        <img
-          src="{% static 'user_assets/images/user_pro.png' %}"
-          alt="Profile Picture"
-          class="profile-image"
-        />
-      </div>
+        {% if user.profile_picture %}
+            <img
+                src="{{ user.profile_picture.url }}"
+                alt="Profile Picture"
+                class="profile-image"
+            />
+        {% else %}
+            <div class="user-avatar">
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+            </div>
+        {% endif %}
+    </div>
       <div class="profile-info">
         <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
 
@@ -339,7 +380,7 @@
         {% endif %}
         <span class="address-type">{{ address.get_address_type_display }}</span>
         
-        <div class="detail-item">
+        <div class="detail-item"  style="width: 60%;">
           <div class="detail-label">Full Name</div>
           <div class="detail-value">{{ address.name }}</div>
         </div>
@@ -349,9 +390,14 @@
           <div class="detail-value">
             {{ address.address }}<br>
             {{ address.locality }}, {{ address.city }}<br>
-            {{ address.district }}, {{ address.state }} - {{ address.pincode }}
+            {{ address.district }}, {{ address.state }} - {{ address.pincode }} -{{ address.phone_number }}
           </div>
         </div>
+
+        <div class="profile-contact-item">
+          <i class="fas fa-phone"></i>
+          <span>{{ address.phone_number }}</span>
+      </div>
 
         {% if address.landmark %}
           <div class="detail-item">
@@ -388,7 +434,10 @@
 <a href="{% url 'user_app:add_address' %}" class="btn-profile btn-back">
   <i class="fas fa-plus"></i> Add New Address
 </a>
-
+<br>
+<a href="{% url 'cart_app:checkout' %}" class="btn-profile btn-back mt-3">
+  <i class="fas fa-arrow-left"></i> Back to checkout
+</a>
 
 </div>
 

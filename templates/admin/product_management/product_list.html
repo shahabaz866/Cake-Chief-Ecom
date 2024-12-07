@@ -7,40 +7,104 @@
 
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        white-space: nowrap;
+    }
+    .product-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+    .description-cell {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .search-set {
+        position: relative;
+    }
+    .search-set input {
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        width: 300px;
+    }
+    .search-set button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        color: #6c757d;
+    }
+    .btn-added {
+        background-color: #4CAF50;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-added:hover {
+        background-color: #45a049;
+        color: white;
+    }
+    .pagination {
+        margin-top: 2rem;
+        justify-content: center;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .card {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+</style>
 
 <div class="page-wrapper">
-    <div class="content">
+    <div class="content container-fluid py-4">
         <!-- Header Section -->
-        <div class="page-header d-flex justify-content-between align-items-center">
+        <div class="page-header d-flex justify-content-between align-items-center mb-4">
             <div class="page-title">
-                <h4>Product List</h4>
-                <h6>Manage your products</h6>
+                <h4 class="mb-1">Product List</h4>
+                <h6 class="text-muted mb-0">Manage your products</h6>
             </div>
             <div class="page-btn">
                 <a href="{% url 'add_products' %}" class="btn btn-added">
-                    <img src="{% static 'admin_assets/img/icons/plus.svg' %}" alt="img" class="me-1">
+                    <i class="bi bi-plus-circle"></i>
                     Add New Product
                 </a>
             </div>
         </div>
 
         <!-- Messages Modal -->
-        <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
+        <div class="modal fade" id="messagesModal" tabindex="-1" aria-labelledby="messagesModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="mySmallModalLabel">Messages</h5>
+                        <h5 class="modal-title" id="messagesModalLabel">Messages</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         {% if messages %}
                             {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-2" role="alert">
                                     {{ message }}
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <p>No messages to display.</p>
+                            <p class="text-muted mb-0">No messages to display.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -50,114 +114,125 @@
         <!-- Main Card -->
         <div class="card">
             <div class="card-body">
-                <!-- Search and Tools Section -->
-                <div class="table-top d-flex justify-content-between align-items-center mb-4">
+                <!-- Search Section -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div class="search-set">
-                        <div class="search-input">
-                            <a class="btn btn-searchset">
-                                <img src="{% static 'admin_assets/img/icons/search-white.svg' %}" alt="search">
-                            </a>
-                        </div>
-                    </div>
-                    <div class="wordset">
-                        <ul class="list-unstyled d-flex gap-3 mb-0">
-                            <li>
-                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf">
-                                    <img src="{% static 'admin_assets/img/icons/pdf.svg' %}" alt="pdf">
-                                </a>
-                            </li>
-                            <li>
-                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel">
-                                    <img src="{% static 'admin_assets/img/icons/excel.svg' %}" alt="excel">
-                                </a>
-                            </li>
-                            <li>
-                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="print">
-                                    <img src="{% static 'admin_assets/img/icons/printer.svg' %}" alt="print">
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Filter Section -->
-                <div class="card mb-4" id="filter_inputs">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-end">
-                                    <div class="form-group mb-0">
-                                        <a class="btn btn-filters">
-                                            <img src="{% static 'admin_assets/img/icons/search-whites.svg' %}" alt="search">
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <form method="get" class="d-flex">
+                            <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search products">
+                            <button type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
 
                 <!-- Products Table -->
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th>Product Image</th>
+                                <th>ID</th>
+                                <th>Image</th>
                                 <th>Product Name</th>
                                 <th>Category</th>
                                 <th>Flavor</th>
                                 <th>Price</th>
                                 <th>Stock</th>
-                                <th>Qty</th>
+                                <th>Weight</th>
                                 <th>Description</th>
-                                <th>Edit</th>
-                                <th>Actions</th>
+                                <th class="text-center">Edit</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for prdt in products %}
-                                <tr>
-                                    <td class="productimg">
-                                        {% if prdt.image %}
-                                            <img src="{{ prdt.image.url }}" 
-                                                 alt="{{ prdt.title }} Image" 
-                                                 class="img-fluid"
-                                                 style="height: 50px; width: 40px; object-fit: cover;">
-                                        {% else %}
-                                            <p class="mb-0">No Image</p>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ prdt.title }}</td>
-                                    <td>{{ prdt.category }}</td>
-                                    <td>{{ prdt.flavour }}</td>
-                                    <td>{{ prdt.price }}</td>
-                                    <td>{{ prdt.stock }}</td>
-                                    <td>
-                                        {% for size in prdt.sizes.all %}
-                                            {{ size.name }}{% if not forloop.last %}, {% endif %}
-                                        {% endfor %}
-                                    </td>
-                                    <td class="description-cell">{{ prdt.description|wrap_text:120|safe }}</td>
-                                    <td>
-                                        <a href="{% url 'edit_product' prdt.id %}" class="btn btn-link p-0">
-                                            <img src="{% static 'admin_assets/img/icons/edit.svg' %}" alt="Edit">
+                            {% for prdt in page_obj %}
+                            <tr>
+                                <td>{{ prdt.id }}</td>
+                                <td>
+                                    {% if prdt.image %}
+                                        <img src="{{ prdt.image.url }}" 
+                                             alt="{{ prdt.title }}" 
+                                             class="product-img">
+                                    {% else %}
+                                        <div class="text-muted">No Image</div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ prdt.title }}</td>
+                                <td>{{ prdt.category }}</td>
+                                <td>{{ prdt.flavour }}</td>
+                                <td>{{ prdt.variants.first.price }}</td>
+                                <td>{{ prdt.variants.first.stock }}</td>
+                                <td>
+                                    {% for variant in prdt.variants.all %}
+                                        <span class="badge bg-light text-dark">{{ variant.weight }}</span>
+                                        {% if not forloop.last %} {% endif %}
+                                    {% endfor %}
+                                </td>
+                            
+                                <td class="description-cell" title="{{ prdt.description }}">
+                                    {{ prdt.description|wrap_text:120|safe }}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'edit_product' prdt.id %}" 
+                                       class="btn btn-link text-primary p-0" 
+                                       title="Edit Product">
+                                        <i class="bi bi-pencil-square fs-5"></i>
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    {% if prdt.is_active %}
+                                        <a href="{% url 'delete_product' prdt.id %}" 
+                                           class="btn btn-danger btn-sm" 
+                                           data-id="{{ prdt.id }}">
+                                            <i class="bi bi-lock-fill me-1"></i>Block
                                         </a>
-                                    </td>
-                                    <td>
-                                        {% if prdt.is_active %}
-                                            <a href="{% url 'delete_product' prdt.id %}" 
-                                               class="btn btn-danger btn-sm" 
-                                               data-id="{{ prdt.id }}">Block</a>
-                                        {% else %}
-                                            <a href="{% url 'unblock_product' prdt.id %}" 
-                                               class="btn btn-success btn-sm">Unblock</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
+                                    {% else %}
+                                        <a href="{% url 'unblock_product' prdt.id %}" 
+                                           class="btn btn-success btn-sm">
+                                            <i class="bi bi-unlock-fill me-1"></i>Unblock
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination -->
+                {% if page_obj.paginator.num_pages > 1 %}
+                <nav aria-label="Product pagination">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -165,19 +240,33 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Check if there are any messages inside the modal to show it
-        const modalAlerts = document.querySelectorAll('.bd-example-modal-sm .alert');
+        // Show messages modal if there are messages
+        const modalAlerts = document.querySelectorAll('#messagesModal .alert');
         if (modalAlerts.length > 0) {
-            var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
+            const messageModal = new bootstrap.Modal(document.getElementById('messagesModal'));
             messageModal.show();
         }
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Add hover effect to table rows
+        const tableRows = document.querySelectorAll('.table tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseover', function() {
+                this.style.backgroundColor = '#f8f9fa';
+            });
+            row.addEventListener('mouseout', function() {
+                this.style.backgroundColor = '';
+            });
+        });
     });
-</script>
-<script 
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
-    crossorigin="anonymous">
 </script>
 {% endblock %}
