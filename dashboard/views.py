@@ -4,14 +4,17 @@ from .models import Product,Category,Flavour,ProductImages,Size,Variant
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
-from PIL import Image
-from io import BytesIO
-import base64
-# from django.core.files.base import ContentFile
+from cart_app.models import Coupon
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import re 
 from django.utils.html import format_html
+from django.utils.dateparse import parse_datetime
+from decimal import Decimal
+from django.db.models import Sum, F, Count
+from django.utils.timezone import now, timedelta
+from django.http import JsonResponse
+from order_app.models import Order, OrderItem 
 
 
 def is_superuser(user):
@@ -71,22 +74,21 @@ def delete_variant(request, variant_id):
 @user_passes_test(is_superuser, login_url='home:login')
 def product_list(request):
     query = request.GET.get('search', '')
-    
-    # Filter products based on the search query
+   
     products = Product.objects.prefetch_related('variants').filter(
         Q(title__icontains=query) |
         Q(category__name__icontains=query) |
         Q(flavour__name__icontains=query)
     )
 
-    # Apply pagination on the filtered products
-    paginator = Paginator(products, 10)  # 10 products per page
+
+    paginator = Paginator(products, 10)  
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     context = {
-        'page_obj': page_obj,        # Paginated products
-        'search_query': query,       # Search query for rendering in template
+        'page_obj': page_obj,     
+        'search_query': query,     
     }
     return render(request, 'admin/product_management/product_list.html', context)
 
@@ -95,7 +97,6 @@ def product_list(request):
 @never_cache
 @user_passes_test(lambda u: u.is_superuser, login_url='home:login')
 def add_products(request):
-    # Default values for form fields (in case of GET request or error)
     title = stock = description = price = None
     category_id = flavour_id = None
     selected_sizes = []
@@ -103,9 +104,7 @@ def add_products(request):
     if request.method == 'POST':
         
         title = request.POST.get('product_name')
-        # stock = request.POST.get('quantity')
         description = request.POST.get('description')
-        # price = request.POST.get('price')
         image = request.FILES.get('main_product_image')
         category_id = request.POST.get('category')
         flavour_id = request.POST.get('flavour')
@@ -124,29 +123,14 @@ def add_products(request):
             messages.error(request, "Product name should not contain special characters.")
             has_errors = True
 
-        # Validate stock
-        # stocks = request.POST.get('quantity')  # Updated variable name
-        # if not stocks or not stocks.isdigit() or int(stocks) <= 0:
-        #     messages.error(request, "Quantity should be a positive integer.")
-        #     has_errors = True
+
 
         # Validate description
         if not description:
             messages.error(request, "Description is required.")
             has_errors = True
 
-        # Validate price
-        # prices = request.POST.get('price')  # Updated variable name
-        # try:
-        #     prices = float(prices)
-        #     if prices <= 0:
-        #         messages.error(request, "Price should be a positive number.")
-        #         has_errors = True
-        # except (ValueError, TypeError):
-        #     messages.error(request, "Invalid price format.")
-        #     has_errors = True
-
-        # Validate category
+      
         try:
             category = Category.objects.get(id=category_id)
         except (Category.DoesNotExist, ValueError):
@@ -199,9 +183,7 @@ def add_products(request):
             try:
                 product = Product.objects.create(
                     title=title,
-                    # stock=int(stock),
                     description=description,
-                    # price=price,
                     image=image,
                     category=category,
                     flavour=flavour,
@@ -217,18 +199,17 @@ def add_products(request):
                         image=additional_image
                     )
 
-                # Add variant
-              # Receive variant details from the form
+              
                 weights = request.POST.getlist('varient_weight[]')
                 prices = request.POST.getlist('varient_price[]')
                 stocks = request.POST.getlist('varient_stock[]')
 
                 # Process each variant
                 for weight, price, stock in zip(weights, prices, stocks):
-                    if weight and price and stock:  # Ensure all fields are filled
+                    if weight and price and stock: 
                         try:
                             Variant.objects.create(
-                                product=product,  # Assuming you already have the product instance
+                                product=product,
                                 weight=weight,
                                 price=float(price),
                                 stock=int(stock)
@@ -244,25 +225,22 @@ def add_products(request):
                 messages.error(request, f"Error saving product: {str(e)}")
                 return redirect('add_products')
 
-        # Redirect to avoid resubmission on page refresh
+        
         return redirect('add_products')
 
-    # GET request - display the form with the previous data
+    
     context = {
         'categories': Category.objects.filter(is_active=True),
         'flavours': Flavour.objects.filter(is_active=True),
-        # 'sizes': Size.objects.all(),
+        
         'title': title,
-        # 'stock': stock,
         'description': description,
-        # 'price': price,
         'category_id': category_id,
         'flavour_id': flavour_id,
-        # 'selected_sizes': selected_sizes,
     }
     return render(request, 'admin/product_management/add_product.html', context)
 
-# Encapsulate product name validation
+
 def validate_product_name(title):
     if not title:
         return "Product name is required."
@@ -286,22 +264,18 @@ def edit_product(request, product_id):
         category_id = request.POST.get('category')
         flavour_id = request.POST.get('flavour')
 
-        # Validate product name
         product_name_error = validate_product_name(title)
         if product_name_error:
             messages.error(request, product_name_error)
 
-        # Validate description
         if not description:
             messages.error(request, "Description is required.")
 
-        # Validate category and flavour
         if not Category.objects.filter(id=category_id).exists():
             messages.error(request, "This category is currently unavailable.")
         if not Flavour.objects.filter(id=flavour_id).exists():
             messages.error(request, "This flavour is currently unavailable.")
 
-        # Process additional images
         for i, img in enumerate(product_images, start=1):
             if request.POST.get(f'remove_image_{i}'):
                 img.delete()
@@ -309,11 +283,9 @@ def edit_product(request, product_id):
                 img.image = request.FILES[f'extra_image_{i}']
                 img.save()
 
-        # Add new images
         for image in request.FILES.getlist('new_images'):
             ProductImages.objects.create(product=product, image=image)
 
-        # Process variants (editing existing variants)
         for variant in variants:
             weight = request.POST.get(f'variant_weight_{variant.id}')
             price = request.POST.get(f'variant_price_{variant.id}')
@@ -588,3 +560,80 @@ def unblock_flavour(request, id):
     flavour.save()  
     return redirect('flavour_list')
 
+@user_passes_test(is_superuser, login_url='home:login')
+def coupon_list(request):
+    coupons = Coupon.objects.all()
+    return render(request, 'admin/coupon_management/coupon_list.html', {'coupons': coupons})
+
+def coupon_add(request):
+    if request.method == 'POST':
+        code = request.POST.get('code')
+        discount = Decimal(request.POST.get('discount'))
+        valid_from = parse_datetime(request.POST.get('valid_from'))
+        valid_to = parse_datetime(request.POST.get('valid_to'))
+        active = request.POST.get('active') == 'on'
+
+        # Create a new Coupon instance
+        Coupon.objects.create(
+            code=code,
+            discount=discount,
+            valid_from=valid_from,
+            valid_to=valid_to,
+            active=active
+        )
+        return redirect('coupon_list')
+    
+    return render(request, 'admin/coupon_management/add_coupon.html')
+
+
+def coupon_edit(request, pk):
+    coupon = get_object_or_404(Coupon, pk=pk)
+    if request.method == 'POST':
+        coupon.code = request.POST.get('code')
+        coupon.discount = Decimal(request.POST.get('discount'))
+        coupon.valid_from = parse_datetime(request.POST.get('valid_from'))
+        coupon.valid_to = parse_datetime(request.POST.get('valid_to'))
+        coupon.active = request.POST.get('active') == 'on'
+
+        coupon.save()
+        return redirect('coupon_list')
+    
+    return render(request, 'admin/coupon_management/add_coupon.html', {'coupon': coupon})
+
+
+def coupon_delete(request, pk):
+    coupon = get_object_or_404(Coupon, pk=pk)
+    if request.method == 'POST':
+        coupon.delete()
+        return redirect('coupon_list')
+    
+    return render(request, 'admin/coupon_management/delete_coupon.html', {'coupon': coupon})
+
+
+def sales_report(request):
+    # Filter parameters
+    report_type = request.GET.get('report_type')  # daily, weekly, yearly, custom
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Default query
+    orders = Order.objects.filter(ORDER_STATUS_CHOICES='DELIVERED')  # Replace 'status' with your order status field
+
+    # Apply filters based on report type
+    if report_type == 'daily':
+        orders = orders.filter(created_at__date=now().date())
+    elif report_type == 'weekly':
+        start_week = now().date() - timedelta(days=7)
+        orders = orders.filter(created_at__date__gte=start_week)
+    elif report_type == 'yearly':
+        orders = orders.filter(created_at__year=now().year)
+    elif report_type == 'custom' and start_date and end_date:
+        orders = orders.filter(created_at__date__range=[start_date, end_date])
+
+    # Aggregate sales data
+    sales_data = orders.annotate(
+        total_amount=Sum(F('orderitem__quantity') * F('orderitem__price')),  # Replace fields as needed
+        total_quantity=Sum('orderitem__quantity')
+    ).values('id', 'total_amount', 'total_quantity', 'created_at')
+
+    return render(request, 'admin/report/sales_report.html', {'sales_data': sales_data})

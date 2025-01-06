@@ -5,7 +5,7 @@
 {% block extra_css %}
 <style>
   .quantity-control h3 {
-    color:#b52a2a !important; /* Forces the color to be red */
+    color:#b52a2a !important;
     margin: 0;
   }
 
@@ -14,12 +14,69 @@
   }
   .coupon-section .form-control {
     width: auto;
-    max-width: 250px; /* Adjust size as needed */
+    max-width: 250px;
     display: inline-block;
   }
   .coupon-section .btn {
     font-size: 0.8rem;
   }
+  
+  /* New styles for coupon display */
+  .available-coupons {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+  }
+  
+  .coupon-card {
+    border: 1px dashed #dc3545;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    position: relative;
+  }
+  
+  .coupon-code {
+    font-weight: bold;
+    color: #dc3545;
+    background-color: #fff;
+    padding: 2px 8px;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .coupon-details {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  .coupon-expiry {
+    font-size: 0.8rem;
+    color: #dc3545;
+  }
+  .available-coupons {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+}
+
+.coupon-details {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px dashed #dc3545;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.coupon-expiry {
+    font-size: 0.8rem;
+    color: #dc3545;
+}
 </style>
 {% endblock %}
 {% block content %}
@@ -100,7 +157,33 @@
         </div>
       </div>
     </div>
-
+    
+<div class="row">
+  <div class="col-md-12">
+    <div class="available-coupons">
+      <h5 class="mb-3">Available Coupons</h5>
+      {% if available_coupons %}
+        <select class="form-select form-select-sm mb-3 danger" id="couponSelect" onchange="handleCouponSelect(this.value)">
+          <option value="">Select a coupon</option>
+          {% for coupon in available_coupons %}
+            <option value="{{ coupon.code }}" data-description="{{ coupon.description }}" 
+                    data-minimum="{{ coupon.minimum_amount }}" 
+                    data-expiry="{{ coupon.valid_to|date:'d M Y' }}">
+              {{ coupon.code }}  {{ coupon.description }}
+            </option>
+          {% endfor %}
+        </select>
+        <div id="couponDetails" class="coupon-details" style="display: none;">
+          <p class="mb-1" id="couponDescription"></p>
+          <small id="minimumAmount"></small>
+          <div class="coupon-expiry mt-1" id="couponExpiry"></div>
+        </div>
+      {% else %}
+        <p class="text-muted">No coupons available at the moment.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
     <!-- Coupon Section -->
     <div class="row coupon-section">
       <div class="col-md-12">
@@ -224,5 +307,31 @@
       });
   });
 </script>
+<script>
+  function handleCouponSelect(code) {
+      if (!code) {
+          document.getElementById('couponDetails').style.display = 'none';
+          return;
+      }
+      
+      const selectedOption = document.querySelector(`option[value="${code}"]`);
+      const description = selectedOption.dataset.description;
+      const minimum = selectedOption.dataset.minimum;
+      const expiry = selectedOption.dataset.expiry;
+      
+      document.getElementById('couponDescription').textContent = description;
+      document.getElementById('minimumAmount').textContent = minimum ? `Minimum purchase: ₹${minimum}` : '';
+      document.getElementById('couponExpiry').textContent = `Valid till: ${expiry}`;
+      document.getElementById('couponDetails').style.display = 'block';
+      
+      // Auto-fill the coupon input
+      document.querySelector('input[name="coupon_code"]').value = code;
+  }
+  
+  // Add this to your existing document ready function
+  $(document).ready(function(){
+      // Your existing JavaScript remains the same
+  });
+  </script>
 
 {% endblock %}

@@ -33,13 +33,13 @@ phone_regex = r"^\+?[1-9](?!6)\d{1,14}$"
 def edit_profile_view(request):
     user = request.user
     if request.method == 'POST':
-        # Retrieve form data
+       
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
-        phone_number = request.POST.get('phone', '').strip()  # Get phone number from form
+        phone_number = request.POST.get('phone', '').strip()  
 
-        # Collect data to repopulate form in case of validation error
+       
         data = {
             'first_name': first_name,
             'last_name': last_name,

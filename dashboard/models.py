@@ -1,10 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
-import os
-import PIL
-
-# from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Category(models.Model):
 
@@ -30,6 +27,7 @@ class Size(models.Model):
     is_active = models.BooleanField(default=True) 
     def __str__(self):
         return self.name
+
 
 
 class Product(models.Model):
@@ -61,27 +59,29 @@ class Product(models.Model):
         super().save(*args, **kwargs)
         
         if self.image:
-            # Open the image
+            
             img = Image.open(self.image.path)
-            
-            # Define the desired size (400x400)
+
             desired_size = (400, 400)
-            
-            # Resize the image while maintaining aspect ratio
+
             img.thumbnail(desired_size, Image.Resampling.LANCZOS)
-            
-            # Create a new blank image with the desired size (400x400)
+
             new_img = Image.new("RGB", desired_size, (255, 255, 255))
-            
-            # Calculate the position to paste the thumbnail on the new image
+
             x = (desired_size[0] - img.width) // 2
             y = (desired_size[1] - img.height) // 2
-            
-            # Paste the thumbnail onto the new image
+
             new_img.paste(img, (x, y))
-            
-            # Save the new image back to the same path
+
             new_img.save(self.image.path)
+    def average_rating(self):
+        reviews = self.reviews.all()
+        if reviews:
+            return round(sum(review.rating for review in reviews) / len(reviews), 1)
+        return 0
+
+    def total_reviews(self):
+        return self.reviews.count()
 
 
 class ProductImages(models.Model):
@@ -92,27 +92,17 @@ class ProductImages(models.Model):
         return f'Image for {self.product.title}'
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        
-        # Open the image
+
         img = Image.open(self.image.path)
-        
-        # Define the desired size
         desired_size = (400, 400)
-        
-        # Calculate the new size to maintain aspect ratio
         img.thumbnail(desired_size, Image.Resampling.LANCZOS)
-        
-        # Create a new blank image with the desired size
         new_img = Image.new("RGB", desired_size, (255, 255, 255))
         
-        # Calculate the position to paste the thumbnail on the new image
         x = (desired_size[0] - img.width) // 2
         y = (desired_size[1] - img.height) // 2
-        
-        # Paste the thumbnail onto the new image
+
         new_img.paste(img, (x, y))
-        
-        # Save the new image back to the same path
+ 
         new_img.save(self.image.path)
 
 
@@ -131,3 +121,21 @@ class Variant(models.Model):
     sku = models.CharField(max_length=20, blank=True, null=True)  
     def __str__(self):
         return f"{self.product.title} - {self.weight} - ${self.price}"
+    
+
+class Review_prdct(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    helpful_votes = models.IntegerField(default=0)
+    
+    class Meta:
+        unique_together = ('product', 'user')
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"{self.user.username}'s review for {self.product.title}"

@@ -29,9 +29,10 @@ urlpatterns = [
     path('cart_app/',include('cart_app.urls')),
     path('user_app/',include('user_app.urls')),
     path('wishlist_app/',include('wishlist_app.urls')),
+    path('payment/',include('payment.urls')),
+    path('wallet/',include('wallet_app.urls')),
   
 
-    
 ]
 
 if settings.DEBUG:

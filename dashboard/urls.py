@@ -27,7 +27,13 @@ urlpatterns = [
     path('unblock_flavour/<int:id>/', views.unblock_flavour, name='unblock_flavour'),
 
 
+    path('coupons/', views.coupon_list, name='coupon_list'),
+    path('coupons/add/', views.coupon_add, name='coupon_add'),
+    path('coupons/edit/<int:pk>/', views.coupon_edit, name='coupon_edit'),
+    path('coupons/delete/<int:pk>/', views.coupon_delete, name='coupon_delete'),
 
+
+    path('sales-report/', views.sales_report, name='sales_report'),
 
 
 ]

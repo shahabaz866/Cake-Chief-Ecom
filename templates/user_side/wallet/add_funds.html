@@ -1,0 +1,7 @@
+<h2>Add Funds</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="amount">Amount:</label>
+    <input type="number" step="0.01" name="amount" required>
+    <button type="submit">Add</button>
+</form>

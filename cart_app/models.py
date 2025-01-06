@@ -1,5 +1,3 @@
-# cart_app/models.py
-
 from django.db import models
 from django.contrib.auth.models import User
 from dashboard.models import Product,Variant 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sales Report</title>
+</head>
+<body>
+  <h1>Sales Report</h1>
+
+  <!-- Filter Form -->
+  <form method="GET" action="">
+    <label for="report_type">Report Type:</label>
+    <select name="report_type" id="report_type">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="yearly">Yearly</option>
+      <option value="custom">Custom</option>
+    </select>
+
+    <label for="start_date">Start Date:</label>
+    <input type="date" name="start_date" id="start_date">
+
+    <label for="end_date">End Date:</label>
+    <input type="date" name="end_date" id="end_date">
+
+    <button type="submit">Generate Report</button>
+  </form>
+
+  <!-- Sales Report Table -->
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Total Amount</th>
+        <th>Total Quantity</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in sales_data %}
+        <tr>
+          <td>{{ order.id }}</td>
+          <td>{{ order.total_amount }}</td>
+          <td>{{ order.total_quantity }}</td>
+          <td>{{ order.created_at }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

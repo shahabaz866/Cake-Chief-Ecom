@@ -89,6 +89,112 @@
     .bg-danger-dark {
         background-color: #b52a2a !important; /* Darker red */
     }
+
+    .review-button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .review-button:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+    }
+
+    .review-button.disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    /* Review Modal Styles */
+    .review-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .review-modal-content {
+        position: relative;
+        background-color: #fff;
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-100px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .close-modal:hover {
+        color: #333;
+    }
+
+    /* Star Rating Styles */
+    .stars {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 8px;
+    }
+
+    .stars input {
+        display: none;
+    }
+
+    .stars label {
+        font-size: 30px;
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .stars label:hover,
+    .stars label:hover ~ label,
+    .stars input:checked ~ label {
+        color: #FFD700;
+    }
+
+    .review-textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px;
+        border: 2px solid #e1e1e1;
+        border-radius: 10px;
+        margin: 15px 0;
+        resize: vertical;
+    }
+
+    .review-textarea:focus {
+        border-color: #28a745;
+        outline: none;
+    }
 </style>
 
 <div class="container my-5 animate-fade-in">
@@ -102,6 +208,7 @@
                         <span class="order-status-badge badge bg-{{ order.order_status|lower }}">
                             {{ order.order_status }}
                         </span>
+                        
                     </div>
                 </div>
                 
@@ -113,7 +220,9 @@
                                 <div>
                                     <h6 class="text-muted mb-1">Order Date</h6>
                                     <p class="mb-0 fw-bold">{{ order.created_at|date:"F j, Y" }}</p>
+                                    
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -170,6 +279,7 @@
                                     <strong>Total:</strong>
                                     <strong>₹{{ order.total_amount }}</strong>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -187,7 +297,7 @@
 
         <!-- Shipping Details Card -->
         <div class="col-lg-4">
-            <div class="order-card card">
+            <div class="order-card card "  style=" height:460px;">
                 <div class="card-header bg-secondary text-white py-3" style="border-radius: 15px 15px 0 0;">
                     <h5 class="mb-0">
                         <i class="fas fa-shipping-fast me-2"></i>
@@ -219,6 +329,19 @@
         <p class="mb-0">No delivery address provided.</p>
     {% endif %}
 </div>
+{% if order.order_status == 'DELIVERED' %}
+    {% if not item.is_reviewed %}
+    <button onclick="openReviewModal('{{ item.product.id }}', '{{ item.product.title }}')" 
+            class="review-button">
+        <i class="fas fa-star me-2"></i>Write Review
+    </button>
+    {% else %}
+    <button class="review-button disabled" disabled>
+        <i class="fas fa-check me-2"></i>Reviewed
+    </button>
+    {% endif %}
+{% endif %}
+</div>
 
 {% comment %}                     
                     <div class="tracking-info">
@@ -237,10 +360,91 @@
                           </a> 
  </div>  {% endcomment %}
                     
-                   
+
                 </div>
             </div>
         </div>
     </div>
+    
+<div id="reviewModal" class="review-modal">
+    <div class="review-modal-content">
+        <span class="close-modal" onclick="closeReviewModal()">&times;</span>
+        <h4 class="mb-3">Write a Review</h4>
+        <p id="reviewProductTitle" class="text-muted mb-4"></p>
+        
+        <form id="reviewForm" method="POST" action="{% url 'create_review' %}">
+            {% csrf_token %}
+            <input type="hidden" id="productId" name="product_id">
+            <input type="hidden" id="orderId" name="order_id" value="{{ order.id }}">
+            
+            <div class="text-center mb-4">
+                <div class="stars">
+                    <input type="radio" id="star5" name="rating" value="5">
+                    <label for="star5">★</label>
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4">★</label>
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3">★</label>
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2">★</label>
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1">★</label>
+                </div>
+            </div>
+            
+            <textarea name="text" 
+                      class="review-textarea" 
+                      placeholder="Share your experience with this product..."
+                      required></textarea>
+            
+            <button type="submit" class="btn btn-success w-100">
+                Submit Review
+            </button>
+        </form>
+    </div>
 </div>
+
+<!-- Add this JavaScript at the end of your template -->
+<script>
+function openReviewModal(productId, productTitle) {
+    document.getElementById('reviewModal').style.display = 'block';
+    document.getElementById('productId').value = productId;
+    document.getElementById('reviewProductTitle').textContent = productTitle;
+    document.body.style.overflow = 'hidden';
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal if clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('reviewModal');
+    if (event.target == modal) {
+        closeReviewModal();
+    }
+}
+
+// Form submission handling
+document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const rating = document.querySelector('input[name="rating"]:checked');
+    const text = document.querySelector('textarea[name="text"]').value;
+    
+    if (!rating) {
+        alert('Please select a rating');
+        return;
+    }
+    
+    if (text.length < 10) {
+        alert('Please write at least 10 characters');
+        return;
+    }
+    
+    this.submit();
+});
+</script>
+
 {% endblock %}

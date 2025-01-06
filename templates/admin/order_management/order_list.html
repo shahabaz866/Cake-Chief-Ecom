@@ -58,59 +58,86 @@
         </div>
 
         <!-- Orders Table -->
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table datanew">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Total</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in orders %}
-                                <tr>
-                                    <td>{{ order.id }}</td>
-                                    <td>{{ order.user.email }}</td>
-                                    <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
-                                    <td>
-                                        <span class="status-badge status-{{ order.order_status }}">
-                                            {{ order.get_order_status_display }}
-                                        </span>
-                                    </td>
-                                    <td>₹{{ order.total_amount }}</td>
-                                    <td>
-                                    <form method="POST" action="{% url 'order_app:update_order_status' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="order_id" value="{{ order.id }}">
-                                        <input type="hidden" name="new_status" value="PROCESSING">
-                                        {% if order.order_status != 'PROCESSING' %}
-                                            <button type="submit" class="button change-status" style="background-color: green;">
-                                                Confirmed
-                                            </button>
-                                        {% else %}
-                                            <button type="submit" class="button change-status" style="background-color: red;">
-                                                Confirm
-                                            </button>
-                                        {% endif %}
-                                    </form>
-                                </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center">No orders found.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <!-- Orders Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table datanew">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Order Status</th>
+                        {% comment %} <th>Payment Status</th> {% endcomment %}
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.user.email }}</td>
+                            <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                            
+                            <!-- Order Status Dropdown -->
+                            <td>
+                                <!-- Order Status Form -->
+                                <form method="POST" action="{% url 'order_app:update_order_status' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                    <select name="new_order_status" class="form-select mb-1" required  onchange="this.form.submit()">
+                                        {% for status_code, status_label in status_choices %}
+                                            <option value="{{ status_code }}" {% if order.order_status == status_code %}selected{% endif %}>
+                                                {{ status_label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                  
+                                    {% comment %} <button type="submit" class="btn btn-success">Update</button> {% endcomment %}
+                                </form>
+                            </td>
+                            
+
+                             <!-- Payment Status Dropdown -->
+                            <td>
+                                <form method="POST" action="{% url 'order_app:update_payment_status' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                    <select name="new_payment_status" class="form-select" onchange="this.form.submit()">
+                                        {% for payment_status_code, payment_status_label in payment_status_choices %}
+                                            <option value="{{ payment_status_code }}" {% if order.payment_status == payment_status_code %}selected{% endif %}>
+                                                {{ payment_status_label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+
+                            <!-- Total Amount -->
+                            <td>₹{{ order.total_amount }}</td>
+
+                            <!-- Actions -->
+                            <td>
+                                <form method="POST" action="{% url 'order_app:delete_order' order.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No orders found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    </div>
+</div>
+
 
         <!-- Pagination -->
         {% if orders.paginator.num_pages > 1 %}

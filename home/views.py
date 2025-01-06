@@ -13,15 +13,27 @@ from django.db.models import Q
 import re
 import random
 import time
-from dashboard.models import Product, ProductImages, Flavour, Category,Size,Variant
+from dashboard.models import Product, ProductImages, Flavour, Category,Size,Review_prdct
+from .models import HeroBanner
 from django.db.models import Max
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.urls import reverse
+from .models import Review, HelpfulVote
+from .forms import ReviewForm
+from dashboard.forms import ReviewForms
+
 
 
 @never_cache
 def HomePage(request):
     flavours = Flavour.objects.all()
     categories = Category.objects.all()
+    hero_banners = HeroBanner.objects.filter(is_active=True)
+
     context = {
+        'hero_banners':hero_banners,
         'flavours': flavours,
         'categories': categories,
     }
@@ -201,18 +213,48 @@ def size_filter(request, size_id):
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     additional_images = ProductImages.objects.filter(product=product)
-    # variants = product.variants.first()
-    # is_out_of_stock = variants.stock <= 0
+    reviews = product.reviews.all()
+    user_review = None
+    if request.user.is_authenticated:
+        user_review = product.reviews.filter(user=request.user).first()
 
 
     context = {
         'product': product,
         'aditional_img': additional_images,
-        # 'is_out_of_stock': is_out_of_stock,
-        # 'variants':variants
+        'reviews': reviews,
+        'user_review': user_review,
+        
     }
 
     return render(request, 'user_side/shop/single_product.html', context)
+@login_required
+def add_review(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review, created = Review_prdct.objects.update_or_create(
+                product=product,
+                user=request.user,
+                defaults={
+                    'rating': form.cleaned_data['rating'],
+                    'comment': form.cleaned_data['comment']
+                }
+            )
+            messages.success(request, 'Your review has been submitted successfully!')
+            return redirect('product_detail', product_id=product_id)
+    
+    return redirect('product_detail', product_id=product_id)
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review_prdct, id=review_id, user=request.user)
+    product_id = review.product.id
+    review.delete()
+    messages.success(request, 'Your review has been deleted successfully!')
+    return redirect('product_detail', product_id=product_id)
 
 
 @never_cache
@@ -235,12 +277,10 @@ def LogingPage(request):
         else:
             User = get_user_model()
             try:
-                # Retrieve the user first
                 user = User.objects.get(username=getName)
                 if not user.is_active:
                     messages.error(request, "Your account is inactive. Please contact support.")
                 else:
-                    # Authenticate if user is active
                     user = authenticate(request, username=getName, password=getPass)
                     if user is not None:
                         login(request, user)
@@ -249,7 +289,6 @@ def LogingPage(request):
                     else:
                         messages.error(request, "Invalid username or password.")
             except User.DoesNotExist:
-                # If user does not exist, show invalid message
                 messages.error(request, "Invalid username or password.")
 
         context['username'] = request.session.get('login_username', '')
@@ -306,6 +345,131 @@ def verify_otp(request):
 
     return render(request, 'user_side/otp_page/verify_otp.html', {'email': email})
 
+
+
+
+
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        
+        try:
+            user = User.objects.get(email=email)
+            
+            # Generate a password reset token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Create reset password link
+            reset_link = request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            
+            # Send email with reset link
+            subject = 'Password Reset Request'
+            message = f'''
+            You have requested a password reset. 
+            Please click the link below to reset your password:
+            
+            {reset_link}
+            
+            If you did not request this reset, please ignore this email.
+            '''
+            send_mail(
+                subject, 
+                message, 
+                settings.DEFAULT_FROM_EMAIL, 
+                [email],
+                fail_silently=False
+            )
+            
+            messages.success(request, "A password reset link has been sent to your email.")
+            return redirect('login')
+        
+        except User.DoesNotExist:
+            messages.error(request, "No account found with this email address.")
+    
+    return render(request, 'user_side/password/forgot_password.html')
+
+def password_reset_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+        
+        # Validate token
+        if default_token_generator.check_token(user, token):
+            if request.method == 'POST':
+                new_password = request.POST.get('new_password')
+                confirm_password = request.POST.get('confirm_password')
+                
+                # Validate password
+                if new_password != confirm_password:
+                    messages.error(request, "Passwords do not match.")
+                elif not validate_password(new_password):
+                    messages.error(request, "Password must be 6-10 characters long, include uppercase and lowercase letters, numbers, and special characters.")
+                else:
+                    user.set_password(new_password)
+                    user.save()
+                    messages.success(request, "Password reset successfully. Please log in.")
+                    return redirect('login')
+            
+            return render(request, 'user_side/password/password_reset_confirm.html')
+        else:
+            messages.error(request, "Invalid or expired reset link.")
+            return redirect('login')
+    
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        messages.error(request, "Invalid reset link.")
+        return redirect('login')
+    
+@login_required
+def review_list(request):
+    reviews = Review.objects.all()
+    return render(request, 'user_side/reviews/review_list.html', {'reviews': reviews})
+
+@login_required
+def create_review(request):
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.save()
+            messages.success(request, 'Your review has been posted!')
+            return redirect('review_list')
+    else:
+        form = ReviewForm()
+    return render(request, 'user_side/reviews/create_review.html', {'form': form})
+
+@login_required
+def vote_helpful(request, review_id):
+ 
+    review = get_object_or_404(Review, id=review_id)
+
+    
+    if HelpfulVote.objects.filter(user=request.user, review=review).exists():
+        messages.error(request, "You have already marked this review as helpful.")
+    else:
+       
+        review.helpful_votes += 1  
+        review.save()
+
+        HelpfulVote.objects.create(user=request.user, review=review)
+        messages.success(request, "Thanks for your feedback!")
+
+    return redirect('review_list')
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+
+    if review.user == request.user:
+        review.delete()
+        messages.success(request, "Review deleted successfully!")
+    else:
+        messages.error(request, "You are not authorized to delete this review.")
+
+    return redirect('review_list')
 
 @never_cache
 def LogoutPage(request):

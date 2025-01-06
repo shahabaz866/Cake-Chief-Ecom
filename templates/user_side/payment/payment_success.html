@@ -1,0 +1,60 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+        <div class="mb-6">
+            <svg class="mx-auto mb-4 w-16 h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Confirm Your Order</h1>
+        </div>
+
+        <div class="mb-6">
+            <p class="text-gray-600 mb-2">Order Details:</p>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="flex justify-between mb-2">
+                    <span class="text-gray-700">Order Number:</span>
+                    <span class="font-semibold">{{ order.id }}</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span class="text-gray-700">Total Amount:</span>
+                    <span class="font-semibold text-green-600">₹{{ grand_total }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-700">Payment Method:</span>
+                    <span class="font-semibold">Razorpay</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <button id="confirm-payment" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300">
+                Confirm & Pay
+            </button>
+            <button id="cancel-payment" class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition duration-300">
+                Cancel Payment
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('confirm-payment').addEventListener('click', function() {
+            // This will trigger the Razorpay payment popup
+            document.getElementById('rzp-button').click();
+        });
+
+        document.getElementById('cancel-payment').addEventListener('click', function() {
+            // Redirect back to cart or previous page
+            window.location.href = "{% url 'cart_app:cart' %}";
+        });
+    </script>
+</body>
+</html> {% endcomment %}
+<h2>Payment Successful!</h2>
+<a href="{% url "home" %}">Go to Home</a>

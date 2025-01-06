@@ -1,0 +1,328 @@
+{% extends 'user_side/base.html' %}
+
+{% block content %}
+<style>
+    .review-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .review-form {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        padding: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .review-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .review-header h2 {
+        color: #333;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .review-header p {
+        color: #666;
+        font-size: 16px;
+    }
+
+    /* Star Rating Styles */
+    .stars-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .stars {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 8px;
+    }
+
+    .stars input {
+        display: none;
+    }
+
+    .stars label {
+        font-size: 35px;
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .stars label:hover,
+    .stars label:hover ~ label,
+    .stars input:checked ~ label {
+        color: #FFD700;
+        transform: scale(1.1);
+    }
+
+    .stars input:checked ~ label {
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    /* Emoji Feedback */
+    .emoji-feedback {
+        height: 60px;
+        text-align: center;
+        font-size: 40px;
+        margin: 15px 0;
+        transition: all 0.3s ease;
+    }
+
+    /* Review Text Area */
+    .review-input {
+        position: relative;
+        margin: 20px 0;
+    }
+
+    .review-textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 15px;
+        border: 2px solid #e1e1e1;
+        border-radius: 15px;
+        font-size: 16px;
+        line-height: 1.5;
+        transition: all 0.3s ease;
+        resize: vertical;
+    }
+
+    .review-textarea:focus {
+        border-color: #dc3545;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+    }
+
+    .char-counter {
+        position: absolute;
+        bottom: 10px;
+        right: 15px;
+        font-size: 14px;
+        color: #666;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        display: block;
+        width: 100%;
+        max-width: 200px;
+        margin: 30px auto 0;
+        padding: 12px 0;
+        border: none;
+        border-radius: 25px;
+        background-color: #dc3545;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn.loading {
+        background-color: #666;
+        pointer-events: none;
+    }
+
+    .submit-btn.loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin: -10px 0 0 -10px;
+        border: 3px solid #fff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: button-loading 0.8s infinite linear;
+    }
+
+    @keyframes button-loading {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Validation Messages */
+    .validation-message {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        display: none;
+    }
+
+    .validation-message.error {
+        background-color: #fff3f3;
+        color: #dc3545;
+        border: 1px solid #ffcdd2;
+        display: block;
+    }
+
+    .validation-message.success {
+        background-color: #f0fff0;
+        color: #28a745;
+        border: 1px solid #c3e6cb;
+        display: block;
+    }
+</style>
+
+<div class="review-container">
+    <div class="review-form">
+        <div class="review-header">
+            <h2>Share Your Experience</h2>
+            <p>Let us know what you think!</p>
+        </div>
+
+        <form method="POST" id="reviewForm">
+            {% csrf_token %}
+            
+            <input type="hidden" name="rating" id="ratingInput">
+            
+            <div class="stars-container">
+                <div class="stars">
+                    <input type="radio" id="star5" name="star_rating" value="5">
+                    <label for="star5">★</label>
+                    <input type="radio" id="star4" name="star_rating" value="4">
+                    <label for="star4">★</label>
+                    <input type="radio" id="star3" name="star_rating" value="3">
+                    <label for="star3">★</label>
+                    <input type="radio" id="star2" name="star_rating" value="2">
+                    <label for="star2">★</label>
+                    <input type="radio" id="star1" name="star_rating" value="1">
+                    <label for="star1">★</label>
+                </div>
+            </div>
+
+            <div class="emoji-feedback" id="emojiFeedback"></div>
+
+            <div class="review-input">
+                <textarea 
+                    class="review-textarea" 
+                    name="text" 
+                    id="reviewText"
+                    placeholder="Tell us about your experience (minimum 10 characters)"
+                    maxlength="500"
+                ></textarea>
+                <div class="char-counter">
+                    <span id="charCount">0</span>/500
+                </div>
+            </div>
+
+            <div class="validation-message" id="validationMessage"></div>
+
+            <button type="submit" class="submit-btn" id="submitButton">
+                Submit Review
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reviewForm');
+    const ratingInput = document.getElementById('ratingInput');
+    const reviewText = document.getElementById('reviewText');
+    const charCount = document.getElementById('charCount');
+    const emojiFeedback = document.getElementById('emojiFeedback');
+    const validationMessage = document.getElementById('validationMessage');
+    const submitButton = document.getElementById('submitButton');
+    const starInputs = document.querySelectorAll('input[name="star_rating"]');
+
+    const emojis = {
+        1: '😞',
+        2: '😕',
+        3: '😊',
+        4: '😃',
+        5: '🤩'
+    };
+
+    // Handle star rating selection
+    starInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const rating = this.value;
+            ratingInput.value = rating;
+            emojiFeedback.textContent = emojis[rating];
+            emojiFeedback.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                emojiFeedback.style.transform = 'scale(1)';
+            }, 200);
+            validateForm();
+        });
+    });
+
+    // Handle text input
+    reviewText.addEventListener('input', function() {
+        const length = this.value.length;
+        charCount.textContent = length;
+        validateForm();
+    });
+
+    function validateForm() {
+        const rating = ratingInput.value;
+        const text = reviewText.value;
+        let isValid = true;
+        let message = '';
+
+        if (!rating) {
+            message = 'Please select a rating';
+            isValid = false;
+        } else if (text.length < 10) {
+            message = 'Please write at least 10 characters';
+            isValid = false;
+        }
+
+        if (message) {
+            validationMessage.textContent = message;
+            validationMessage.className = 'validation-message error';
+        } else {
+            validationMessage.className = 'validation-message';
+        }
+
+        return isValid;
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        // Show loading state
+        submitButton.classList.add('loading');
+        submitButton.textContent = '';
+
+        // Simulate brief loading for better UX
+        setTimeout(() => {
+            this.submit();
+        }, 800);
+    });
+});
+</script>
+{% endblock %}

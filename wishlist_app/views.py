@@ -10,36 +10,23 @@ from django.views.decorators.cache import never_cache
 @login_required
 def wishlist(request):
     wishlist_items = Wishlist.objects.select_related('variant', 'product').filter(user=request.user)
-
+    
     wishlist = []
     for item in wishlist_items:
-        # Use variant price if available, otherwise fallback to product price
-        price = item.variant.price if item.variant else item.product.price
+        # Get the default variant if none is specified
+        if not item.variant:
+            variant = Variant.objects.filter(product=item.product).first()
+        else:
+            variant = item.variant
+            
+        price = variant.price if variant else item.product.price
+        
         wishlist.append({
             'product': item.product,
-            'variant': item.variant,
+            'variant': variant,
             'price': price
         })
-        # for variant in Variant.objects.all():
-        #     print(f"Variant: {variant.product.title} - {variant.weight}, Price: {variant.price}")
-
-        wishlist = []
-    for item in wishlist_items:
-    # Debug print
-        print(f"Processing item: {item.product.title}")
-    if item.variant:
-        print(f"Variant Price: {item.variant.price}")
-        price = item.variant.price
-    else:
-        print(f"Product Price: {item.product.price}")
-        price = item.product.price
-
-    wishlist.append({
-        'product': item.product,
-        'variant': item.variant,
-        'price': price
-    })
-
+    
     context = {'wishlist': wishlist}
     return render(request, 'user_side/wishlist/wishlist.html', context)
 

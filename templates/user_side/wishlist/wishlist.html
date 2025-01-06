@@ -398,7 +398,9 @@
                     {% if item.product.is_active %}
                     <form method="POST" action="{% url 'cart_app:add_cart' item.product.id %}" class="add-to-cart-form">
                         {% csrf_token %}
-                        <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                        {% if item.variant %}
+                            <input type="hidden" name="variant" value="{{ item.variant.id }}">
+                        {% endif %}
                         <button type="submit" class="add-to-cart-btn">
                             <svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path d="M9 20C9 21.1 8.1 22 7 22C5.9 22 5 21.1 5 20C5 18.9 5.9 18 7 18C8.1 18 9 18.9 9 20ZM21 20C21 21.1 20.1 22 19 22C17.9 22 17 21.1 17 20C17 18.9 17.9 18 19 18C20.1 18 21 18.9 21 20ZM3 4H5L5.4 6M7 11H19L21 6H5.4M7 11L5.4 6M7 11L4.7 2H2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

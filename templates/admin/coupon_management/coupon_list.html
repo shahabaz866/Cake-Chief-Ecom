@@ -1,0 +1,95 @@
+{% extends 'admin/bas.html' %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Coupon Management</h4>
+                <h6>View and manage your store coupons</h6>
+            </div>
+            <div class="page-btn">
+                <a href="{% url 'coupon_add' %}" class="btn btn-added">
+                    <i data-feather="plus"></i>Add New Coupon
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table datanew">
+                        <thead>
+                            <tr>
+                                <th>Coupon Code</th>
+                                <th>Discount</th>
+                                <th>Valid From</th>
+                                <th>Valid To</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for coupon in coupons %}
+                            <tr>
+                                <td>{{ coupon.code }}</td>
+                                <td>
+                                    <span class="badges ">
+                                        {{ coupon.discount }}₹
+                                    </span>
+                                </td>
+                                <td>{{ coupon.valid_from|date:"M d, Y" }}</td>
+                                <td>{{ coupon.valid_to|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="badges {% if coupon.active %}bg-lightgreen{% else %}bg-lightred{% endif %}">
+                                        {% if coupon.active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                    
+                                </td>
+                                <td>
+                                    <div class="dropdown dropdown-action">
+                                        <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i data-feather="more-vertical"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="{% url 'coupon_edit' coupon.pk %}">
+                                                <i data-feather="edit" class="me-2"></i>Edit
+                                            </a>
+                                            <a class="dropdown-item" href="{% url 'coupon_delete' coupon.pk %}">
+                                                <i data-feather="trash-2" class="me-2"></i>Delete
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="no-data-found">
+                                        <i data-feather="alert-circle" class="text-muted"></i>
+                                        <p class="m-0">No coupons found. Create your first coupon!</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable
+        $('.datanew').DataTable({
+            "bFilter": true,
+            "bPaginate": true,
+            "bLengthChange": true,
+            "bInfo": true,
+            "bAutoWidth": false
+        });
+    });
+</script>
+{% endblock %}

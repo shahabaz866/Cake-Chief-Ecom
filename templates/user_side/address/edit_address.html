@@ -4,164 +4,316 @@
 
 <style>
   .profile-bg {
-    background: linear-gradient(135deg,#b52a2a 0%, #FF6B6B 100%);
+    {% comment %} background: linear-gradient(135deg, #b52a2a 0%, #FF6B6B 100%); {% endcomment %}
     min-height: 100vh;
-    padding: 2rem 1rem;
+    padding: 3rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
   }
 
   .glass-effect {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 1000px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .glass-effect:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
   }
 
   .input-field {
     transition: all 0.3s ease;
     border: 2px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
     font-size: 1rem;
     width: 100%;
     background: #f9fafb;
+    color: #374151;
   }
 
   .input-field:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #b52a2a;
+    box-shadow: 0 0 0 4px rgba(181, 42, 42, 0.1);
     background: white;
+    outline: none;
+  }
+
+  .input-field::placeholder {
+    color: #9ca3af;
+  }
+
+  select.input-field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.5em;
+    padding-right: 2.5rem;
   }
 
   .form-label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.625rem;
     font-weight: 600;
-    color: #4b5563;
+    color: #374151;
     font-size: 0.95rem;
-  }
-
-  .btn {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    font-weight: 600;
-    padding: 0.875rem 2rem;
-    border-radius: 12px;
     letter-spacing: 0.025em;
   }
 
+
+
+  .btn {
+    transition: all 0.3s ease;
+    font-weight: 600;
+    padding: 1rem 2.5rem;
+    border-radius: 12px;
+    letter-spacing: 0.025em;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .btn-submit {
-    background:#b52a2a;
+    background: #b52a2a;
     color: white;
     border: none;
   }
 
   .btn-submit:hover {
+    background: #a02525;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 20px rgba(181, 42, 42, 0.3);
   }
 
   .btn-cancel {
     background: #f3f4f6;
     color: #4b5563;
+    border: 1px solid #e5e7eb;
   }
 
   .btn-cancel:hover {
     background: #e5e7eb;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   .card-header {
-    padding: 2.5rem 2rem;
+    padding: 3rem;
     text-align: center;
-    background: linear-gradient(to right, #f8fafc, #f1f5f9);
+    background: linear-gradient(to right, #fff, #f8fafc);
     border-bottom: 1px solid #e5e7eb;
+    border-radius: 24px 24px 0 0;
   }
 
   .form-section {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
+    padding: 2.5rem 3rem;
   }
 
   .input-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-section {
+      padding: 1.5rem;
+    }
+    
+    .card-header {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 </style>
 
 <div class="profile-bg">
-  <div class="max-w-4xl mx-auto animate-slide-up">
-    <div class="glass-effect rounded-2xl overflow-hidden">
-      <!-- Header Section -->
-      <div class="card-header">
-        <h1 class="text-3xl font-bold text-gray-900 mb-3">
-          Address Details
-        </h1>
-        <p class="text-gray-600">
-          Manage your address information
-        </p>
+  <div class="animate-slide-up glass-effect">
+    <!-- Header Section -->
+    <div class="card-header">
+      <h1 class="text-3xl font-bold text-gray-900 mb-3">
+        {% if address %}Edit{% else %}Add New{% endif %} Address
+      </h1>
+      <p class="text-gray-600">
+        {% if address %}Update your address information{% else %}Provide your delivery address details{% endif %}
+      </p>
+    </div>
+
+    <!-- Form Section -->
+    <form 
+      method="post" 
+      enctype="multipart/form-data" 
+      action="{% if address %}{% url 'user_app:edit_address' address_id=address.id %}{% else %}{% url 'user_app:add_address' %}{% endif %}" 
+      class="form-section"
+    >
+      {% csrf_token %}
+
+      <!-- Personal Information -->
+      <h2 class="section-title">Personal Information</h2>
+      <div class="form-grid mb-8">
+        <div class="input-group">
+          <label class="form-label required-label">Full Name</label>
+          <input 
+            type="text" 
+            name="name" 
+            value="{{ address.name }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your full name"
+          />
+        </div>
+        <div class="input-group">
+          <label class="form-label required-label">Phone Number</label>
+          <input 
+            type="text" 
+            name="phone_number" 
+            value="{{ address.phone_number }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your contact number"
+          />
+        </div>
       </div>
 
-      <!-- Form Section -->
-      <form method="post" enctype="multipart/form-data" 
-      action="{% if address %}{% url 'user_app:edit_address' address_id=address.id %}{% else %}{% url 'user_app:add_address' %}{% endif %}" 
-      class="form-section">
-        {% csrf_token %}
-
-        <!-- Address Information -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
-          <div class="input-group">
-            <label class="form-label">Name</label>
-            <input type="text" name="name" value="{{ address.name }}" required class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">Phone Number</label>
-            <input type="text" name="phone_number" value="{{ address.phone_number }}" required class="input-field" />
-          </div>
-          
-          <div class="input-group">
-            <label class="form-label">Pincode</label>
-            <input type="text" name="pincode" value="{{ address.pincode }}" required class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">Locality</label>
-            <input type="text" name="locality" value="{{ address.locality }}" required class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">Address</label>
-            <input type="text" name="address" value="{{ address.address }}" required class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">City</label>
-            <input type="text" name="city" value="{{ address.city }}" required class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">District</label>
-            <input type="text" name="district" value="{{ address.district }}" required class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">State</label>
-            <input type="text" name="state" value="{{ address.state }}" required class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">Landmark</label>
-            <input type="text" name="landmark" value="{{ address.landmark }}" class="input-field" />
-          </div>
-          <div class="input-group">
-            <label class="form-label">Address Type</label>
-            <select name="address_type" required class="input-field">
-              <option value="home" {% if address and address.address_type == 'home' %}selected{% endif %}>Home</option>
-              <option value="work" {% if address and address.address_type == 'work' %}selected{% endif %}>Office</option>
-              <option value="other" {% if address and address.address_type == 'other' %}selected{% endif %}>Other</option>
-            </select>
-          </div>
+      <!-- Address Details -->
+      <h2 class="section-title">Address Details</h2>
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="form-label required-label">Pincode</label>
+          <input 
+            type="text" 
+            name="pincode" 
+            value="{{ address.pincode }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your pincode"
+          />
         </div>
-
-        <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4 mt-8">
-          <a href="{% url 'user_app:user_show' %}" class="btn btn-cancel">Cancel</a>
-          <button type="submit" class="btn btn-submit">Save</button>
+        <div class="input-group">
+          <label class="form-label required-label">Locality</label>
+          <input 
+            type="text" 
+            name="locality" 
+            value="{{ address.locality }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your locality"
+          />
         </div>
-      </form>
-    </div>
+        <div class="input-group">
+          <label class="form-label required-label">Address</label>
+          <input 
+            type="text" 
+            name="address" 
+            value="{{ address.address }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your street address"
+          />
+        </div>
+        <div class="input-group">
+          <label class="form-label required-label">City</label>
+          <input 
+            type="text" 
+            name="city" 
+            value="{{ address.city }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your city"
+          />
+        </div>
+        <div class="input-group">
+          <label class="form-label required-label">District</label>
+          <input 
+            type="text" 
+            name="district" 
+            value="{{ address.district }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your district"
+          />
+        </div>
+        <div class="input-group">
+          <label class="form-label required-label">State</label>
+          <input 
+            type="text" 
+            name="state" 
+            value="{{ address.state }}" 
+            required 
+            class="input-field" 
+            placeholder="Enter your state"
+          />
+        </div>
+        <div class="input-group">
+          <label class="form-label">Landmark (Optional)</label>
+          <input 
+            type="text" 
+            name="landmark" 
+            value="{{ address.landmark }}" 
+            class="input-field" 
+            placeholder="Enter a nearby landmark"
+          />
+        </div>
+        <div class="input-group">
+          <label class="form-label required-label">Address Type</label>
+          <select name="address_type" required class="input-field">
+            <option value="" disabled {% if not address %}selected{% endif %}>Select address type</option>
+            <option value="home" {% if address and address.address_type == 'home' %}selected{% endif %}>Home</option>
+            <option value="work" {% if address and address.address_type == 'work' %}selected{% endif %}>Office</option>
+            <option value="other" {% if address and address.address_type == 'other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-4 mt-12">
+        <a href="{% url 'user_app:user_show' %}" class="btn btn-cancel">Cancel</a>
+        <button type="submit" class="btn btn-submit">
+          {% if address %}Update{% else %}Save{% endif %} Address
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 

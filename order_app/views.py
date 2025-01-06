@@ -7,6 +7,10 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from user_app.models import Address, UserContact
+from django.views.decorators.csrf import csrf_exempt
+from .constants import PaymentStatus
+
+
 
 
 def get_primary_mobile_number(user):
@@ -17,12 +21,10 @@ def get_primary_mobile_number(user):
 
 @login_required
 def order_list(request):
-    orders = Order.objects.filter(user=request.user)
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
     pending_orders_count = orders.filter(order_status='PENDING').count()
     delivery_orders_count = orders.filter(order_status='DELIVERED').count()
 
-
-    
 
     orders_with_items = []
     for order in orders:
@@ -46,16 +48,13 @@ def order_list(request):
 @login_required
 def order_view(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
+
     order_items = OrderItem.objects.filter(order=order)
+ 
+    default_address = Address.objects.filter(user=request.user, is_default=True).first()   
 
-    
-    # Get the default address
-    default_address = Address.objects.filter(user=request.user, is_default=True).first()
-
-    # Get the primary mobile number
     primary_mobile_number = get_primary_mobile_number(request.user)
-    print(primary_mobile_number ,"fds")
-    print(default_address,"ggf")
+ 
 
     context = {
         'order': order,
@@ -81,10 +80,10 @@ def cancel_order(request, order_id):
            
             for order_item in order.orderitem_set.all():
                 product = order_item.product
-                product.stock += order_item.quantity  # Restore the stock by adding the order quantity
-                product.save()  # Save the updated product
+                product.stock += order_item.quantity  
+                product.save() 
 
-            order.save()  # Save the canceled order
+            order.save() 
             messages.success(request, f'Order #{order_id} has been cancelled and stock has been restored.')
         else:
             messages.error(request, 'This order cannot be cancelled.')
@@ -98,30 +97,67 @@ def cancel_order(request, order_id):
     return render(request, 'user_side/order/cancel_confirmation.html', context)
 
     
+@csrf_exempt
+def update_order_status(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        new_order_status = request.POST.get('new_order_status')
+        new_payment_status = request.POST.get('new_payment_status')
+
+        order = get_object_or_404(Order, id=order_id)
+
+        if new_order_status and new_order_status != order.order_status:
+            order.order_status = new_order_status
+            messages.success(request, f"Order status updated to {new_order_status}")
+
+        # Update payment status
+        if new_payment_status and new_payment_status != order.payment_status:
+            order.payment_status = new_payment_status
+            messages.success(request, f"Payment status updated to {new_payment_status}")
+
+        # Save changes
+        order.save()
+
+    return redirect('order_app:order_management')
+
+def update_payment_status(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        new_payment_status = request.POST.get('new_payment_status')
+        order = get_object_or_404(Order, id=order_id)
+        order.payment_status = new_payment_status
+        order.save()
+        messages.success(request, f"Order #{order_id} payment status updated to {new_payment_status}.")
+    return redirect('order_app:admin_order_list')
 
 @login_required
 def admin_order_list(request):
-    # Get all orders ordered by creation date
-    order_list = Order.objects.all().order_by('id')
-    
-    # Handle search
+    order_list = Order.objects.all().order_by('-id')
+
+    order_status_choices = Order.ORDER_STATUS_CHOICES
+    payment_status_choices = PaymentStatus.CHOICES
+
     search_query = request.GET.get('search', '')
     if search_query:
         order_list = order_list.filter(
-            Q(order_number__icontains=search_query) |
-            Q(customer__email__icontains=search_query) |
-            Q(customer__username__icontains=search_query) |
+            Q(id__icontains=search_query) |  
+            Q(user__email__icontains=search_query) | 
+            Q(user__username__icontains=search_query) | 
             Q(order_status__icontains=search_query)
         )
     
-    # Handle status filter
+
     status_filter = request.GET.get('order_status', '')
     if status_filter:
         order_list = order_list.filter(order_status=status_filter)
-    
-    # Pagination
+
+
+    payment_status_filter = request.GET.get('payment_status', '')
+    if payment_status_filter:
+        order_list = order_list.filter(payment_status=payment_status_filter)
+
     page = request.GET.get('page', 1)
-    paginator = Paginator(order_list, 20) 
+    paginator = Paginator(order_list, 20)
     
     try:
         orders = paginator.page(page)
@@ -134,66 +170,37 @@ def admin_order_list(request):
         'orders': orders,
         'search_query': search_query,
         'status_filter': status_filter,
-        'status_choices': Order.ORDER_STATUS_CHOICES,
+        'payment_status_filter': payment_status_filter,
+        'status_choices': order_status_choices,
+        'payment_status_choices': payment_status_choices,
     }
     
     return render(request, 'admin/order_management/order_list.html', context)
 
 
 
-
 def update_order_status(request):
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
-        new_status = request.POST.get('new_status')
+        new_status = request.POST.get('new_order_status')
 
-        try:
-            order = Order.objects.get(id=order_id)
-            order.order_status = new_status  # Update status to "processing"
-            order.save()
-
-            messages.success(request, f"Order #{order_id} status updated to {new_status}.")
-
+        if not new_status:  # Check for empty values
+            messages.error(request, "Order status cannot be empty.")
             return redirect('order_app:admin_order_list')
 
-        except Order.DoesNotExist:
-            messages.error(request, "Order not found.")
-            return redirect('admin_order_list') 
+        order = get_object_or_404(Order, id=order_id)
+        order.order_status = new_status
+        order.save()
+        messages.success(request, "Order status updated successfully.")
 
-    # If it's not a POST request, return an error message
-    messages.error(request, "Invalid request.")
-    return redirect('admin_order_list')  # Redirect to a fallback page
+    return redirect('order_app:admin_order_list')
+
+@login_required
+def delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.delete()
+    messages.success(request, f"Order #{order_id} has been deleted.")
+    return redirect('order_app:admin_order_list')
 
 def success_view(request):
     return render(request, 'user_side/order/order_view.html')
-
-# @login_required
-# def status_page(request,order_id):
-#     order = get_object_or_404(Order, id=order_id, user=request.user)
-
-#     order_items = order.orderitem_set.all().select_related('product')
-
-#     default_address = Address.objects.filter(user=request.user, is_default=True).first()
-
-#     primary_mobile_number = get_primary_mobile_number(request.user)
-
-#     total_amount = sum(item.quantity * item.price for item in order_items)
-    
-  
-#     order.total_amount = total_amount
-#     order.save()
-
-#     if not default_address:
-#         default_address = Address.objects.filter(user=request.user).first()
-        
-#     context = {
-#         'order': order,
-#         'order_items': order_items,
-        
-#         'payment_status': 'Paid' if order.is_paid else 'Pending',
-#         'default_address': default_address,
-#         'primary_mobile_number': primary_mobile_number,
-
-#     }
-
-#     return render(request,'user_side/order/status_page.html',context)
