@@ -10,6 +10,8 @@ class Order(models.Model):
         ('upi', 'UPI Payment'),
         ('paypal','paypal'),
         ('cod', 'Cash on Delivery'),
+         ('wallet', 'Wallet'),
+        
     )
     ORDER_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
@@ -47,7 +49,6 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
-    # Fields from the second model
     customer_name = models.CharField(_("Customer Name"), max_length=254, blank=False,default="N/A", null=False)
     payment_status = models.CharField(
         _("Payment Status"),

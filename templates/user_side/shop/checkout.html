@@ -433,91 +433,67 @@
                 </tbody>
               </table>
 
-              <h3 class="payment-title">Payment Options</h3>
-              <div class="payment-options">
-                <label class="payment-option">
-                    <input type="radio" name="payment_method" value="cod" required> Cash on Delivery (COD)
-                </label>
-                <label class="payment-option">
-                    <input type="radio" name="payment_method" value="razorpay" required> Razorpay
-                </label>
-                <label class="payment-option">
-                  <input type="radio" name="payment_method" value="PayPal" required> Paypal
-              </label>
-              
-              <div id="paypal-button-container">Paypal</div>
-
-    <!-- Include the PayPal JavaScript SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=AU0J_J7VDhvn0yrQRypwt22NsxiZbAYrGh4gI8tlr0U_gWQmktkosS6CDpwqcPu0MzwLeXMHf_zJTz4H&currency=USD"></script>
-              
-    <script>
-        // Render the PayPal button into #paypal-button-container
-        paypal.Buttons({
-
-            // Call your server to set up the transaction
-            createOrder: function(data, actions) {
-                return fetch('/demo/checkout/api/paypal/order/create/', {
-                    method: 'post'
-                }).then(function(res) {
-                    return res.json();
-                }).then(function(orderData) {
-                    return orderData.id;
-                });
-            },
-
-            // Call your server to finalize the transaction
-            onApprove: function(data, actions) {
-                return fetch('/demo/checkout/api/paypal/order/' + data.orderID + '/capture/', {
-                    method: 'post'
-                }).then(function(res) {
-                    return res.json();
-                }).then(function(orderData) {
-                    // Three cases to handle:
-                    //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-                    //   (2) Other non-recoverable errors -> Show a failure message
-                    //   (3) Successful transaction -> Show confirmation or thank you
-
-                    // This example reads a v2/checkout/orders capture response, propagated from the server
-                    // You could use a different API or structure for your 'orderData'
-                    var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
-
-                    if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
-                        return actions.restart(); // Recoverable state, per:
-                        // https://developer.paypal.com/docs/checkout/integration-features/funding-failure/
-                    }
-
-                    if (errorDetail) {
-                        var msg = 'Sorry, your transaction could not be processed.';
-                        if (errorDetail.description) msg += '\n\n' + errorDetail.description;
-                        if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
-                        return alert(msg); // Show a failure message (try to avoid alerts in production environments)
-                    }
-
-                    // Successful capture! For demo purposes:
-                    console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-                    var transaction = orderData.purchase_units[0].payments.captures[0];
-                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
-
-                    // Replace the above to show a success message within this page, e.g.
-                    // const element = document.getElementById('paypal-button-container');
-                    // element.innerHTML = '';
-                    // element.innerHTML = '<h3>Thank you for your payment!</h3>';
-                    // Or go to another URL:  actions.redirect('thank_you.html');
-                });
-            }
-
-        }).render('#paypal-button-container');
-    </script>
-            </div>
-            
-  
+              <div class="section-box">
+                <h3 class="payment-title mb-3">Payment Options</h3>
+                
+                <!-- Wallet Balance Option -->
+                <div class="payment-options d-flex justify-content-between mb-3">
+                    <div class="payment-option">
+                        <input type="checkbox" id="use_wallet" name="wallet" value="{{ wallet.balance }}">
+                        <label for="use_wallet">
+                            <i class="fas fa-wallet"></i> Use Wallet Balance
+                        </label>
+                        <span class="wallet-balance">{{ wallet.balance }}</span>
+                    </div>
+                </div>
+                
+                <!-- Payment Method Options -->
+                <div class="payment-options d-flex justify-content-between mb-3">
+                    {% if grand_total < 1000 %}
+                        <!-- COD Option for orders under 1000 -->
+                        <div class="payment-option selected">
+                            <div class="payment-icon">💵</div>
+                            <input type="radio" name="payment_method" value="cod" id="cod" class="payment-radio" checked required>
+                            <label for="cod">Cash on Delivery</label>
+                        </div>
+                        
+                        <!-- PayPal Option -->
+                        <div class="payment-option">
+                            <div class="payment-icon">💳</div>
+                            <input type="radio" name="payment_method" value="paypal" id="paypal" class="payment-radio" required>
+                            <label for="paypal">Pay with PayPal</label>
+                        </div>
+                    {% else %}
+                        <!-- PayPal Option for orders over 1000 -->
+                        <div class="payment-option">
+                            <div class="payment-icon">💳</div>
+                            <input type="radio" name="payment_method" value="paypal" id="paypal" class="payment-radio"  required>
+                            <label for="paypal">Pay with PayPal</label>
+                        </div>
+                        
+                        <!-- Disabled COD Option with message -->
+                        <div class="payment-option disabled">
+                            <div class="payment-icon">💵</div>
+                            <label class="text-muted">Cash on Delivery not available above 1000</label>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="payment-option">
+                    {% if paypal %}
+                        <form method="post" action="{% url 'paypal-ipn' %}">
+                            {{ paypal.render }}
+                        </form>
+                    {% endif %}
+                </div>
+                
                 <!-- Place Order Button -->
                 <div class="place-order-btn">
-                  <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-check-circle"></i> Place Order
-                  </button>
+                    <button type="submit" class="w-100 btn btn-primary btn-lg" value="{{ cart_item.Product.id }}">
+                        <i class="fas fa-check-circle"></i> Place Order
+                    </button>
                 </div>
-              </div>
+            </div>
             </div>
           </div>
         </form>

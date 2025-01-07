@@ -31,6 +31,7 @@ urlpatterns = [
     path('wishlist_app/',include('wishlist_app.urls')),
     path('payment/',include('payment.urls')),
     path('wallet/',include('wallet_app.urls')),
+    path('paypal/', include('paypal.standard.ipn.urls')),
   
 
 ]

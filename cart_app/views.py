@@ -13,14 +13,15 @@ from django.http import JsonResponse
 from django.db.models import F
 from decimal import Decimal
 from django.db.models import Sum
-from django.db import transaction
-import razorpay
-import json 
+from django.db import transaction 
 from django.conf import settings
 from django.utils import timezone
-
-
-
+import paypalrestsdk 
+from wallet_app.models import Wallet, Transaction
+from paypal.standard.forms import PayPalPaymentsForm
+from django.conf import settings
+import uuid
+from django.urls import reverse
 
 
 def calculate_cart_total(cart):
@@ -203,14 +204,12 @@ def cart_view(request):
 
 
 
-
 @login_required
 def checkout_view(request):
     cart = get_object_or_404(Cart, user=request.user)
     cart_items = CartItem.objects.filter(cart=cart).select_related('product', 'variant')
-    wallet,created=Wallet.objects.get_or_create(user=request.user)
-
-
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
+    host = request.get_host()
     if not cart_items:
         messages.warning(request, "Your cart is empty!")
         return redirect('cart_app:cart')
@@ -225,6 +224,7 @@ def checkout_view(request):
     packaging_charge = cart.packaging_charge
     tax = cart.tax
     grand_total = max(cart_subtotal - discount + delivery_charge + packaging_charge + tax, 0)
+    print(grand_total)
     cart.total = grand_total
     cart.save()
 
@@ -243,6 +243,7 @@ def checkout_view(request):
 
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
+        print(payment_method)
 
         try:
             with transaction.atomic():
@@ -265,52 +266,69 @@ def checkout_view(request):
                     item.variant.stock = F('stock') - item.quantity
                     item.variant.save()
 
-                 # Handle different payment methods
                 if payment_method == 'cod':
-                    # Process COD order
                     cart_items.delete()
                     cart.total = 0
                     cart.save()
+                    # order.payment_status = 'Completed'
+                    order.order_status = 'Processing'
+                    order.save()
                     messages.success(request, "Order placed successfully with Cash on Delivery!")
                     return redirect('cart_app:order_confirmation', order_id=order.id)
 
-                elif payment_method == 'razorpay':
-                    # Create Razorpay order
-                    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-                    razorpay_order = client.order.create({
-                        'amount': int(grand_total * 100),
-                        'currency': 'INR',
-                        'receipt': str(order.id),
-                        'payment_capture': 1
-                    })
-                    
-                    # Save Razorpay order ID
-                    order.razorpay_order_id = razorpay_order['id']
-                    order.save()
+                elif payment_method == 'paypal':
+                        print("ghdh")
+                        paypal_checkout = {
+                            'business': settings.PAYPAL_RECEIVER_EMAIL,
+                            'amount': grand_total,
+                            'item_name': f'Order-{uuid.uuid4()}',
+                            'invoice': uuid.uuid4(),
+                            'currency_code': 'INR',
+                            'notify_url': f"http://{host}{reverse('paypal-ipn')}",
+                            'return_url': f"http://{host}{reverse('payment-success')}?order_id={order.id}",
+                            'cancel_url': f"http://{host}{reverse('payment-failed')}",
+                        }
 
-                    # Redirect to payment page
-                    context = {
-                        'order': order,
-                        'razorpay_order_id': razorpay_order['id'],
-                        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
-                        'grand_total': grand_total,
-                        'user_mobile': user_mobile
-                    }
-                    return render(request, 'user_side/payment/payment.html', context)
+                        paypal_payment = PayPalPaymentsForm(initial=paypal_checkout)
+
+                        context.update({'paypal': paypal_payment})
+
+                        return render(request, 'user_side/payment/payment.html', context)
+                                        # else:
+                       
+                elif payment_method == 'wallet':
+                    # Handle wallet payment
+                    if wallet.balance >= grand_total:
+                        wallet.balance -= grand_total
+                        wallet.save()
+
+                        # Create a transaction record for the wallet payment
+                        Transaction.objects.create(
+                            wallet=wallet,
+                            amount=-grand_total,  # Negative because it's a debit from the wallet
+                            balance_after_transaction=wallet.balance,
+                            transaction_type="Debit",
+                            description=f"Order #{order.id} payment"
+                        )
+
+                        # Process the order
+                        cart_items.delete()
+                        cart.total = 0
+                        cart.save()
+                        order.payment_status = 'Completed'
+                        order.order_status = 'Processing'
+                        order.save()
+                        
+                        messages.success(request, "Order placed successfully using your wallet!")
+                        return redirect('cart_app:order_confirmation', order_id=order.id)
+
+                else:
+                    messages.error(request, "Invalid payment method selected.")
+                    return redirect('cart_app:checkout')
 
         except Exception as e:
             messages.error(request, f"Error processing order: {str(e)}")
             return redirect('cart_app:checkout')
-
-        #             except razorpay.errors.BadRequestError as e:
-        #                 messages.error(request, f"Error creating Razorpay order: {str(e)}")
-        #             except Exception as e:
-        #                 messages.error(request, f"Unexpected error creating Razorpay order: {str(e)}")
-                    
-        #                 render(request, 'user_side/payment/payment.html', context)
-        # except Exception as e:
-        #     messages.error(request, f"Error processing order: {str(e)}")
-        #     return redirect('cart_app:checkout')
 
     context = {
         'cart_items': cart_items,
@@ -328,73 +346,28 @@ def checkout_view(request):
 
     return render(request, 'user_side/shop/checkout.html', context)
 
-@csrf_exempt
-def verify_payment(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            
-            params_dict = {
-                'razorpay_payment_id': data.get('razorpay_payment_id'),
-                'razorpay_order_id': data.get('razorpay_order_id'),
-                'razorpay_signature': data.get('razorpay_signature')
-            }
-            
-            # Initialize Razorpay client
-            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-            
-            # Verify signature
-            client.utility.verify_payment_signature(params_dict)
-            
-            # Get the order and update it
-            order = Order.objects.get(razorpay_order_id=params_dict['razorpay_order_id'])
-            order.order_status = 'PAID'
-            order.is_paid = True
-            order.save()
-            
-            # Clear cart
-            cart = Cart.objects.get(user=order.user)
-            CartItem.objects.filter(cart=cart).delete()
-            cart.total = 0
-            cart.save()
-            
-            return JsonResponse({'success': True})
-            
-        except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
-        except razorpay.errors.SignatureVerificationError:
-            return JsonResponse({'success': False, 'error': 'Invalid payment signature'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-    
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+@login_required
 def payment_success(request):
-    return render(request, 'user_side/payment/payment_success.html')
+    order_id = request.GET.get('order_id')
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order.payment_status = 'Completed'
+    order.order_status = 'Processing'
+    order.save()
+
+    messages.success(request, "Payment successful! Your order is being processed.")
+    return redirect('cart_app:order_confirmation', order_id=order.id)
 
 
-# def order_payment(request):
-#     if request.method == "POST":
-#         name = request.POST.get("name")
-#         amount = request.POST.get("amount")
-#         client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-#         razorpay_order = client.order.create(
-#             {"amount": int(amount) * 100, "currency": "INR", "payment_capture": "1"}
-#         )
-#         order = Order.objects.create(
-#             name=name, amount=amount, provider_order_id=payment_order["id"]
-#         )
-#         order.save()
-#         return render(
-#             request,
-#             "payment.html",
-#             {
-#                 "callback_url": "http://" + "127.0.0.1:8000" + "/razorpay/callback/",
-#                 "razorpay_key": RAZORPAY_KEY_ID,
-#                 "order": order,
-#             },
-#         )
-#     return render(request, "cart_app: payment.html")
+
+@login_required
+def payment_failed(request):
+    messages.error(request, "Payment failed. Please try again.")
+    return redirect('cart_app:checkout')
+
+
+
+
 
 
 def get_primary_mobile_number(user):
@@ -431,102 +404,6 @@ def order_confirmation(request, order_id):
 
     return render(request, 'user_side/order/order_confirm.html', context)
 
-# @login_required
-# def verify_payment(request):
-#     if request.method == "POST":
-#         data = json.loads(request.body)
-#         razorpay_payment_id = data.get('razorpay_payment_id')
-#         razorpay_order_id = data.get('razorpay_order_id')
-#         razorpay_signature = data.get('razorpay_signature')
-
-#         client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-
-#         try:
-#             client.utility.verify_payment_signature({
-#                 'razorpay_order_id': razorpay_order_id,
-#                 'razorpay_payment_id': razorpay_payment_id,
-#                 'razorpay_signature': razorpay_signature,
-#             })
-
-#             # Update order status to 'PAID'
-#             order = Order.objects.get(razorpay_order_id=razorpay_order_id)
-#             order.order_status = 'PAID'
-#             order.save()
-
-#             return JsonResponse({'success': True})
-#         except razorpay.errors.SignatureVerificationError:
-#             return JsonResponse({'success': False})
-
-
-# @login_required
-# @csrf_exempt
-# @require_POST
-# def verify_payment(request):
-#     try:
-#         data = json.loads(request.body)
-#         razorpay_payment_id = data.get('razorpay_payment_id')
-#         razorpay_order_id = data.get('razorpay_order_id')
-#         razorpay_signature = data.get('razorpay_signature')
-
-#         # Validate input
-#         if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature]):
-#             return JsonResponse({'success': False, 'error': 'Missing payment details'}, status=400)
-
-#         client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-
-#         # Verify the Razorpay payment signature
-#         try:
-#             client.utility.verify_payment_signature({
-#                 'razorpay_order_id': razorpay_order_id,
-#                 'razorpay_payment_id': razorpay_payment_id,
-#                 'razorpay_signature': razorpay_signature,
-#             })
-#         except Exception as signature_error:
-#             return JsonResponse({
-#                 'success': False, 
-#                 'error': f'Signature verification failed: {str(signature_error)}'
-#             }, status=400)
-
-#         # Find the order (ensure it belongs to the current user)
-#         order = get_object_or_404(Order, 
-#                                   razorpay_order_id=razorpay_order_id, 
-#                                   user=request.user)
-
-#         # Update order status
-#         order.order_status = 'PAID'
-#         order.is_paid = True
-#         order.save()
-
-#         # Clear the cart
-#         try:
-#             cart = Cart.objects.get(user=request.user)
-#             CartItem.objects.filter(cart=cart).delete()
-#             cart.total = 0
-#             cart.save()
-#         except Cart.DoesNotExist:
-#             # Log this or handle as needed
-#             pass
-
-#         return JsonResponse({
-#             'success': True, 
-#             'message': 'Payment verified and order placed successfully',
-#             'order_id': order.id
-#         })
-
-#     except json.JSONDecodeError:
-#         return JsonResponse({
-#             'success': False, 
-#             'error': 'Invalid JSON'
-#         }, status=400)
-#     except Exception as e:
-#         # Log the full error for debugging
-#         print(f"Unexpected error in verify_payment: {str(e)}")
-#         return JsonResponse({
-#             'success': False, 
-#             'error': 'An unexpected error occurred'
-#         }, status=500)
-
-
 
 @never_cache
 def apply_coupon(request):
@@ -548,3 +425,24 @@ def remove_coupon(request):
     cart.coupon = None
     cart.save()
     return redirect('cart_app:cart')  
+
+@login_required
+def paypal_return(request):
+    payment_id = request.GET.get('paymentId')
+    payer_id = request.GET.get('PayerID')
+    payment = paypalrestsdk.Payment.find(payment_id)
+    if payment.execute({"payer_id": payer_id}):
+        # Payment successful, mark the order as paid
+        order = Order.objects.get(id=request.session.get('order_id'))
+        order.status = 'Paid'
+        order.save()
+        messages.success(request, "Payment successful via PayPal!")
+        return redirect('cart_app:order_confirmation', order_id=order.id)
+    else:
+        messages.error(request, "Payment failed.")
+        return redirect('cart_app:checkout')
+
+@login_required
+def paypal_cancel(request):
+    messages.warning(request, "Payment was cancelled.")
+    return redirect('cart_app:checkout')

@@ -610,30 +610,68 @@ def coupon_delete(request, pk):
     return render(request, 'admin/coupon_management/delete_coupon.html', {'coupon': coupon})
 
 
+# def sales_report(request):
+#     # Filter parameters
+#     report_type = request.GET.get('report_type')  # daily, weekly, yearly, custom
+#     start_date = request.GET.get('start_date')
+#     end_date = request.GET.get('end_date')
+
+#     # Default query
+#     orders = Order.objects.filter(order_status='DELIVERED')  # Replace 'status' with your order status field
+
+#     # Apply filters based on report type
+#     if report_type == 'daily':
+#         orders = orders.filter(created_at__date=now().date())
+#     elif report_type == 'weekly':
+#         start_week = now().date() - timedelta(days=7)
+#         orders = orders.filter(created_at__date__gte=start_week)
+#     elif report_type == 'yearly':
+#         orders = orders.filter(created_at__year=now().year)
+#     elif report_type == 'custom' and start_date and end_date:
+#         orders = orders.filter(created_at__date__range=[start_date, end_date])
+
+#     # Aggregate sales data
+#     sales_data = orders.annotate(
+#         total_amount=Sum(F('orderitem__quantity') * F('orderitem__price')),  # Replace fields as needed
+#         total_quantity=Sum('orderitem__quantity')
+#     ).values('id', 'total_amount', 'total_quantity', 'created_at')
+
+#     return render(request, 'admin/report/sales_report.html', {'sales_data': sales_data})
+
+
 def sales_report(request):
-    # Filter parameters
-    report_type = request.GET.get('report_type')  # daily, weekly, yearly, custom
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+    # Get filter parameters from request
+    filter_type = request.GET.get('filter', 'daily')  # Default is 'daily'
+    start_date = request.GET.get('start_date')  # Custom start date
+    end_date = request.GET.get('end_date')      # Custom end date
 
-    # Default query
-    orders = Order.objects.filter(ORDER_STATUS_CHOICES='DELIVERED')  # Replace 'status' with your order status field
+    # Base query for delivered orders
+    orders = Order.objects.filter(order_status='DELIVERED')
 
-    # Apply filters based on report type
-    if report_type == 'daily':
+    # Apply date filters
+    if filter_type == 'daily':
         orders = orders.filter(created_at__date=now().date())
-    elif report_type == 'weekly':
-        start_week = now().date() - timedelta(days=7)
-        orders = orders.filter(created_at__date__gte=start_week)
-    elif report_type == 'yearly':
+    elif filter_type == 'weekly':
+        start_of_week = now().date() - timedelta(days=now().weekday())  # Start of the week (Monday)
+        orders = orders.filter(created_at__date__gte=start_of_week)
+    elif filter_type == 'yearly':
         orders = orders.filter(created_at__year=now().year)
-    elif report_type == 'custom' and start_date and end_date:
+    elif filter_type == 'custom' and start_date and end_date:
         orders = orders.filter(created_at__date__range=[start_date, end_date])
 
     # Aggregate sales data
     sales_data = orders.annotate(
-        total_amount=Sum(F('orderitem__quantity') * F('orderitem__price')),  # Replace fields as needed
+        calculated_total_amount=Sum(F('orderitem__quantity') * F('orderitem__price')),
         total_quantity=Sum('orderitem__quantity')
-    ).values('id', 'total_amount', 'total_quantity', 'created_at')
+    
+    ).values('id', 'calculated_total_amount', 'total_quantity', 'created_at')
 
-    return render(request, 'admin/report/sales_report.html', {'sales_data': sales_data})
+    print(sales_data,"ddd")
+
+    # Pass the data to the template
+    return render(request, 'admin/reports/sales_report.html', {
+        'sales_data': sales_data,
+        'filter_type': filter_type,
+        'start_date': start_date,
+        'end_date': end_date,
+    })

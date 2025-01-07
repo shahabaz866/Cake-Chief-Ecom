@@ -6,26 +6,24 @@
 <body>
   <h1>Sales Report</h1>
 
-  <!-- Filter Form -->
   <form method="GET" action="">
-    <label for="report_type">Report Type:</label>
-    <select name="report_type" id="report_type">
-      <option value="daily">Daily</option>
-      <option value="weekly">Weekly</option>
-      <option value="yearly">Yearly</option>
-      <option value="custom">Custom</option>
+    <label for="filter">Filter:</label>
+    <select name="filter" id="filter" onchange="this.form.submit()">
+      <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
+      <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
+      <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
+      <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom</option>
     </select>
-
-    <label for="start_date">Start Date:</label>
-    <input type="date" name="start_date" id="start_date">
-
-    <label for="end_date">End Date:</label>
-    <input type="date" name="end_date" id="end_date">
-
-    <button type="submit">Generate Report</button>
+  
+    <label for="start_date">From:</label>
+    <input type="date" name="start_date" id="start_date" value="{{ start_date }}">
+  
+    <label for="end_date">To:</label>
+    <input type="date" name="end_date" id="end_date" value="{{ end_date }}">
+  
+    <button type="submit">Apply</button>
   </form>
-
-  <!-- Sales Report Table -->
+  
   <table border="1">
     <thead>
       <tr>
@@ -39,12 +37,13 @@
       {% for order in sales_data %}
         <tr>
           <td>{{ order.id }}</td>
-          <td>{{ order.total_amount }}</td>
+          <td>{{ order.calculated_total_amount }}</td>
           <td>{{ order.total_quantity }}</td>
           <td>{{ order.created_at }}</td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+    
 </body>
 </html>

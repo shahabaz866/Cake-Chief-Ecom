@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
+    'paypal.standard.ipn',
     'home',
     'dashboard',
     'order_app',
@@ -118,6 +119,8 @@ RAZORPAY_KEY_SECRET = 'cU2FoFBggCQl0724Y1DJaFNr'
 PAYPAL_CLIENT_ID = 'ARuGZDAxMltyG-esdCOQ9-CP47h3iHk8FfZ4LlJqrjNUdFXVAayNFSXI_jLJZ3RgBKmfhg35DQML01hH'
 PAYPAL_CLIENT_SECRET = 'EHHBjjqQ0DBw_SljpWaN09YpXyilus-TqiK4tA2VYRW14qoxZ8us0PSU4IKNygwIt_CP1FzVuMr8hVTC'
 PAYPAL_MODE = 'sandbox'
+PAYPAL_RECEIVER_EMAIL='sb-j3b3x34162930@business.example.com'
+PAYPAL_TEST= True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -143,7 +146,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
+
 
 USE_I18N = True
 

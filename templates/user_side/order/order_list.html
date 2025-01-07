@@ -1,11 +1,15 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'admin_assets\img\Starlogo.png' %}">
     <title>My Orders</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+
     <style>
         :root {
             --primary-color: #D33C3C;
@@ -91,7 +95,7 @@
                 <span class="breadcrumb-divider">/</span>
             </div>
             <div class="breadcrumb-item">
-                <a href="#" class="hover:underline">
+                <a href="{% url "home" %}" class="hover:underline">
                     <i class="bi bi-grid-fill mr-1"></i>
                     My Account
                 </a>

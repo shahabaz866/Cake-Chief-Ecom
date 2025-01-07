@@ -1,106 +1,142 @@
-
 {% extends 'user_side/base.html' %}
 {% block content %}
+{% load static %}
+<link rel="icon" href="{% static 'admin_assets\img\Starlogo.png' %}">
 
 <style>
-    .wallet-container {
-        max-width: 800px;
+    /* Container Styles */
+    .main-container {
+        max-width: 1200px;
         margin: 40px auto;
         padding: 0 20px;
     }
+
+    /* Wallet Card Styles */
     .wallet-card {
         background: white;
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin-bottom: 40px;
         text-align: center;
+        transition: transform 0.3s ease;
     }
+
+    .wallet-card:hover {
+        transform: translateY(-5px);
+    }
+
     .wallet-title {
         color: #1a237e;
-        font-size: 24px;
-        font-weight: 600;
+        font-size: 28px;
+        font-weight: 700;
         margin-bottom: 30px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
     }
+
     .balance {
         background: linear-gradient(135deg, #1a237e, #3949ab);
         color: white;
-        padding: 20px;
-        border-radius: 12px;
+        padding: 25px;
+        border-radius: 15px;
         display: inline-block;
-        min-width: 200px;
+        min-width: 250px;
         margin: 20px 0 30px;
+        box-shadow: 0 8px 20px rgba(26, 35, 126, 0.2);
     }
+
     .balance-label {
-        font-size: 0.9em;
-        opacity: 0.9;
-        margin-bottom: 5px;
-    }
-    .balance-amount {
-        font-size: 2.8em;
-        font-weight: 600;
-    }
-    .currency {
-        font-size: 0.6em;
-        margin-right: 4px;
-        opacity: 0.9;
-    }
-    .amount-input {
-        width: 100%;
-        max-width: 300px;
-        padding: 15px;
-        margin: 15px auto;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
         font-size: 1.1em;
-        text-align: center;
-        transition: border-color 0.3s;
+        opacity: 0.9;
+        margin-bottom: 10px;
+        font-weight: 500;
     }
-    .amount-input:focus {
-        border-color: #3949ab;
-        outline: none;
+
+    .balance-amount {
+        font-size: 3.2em;
+        font-weight: 700;
+        line-height: 1.2;
     }
-    .actions {
-        display: flex;
-        gap: 20px;
-        justify-content: center;
-        margin-top: 30px;
+
+    .currency {
+        font-size: 0.5em;
+        margin-right: 5px;
+        opacity: 0.9;
+        vertical-align: super;
     }
-    .btn {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1em;
+
+    /* Transactions Table Styles */
+    .transactions-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .transactions-title {
+        color: #1a237e;
+        font-size: 24px;
         font-weight: 600;
-        transition: all 0.3s;
-        min-width: 140px;
+        margin-bottom: 25px;
+        padding-left: 10px;
     }
-    .btn-add {
-        background: #00c853;
-        color: white;
+
+    .transactions-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
     }
-    .btn-deduct {
-        background: #ff1744;
-        color: white;
+
+    .transactions-table th {
+        background: #f5f6fa;
+        color: #1a237e;
+        font-weight: 600;
+        padding: 15px;
+        text-align: left;
+        border-bottom: 2px solid #e0e0e0;
     }
-    .btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+    .transactions-table td {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        color: #424242;
     }
-    .btn:active {
-        transform: translateY(-1px);
+
+    .transactions-table tr:hover {
+        background-color: #f8f9ff;
     }
-    .error {
-        color: #ff1744;
-        margin-top: 12px;
+
+    .transaction-type {
+        padding: 6px 12px;
+        border-radius: 20px;
         font-size: 0.9em;
         font-weight: 500;
     }
+
+    .type-credit {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .type-debit {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .amount {
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #9e9e9e;
+        font-style: italic;
+    }
 </style>
 
-<div class="wallet-container">
+<div class="main-container">
     <div class="wallet-card">
         <h2 class="wallet-title">Wallet Balance</h2>
         <div class="balance">
@@ -110,15 +146,40 @@
                 <span id="balance">{{ wallet.balance }}</span>
             </div>
         </div>
+    </div>
 
-        <form method="POST" class="actions">
-            {% csrf_token %}
-            <input type="number" name="amount" class="amount-input" placeholder="Enter amount" required>
-            <br>
-            <button type="submit" name="action" value="add" class="btn btn-add">Add Funds</button>
-            <button type="submit" name="action" value="deduct" class="btn btn-deduct">Deduct Funds</button>
-        </form>
+    <div class="transactions-section">
+        <h2 class="transactions-title">Transaction History</h2>
+        <table class="transactions-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <span class="transaction-type {% if transaction.transaction_type == 'credit' %}type-credit{% else %}type-debit{% endif %}">
+                                {{ transaction.transaction_type|title }}
+                            </span>
+                        </td>
+                        <td class="amount">₹{{ transaction.amount }}</td>
+                        <td>{{ transaction.description|default:"N/A" }}</td>
+                        <td>{{ transaction.timestamp }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">No transactions found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
-
 {% endblock %}

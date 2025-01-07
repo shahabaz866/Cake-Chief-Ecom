@@ -1,136 +1,95 @@
-{# payment.html #}
 <!DOCTYPE html>
 <html lang="en">
-{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment - Cake Chief</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <title>Secure Payment</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Complete Your Payment</h1>
-            <p class="text-gray-600 mt-2">Order #{{ order.id }}</p>
-        </div>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3">
+                        <h4 class="mb-0 text-center">Secure Payment</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Order Summary -->
+                        <div class="border-bottom pb-3 mb-4">
+                            <h5 class="mb-3">Order Summary</h5>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal</span>
+                                <span>${{ total_price }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Shipping Total</span>
+                                <span>${{ shipping_price }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Tax</span>
+                                <span>${{ tax }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Total</span>
+                                <span>${{ grand_total }}</span>
+                            </div>
+                        </div>
 
-        <div class="bg-blue-50 p-4 rounded-lg mb-6">
-            <div class="flex justify-between mb-2">
-                <span class="text-gray-700">Total Amount:</span>
-                <span class="font-bold text-blue-700">₹{{ grand_total|floatformat:2 }}</span>
+                        <!-- Payment Options -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">Payment Method</h5>
+                            <div class="bg-light p-3 rounded">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fab fa-paypal text-primary me-2 fs-4"></i>
+                                    <span class="fw-semibold">PayPal</span>
+                                </div>
+                                <!-- PayPal Button Container -->
+                                <div id="paypal-button-container" class="d-flex justify-content-center">
+                                    {{ paypal.render }}
+                                </div>
+                                <a href="{% url 'checkout' %}" class="btn btn-secondary mt-3">Cancel</a>
+                            </div>
+                        </div>
+
+                        <!-- Security Notice -->
+                        <div class="text-center text-muted">
+                            <small>
+                                <i class="fas fa-lock me-1"></i>
+                                Your payment information is encrypted and secure
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="mt-4">
+                    <div class="row g-3 text-center">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="fas fa-shield-alt text-primary me-2"></i>
+                                <small>Secure Payment</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="fas fa-undo text-primary me-2"></i>
+                                <small>30-Day Returns</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="fas fa-headset text-primary me-2"></i>
+                                <small>24/7 Support</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="flex justify-between">
-                <span class="text-gray-700">Payment Method:</span>
-                <span class="font-semibold">Razorpay</span>
-            </div>
-        </div>
-
-        <div class="space-y-4">
-            <button id="rzp-button" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300">
-                Pay Now
-            </button>
-            <button id="cancel-payment" class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition duration-300">
-                Cancel Payment
-            </button>
-        </div>
-
-        <div id="payment-status" class="mt-4 text-center hidden">
-            <p id="status-message" class="text-gray-700"></p>
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const rzpButton = document.getElementById('rzp-button');
-        const cancelButton = document.getElementById('cancel-payment');
-        const paymentStatus = document.getElementById('payment-status');
-        const statusMessage = document.getElementById('status-message');
-
-        function showError(message) {
-            statusMessage.textContent = message;
-            statusMessage.classList.add('text-red-600');
-            paymentStatus.classList.remove('hidden');
-        }
-
-        function showSuccess(message) {
-            statusMessage.textContent = message;
-            statusMessage.classList.add('text-green-600');
-            paymentStatus.classList.remove('hidden');
-        }
-
-        var options = {
-            key: "{{ razorpay_key_id }}",
-            amount: {{ grand_total|multiply:100 }},
-            currency: "INR",
-            name: "Cake Chief",
-            description: "Order #{{ order.id }}",
-            order_id: "{{ razorpay_order_id }}",
-            handler: function (response) {
-                showSuccess('Verifying payment...');
-                
-                fetch("{% url 'cart_app:verify_payment' %}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}",
-                    },
-                    body: JSON.stringify({
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_signature: response.razorpay_signature
-                    }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showSuccess('Payment successful! Redirecting...');
-                        setTimeout(() => {
-                            window.location.href = "{% url 'cart_app:payment_success' %}";
-                        }, 1500);
-                    } else {
-                        throw new Error(data.error || 'Payment verification failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showError(error.message);
-                });
-            },
-            "prefill": {
-                "name": "{{ request.user.get_full_name }}",
-                "email": "{{ request.user.email }}",
-                "contact": "{{ user_mobile }}"
-            },
-            "theme": {
-                "color": "#3399cc"
-            },
-            "modal": {
-                "ondismiss": function() {
-                    paymentStatus.classList.add('hidden');
-                }
-            }
-        };
-
-        // Initialize Razorpay
-        var rzp = new Razorpay(options);
-
-        // Add click handlers
-        rzpButton.onclick = function(e) {
-            e.preventDefault();
-            try {
-                rzp.open();
-            } catch (error) {
-                console.error('Razorpay error:', error);
-                showError('Error initializing payment');
-            }
-        };
-
-        cancelButton.onclick = function() {
-            window.location.href = "{% url 'cart_app:cart' %}";
-        };
-    });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

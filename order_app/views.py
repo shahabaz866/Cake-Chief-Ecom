@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from django.contrib.auth.decorators import login_required
 from .models import Order,OrderItem
-from cart_app.models import Cart, CartItem
+# from cart_app.models import Cart, CartItem
 from  user_app.models import Address,UserContact
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -9,6 +9,7 @@ from django.db.models import Q
 from user_app.models import Address, UserContact
 from django.views.decorators.csrf import csrf_exempt
 from .constants import PaymentStatus
+from wallet_app.models import Wallet, Transaction
 
 
 
@@ -67,33 +68,43 @@ def order_view(request, order_id):
 
 
 
-
 @login_required
 def cancel_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
     if request.method == 'POST':
         if order.order_status in ['PROCESSING', 'SHIPPED']:
-           
             order.order_status = 'CANCELLED'
 
-           
             for order_item in order.orderitem_set.all():
                 product = order_item.product
-                product.stock += order_item.quantity  
-                product.save() 
+                product.stock += order_item.quantity
+                product.save()
 
-            order.save() 
-            messages.success(request, f'Order #{order_id} has been cancelled and stock has been restored.')
+            wallet, created = Wallet.objects.get_or_create(user=request.user)
+            wallet.balance += order.total_amount 
+            wallet.save()
+
+            Transaction.objects.create(
+                wallet=wallet,
+                amount=order.total_amount,
+                transaction_type='CREDIT'
+            )
+
+            order.save()
+
+            messages.success(
+                request, f'Order #{order_id} has been cancelled, stock restored, and amount refunded to wallet.'
+            )
         else:
             messages.error(request, 'This order cannot be cancelled.')
+
         return redirect('order_app:order_list')
 
     context = {
         'order_id': order_id,
-        'order': order  
+        'order': order
     }
-
     return render(request, 'user_side/order/cancel_confirmation.html', context)
 
     
@@ -110,12 +121,10 @@ def update_order_status(request):
             order.order_status = new_order_status
             messages.success(request, f"Order status updated to {new_order_status}")
 
-        # Update payment status
         if new_payment_status and new_payment_status != order.payment_status:
             order.payment_status = new_payment_status
             messages.success(request, f"Payment status updated to {new_payment_status}")
 
-        # Save changes
         order.save()
 
     return redirect('order_app:order_management')
