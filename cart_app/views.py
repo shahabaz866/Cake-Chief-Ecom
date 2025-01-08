@@ -294,18 +294,15 @@ def checkout_view(request):
                         context.update({'paypal': paypal_payment})
 
                         return render(request, 'user_side/payment/payment.html', context)
-                                        # else:
                        
                 elif payment_method == 'wallet':
-                    # Handle wallet payment
                     if wallet.balance >= grand_total:
                         wallet.balance -= grand_total
                         wallet.save()
 
-                        # Create a transaction record for the wallet payment
                         Transaction.objects.create(
                             wallet=wallet,
-                            amount=-grand_total,  # Negative because it's a debit from the wallet
+                            amount=-grand_total,  
                             balance_after_transaction=wallet.balance,
                             transaction_type="Debit",
                             description=f"Order #{order.id} payment"
@@ -321,9 +318,12 @@ def checkout_view(request):
                         
                         messages.success(request, "Order placed successfully using your wallet!")
                         return redirect('cart_app:order_confirmation', order_id=order.id)
+                elif wallet.balance < grand_total:
+                    messages.error(request, "there is no balance in wallet please choose another payment.")
+                    return redirect('cart_app:checkout')
 
                 else:
-                    messages.error(request, "Invalid payment method selected.")
+                    messages.error(request, "there is no ballence in wallet please choose another payment.")
                     return redirect('cart_app:checkout')
 
         except Exception as e:

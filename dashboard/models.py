@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg
 
 class Category(models.Model):
 
@@ -82,6 +83,16 @@ class Product(models.Model):
 
     def total_reviews(self):
         return self.reviews.count()
+    def average_rating(self):
+        avg = self.reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg, 1) if avg else 0
+
+    def total_reviews(self):
+        return self.reviews.count()
+
+    def rating_distribution(self):
+        distribution = {i: self.reviews.filter(rating=i).count() for i in range(1, 6)}
+        return distribution
 
 
 class ProductImages(models.Model):
@@ -132,6 +143,7 @@ class Review_prdct(models.Model):
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     helpful_votes = models.IntegerField(default=0)
+    images = models.ImageField(upload_to='review_images/', blank=True, null=True)
     
     class Meta:
         unique_together = ('product', 'user')
@@ -139,3 +151,11 @@ class Review_prdct(models.Model):
         
     def __str__(self):
         return f"{self.user.username}'s review for {self.product.title}"
+
+class ReviewHelpful(models.Model):
+    review = models.ForeignKey(Review_prdct, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('review', 'user')

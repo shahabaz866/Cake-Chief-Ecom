@@ -3,6 +3,7 @@
 {% load static %} 
 {% load temp_tags %}
 {% block extra_css %}
+{% load custom_filters %}
 <style>
   .product-section {
     padding: 4rem 0;
@@ -430,6 +431,32 @@
         font-size: 16px;  /* Better readability on mobile */
     }
 }
+
+  .rating-input {
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 0.5rem;
+  }
+  
+  .rating-input input {
+      display: none;
+  }
+  
+  .rating-input label {
+      cursor: pointer;
+      color: #ddd;
+      font-size: 1.5rem;
+  }
+  
+  .rating-input input:checked ~ label {
+      color: #fbbf24;
+  }
+  
+  .rating-input label:hover,
+  .rating-input label:hover ~ label {
+      color: #fbbf24;
+  }
+ 
 </style>
 {% endblock %}
 <div class="bg-light py-3">
@@ -680,10 +707,151 @@
           </div>
         </form>
 
-         
+      
         </div>
       </div>
     </div>
+    <div class="reviews-section mt-8">
+      <!-- Rating Summary -->
+      <div class="rating-summary bg-gray-50 p-6 rounded-lg mb-6">
+          <div class="flex items-start">
+              <!-- Average Rating -->
+              <div class="text-center mr-8">
+                  <div class="text-4xl font-bold">{{ product.average_rating }}</div>
+                  <div class="text-yellow-400 text-2xl">
+                      {% for i in "12345" %}
+                          {% if forloop.counter <= product.average_rating %}
+                              ★
+                          {% else %}
+                              ☆
+                          {% endif %}
+                      {% endfor %}
+                  </div>
+                  <div class="text-sm text-gray-600">{{ total_reviews }} reviews</div>
+              </div>
+              
+              <!-- Rating Distribution -->
+              {% comment %} <div class="flex-grow">
+                  {% comment %} {% for rating in "54321" %}
+                      <div class="flex items-center mb-1">
+                          <span class="w-12 text-sm">{{ rating }} stars</span>
+                          <div class="flex-grow mx-2 h-4 bg-gray-200 rounded">
+                              {% with count=rating_distribution %}
+                              <div class="h-full bg-yellow-400 rounded" 
+                                   style="width: {% if total_reviews %}{{ total_reviews }}{% else %}0{% endif %}%">
+                              </div>
+                              {% endwith %}
+                          </div>
+                          <span class="w-12 text-sm text-right">{{ rating_distribution }}</span>
+                      </div>
+                  {% endfor %} {% endcomment %}
+              {% comment %} </div> {% endcomment %} 
+          </div>
+      </div>
+  
+      <!-- Review Form -->
+      {% if user.is_authenticated %}
+          <div class="review-form bg-white p-6 rounded-lg shadow-sm mb-6">
+              <h3 class="text-xl font-semibold mb-4">
+                  {% comment %} {% if user_review %}
+                      Edit Your Review
+                  {% else %}
+                      Write a Review
+                  {% endif %} {% endcomment %}
+              </h3>
+              <form method="post" action="{% url 'add_review' product.id %}" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  
+                  <!-- Rating Input -->
+                  <div class="mb-4">
+                      <label class="block text-gray-700 font-medium mb-2">Rating</label>
+                      <div class="flex space-x-4">
+                          {{ review_form.rating }}
+                      </div>
+                  </div>
+                  
+                  <!-- Comment Input -->
+                  <div class="mb-4">
+                      <label class="block text-gray-700 font-medium mb-2">Your Review</label>
+                      {{ review_form.comment }}
+                  </div>
+                  
+                  <!-- Image Upload -->
+                  <div class="mb-4">
+                      <label class="block text-gray-700 font-medium mb-2">Add Photos (optional)</label>
+                      {{ review_form.images }}
+                  </div>
+                  
+                  <div class="flex items-center">
+                      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                          {% if user_review %}
+                              Update Review
+                          {% else %}
+                              Submit Review
+                          {% endif %}
+                      </button>
+                      {% if user_review %}
+                          <a href="{% url 'delete_review' user_review.id %}" 
+                             class="ml-4 text-red-600 hover:text-red-700"
+                             onclick="return confirm('Are you sure you want to delete your review?')">
+                              Delete Review
+                          </a>
+                      {% endif %}
+                  </div>
+              </form>
+          </div>
+      {% endif %}
+  
+      <!-- Reviews List -->
+      <div class="reviews-list">
+          {% for review in reviews %}
+              <div class="review-item border-b border-gray-200 py-6 {% if not forloop.last %}mb-4{% endif %}">
+                  <div class="flex justify-between items-start mb-2">
+                      <div>
+                          <div class="font-semibold">{{ review.user.username }}</div>
+                          <div class="text-yellow-400">
+                              {% for i in "12345" %}
+                                  {% if forloop.counter <= review.rating %}
+                                      ★
+                                  {% else %}
+                                      ☆
+                                  {% endif %}
+                              {% endfor %}
+                          </div>
+                          <div class="text-sm text-gray-500">
+                              {{ review.created_at|date:"F d, Y" }}
+                          </div>
+                      </div>
+                      
+                      <!-- Helpful Button -->
+                      {% if user.is_authenticated and user != review.user %}
+                          <form method="post" action="{% url 'helpful_review' review.id %}">
+                              {% csrf_token %}
+                              <button type="submit" 
+                                      class="text-sm text-gray-600 hover:text-blue-600 flex items-center">
+                                  <span class="mr-1">Helpful</span>
+                                  <span class="bg-gray-100 px-2 py-1 rounded">
+                                      {{ review.helpful_votes }}
+                                  </span>
+                              </button>
+                          </form>
+                      {% endif %}
+                  </div>
+                  
+                  <p class="text-gray-700 mb-4">{{ review.comment }}</p>
+                  
+                  {% if review.images %}
+                      <div class="mt-2">
+                          <img src="{{ review.images.url }}" alt="Review image" 
+                               class="max-w-xs rounded-lg shadow-sm">
+                      </div>
+                  {% endif %}
+              </div>
+          {% empty %}
+              <p class="text-gray-600">No reviews yet. Be the first to review this product!</p>
+          {% endfor %}
+      </div>
+  </div>
   </div>
 </div>
 

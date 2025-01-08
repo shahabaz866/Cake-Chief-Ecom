@@ -287,6 +287,26 @@
         text-decoration: none;
         transition: all 0.3s ease;
       }
+      <style>
+        .toastify {
+          padding: 12px 20px;
+          color: white;
+          display: inline-block;
+          box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12);
+          background-color: #dc3545;
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          opacity: 0;
+          transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+          border-radius: 4px;
+          z-index: 2147483647;
+        }
+      
+        .toastify.on {
+          opacity: 1;
+        }
+      </style>
     </style>
   </head>
   <body>
@@ -300,7 +320,16 @@
         <strong>Checkout</strong>
       </div>
     </div>
-
+    {% if messages %}
+    <div>
+      {% for message in messages %}
+      <div class="toastify {{ message.tags }}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    
     <div class="container">
       <form method="POST" class="row" action="{% url 'cart_app:checkout' %}" id="checkout-form">
         {% csrf_token %}
@@ -433,67 +462,32 @@
                 </tbody>
               </table>
 
-              <div class="section-box">
-                <h3 class="payment-title mb-3">Payment Options</h3>
+              <h3 class="payment-title">Payment Options</h3>
+              <div class="payment-options">
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="cod" required> <i class="fas fa-money-bill-wave"></i>
+                    Cash on Delivery (COD)
+                </label>
                 
-                <!-- Wallet Balance Option -->
-                <div class="payment-options d-flex justify-content-between mb-3">
-                    <div class="payment-option">
-                        <input type="checkbox" id="use_wallet" name="wallet" value="{{ wallet.balance }}">
-                        <label for="use_wallet">
-                            <i class="fas fa-wallet"></i> Use Wallet Balance
-                        </label>
-                        <span class="wallet-balance">{{ wallet.balance }}</span>
-                    </div>
-                </div>
+                <label class="payment-option">
+                  <input type="radio" name="payment_method" value="wallet" required> <i class="fas fa-wallet"></i>Pay with Wallet
+              </label>
                 
-                <!-- Payment Method Options -->
-                <div class="payment-options d-flex justify-content-between mb-3">
-                    {% if grand_total < 1000 %}
-                        <!-- COD Option for orders under 1000 -->
-                        <div class="payment-option selected">
-                            <div class="payment-icon">💵</div>
-                            <input type="radio" name="payment_method" value="cod" id="cod" class="payment-radio" checked required>
-                            <label for="cod">Cash on Delivery</label>
-                        </div>
-                        
-                        <!-- PayPal Option -->
-                        <div class="payment-option">
-                            <div class="payment-icon">💳</div>
-                            <input type="radio" name="payment_method" value="paypal" id="paypal" class="payment-radio" required>
-                            <label for="paypal">Pay with PayPal</label>
-                        </div>
-                    {% else %}
-                        <!-- PayPal Option for orders over 1000 -->
-                        <div class="payment-option">
-                            <div class="payment-icon">💳</div>
-                            <input type="radio" name="payment_method" value="paypal" id="paypal" class="payment-radio"  required>
-                            <label for="paypal">Pay with PayPal</label>
-                        </div>
-                        
-                        <!-- Disabled COD Option with message -->
-                        <div class="payment-option disabled">
-                            <div class="payment-icon">💵</div>
-                            <label class="text-muted">Cash on Delivery not available above 1000</label>
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <div class="payment-option">
-                    {% if paypal %}
-                        <form method="post" action="{% url 'paypal-ipn' %}">
-                            {{ paypal.render }}
-                        </form>
-                    {% endif %}
-                </div>
-                
+                <label class="payment-option">
+                  <input type="radio" name="payment_method" value="paypal" required><i class="fab fa-paypal"></i> Paypal
+                  {{ paypal.render }}
+              </label>
+              
+              
+            
+  
                 <!-- Place Order Button -->
                 <div class="place-order-btn">
-                    <button type="submit" class="w-100 btn btn-primary btn-lg" value="{{ cart_item.Product.id }}">
-                        <i class="fas fa-check-circle"></i> Place Order
-                    </button>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-check-circle"></i> Place Order
+                  </button>
                 </div>
-            </div>
+              </div>
             </div>
           </div>
         </form>
@@ -565,5 +559,56 @@
         {% endfor %}
       {% endif %}
     </script>
+    <script>
+      function showToast(message, type) {
+        let backgroundColor = "#000";
+        switch(type) {
+          case 'success':
+          backgroundColor = "#0BDA51"; 
+          break;
+        case 'error':
+          backgroundColor = "#D33C3C";
+          break;
+        case 'warning':
+          backgroundColor = "#FFB347"; 
+          break;
+        case 'info':
+          backgroundColor = "#9B6A6C";
+          break;
+        }
+    
+        Toastify({
+          text: message,
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          style: {
+            background: backgroundColor,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            borderRadius: "8px",
+            fontWeight: "500",
+          },
+        }).showToast();
+      }
+    
+      // For Django messages
+      {% if messages %}
+        {% for message in messages %}
+          showToast("{{ message }}", "{{ message.tags }}");
+        {% endfor %}
+      {% endif %}
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const messages = document.querySelectorAll(".toastify");
+        messages.forEach((msg) => {
+          msg.classList.add("on");
+          setTimeout(() => {
+            msg.classList.remove("on");
+          }, 4000); // Auto-hide after 4 seconds
+        });
+      });
+    </script>
+    
   </body>
 </html>

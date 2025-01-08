@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'wishlist_app', 
     'payment',
     'wallet_app',
+     'tailwind',
  
 ]
 

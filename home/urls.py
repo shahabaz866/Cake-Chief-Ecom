@@ -21,6 +21,8 @@ urlpatterns =[
     path('delete-review/<int:review_id>/', views.delete_review, name='delete_review'),
     path('logout/',views.LogoutPage,name='logout'),
     path('signup/', views.SignupPage, name='SignupPage'),
-   
+    path('product/<int:product_id>/review/', views.add_review, name='add_review'),
+    path('review/<int:review_id>/delete/', views.delete_review, name='delete_review'),
+    path('review/<int:review_id>/helpful/', views.helpful_review, name='helpful_review'),
      
 ]

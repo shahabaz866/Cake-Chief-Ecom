@@ -22,7 +22,8 @@ from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
 from .models import Review, HelpfulVote
 from .forms import ReviewForm
-from dashboard.forms import ReviewForms
+from dashboard.forms import ReviewForm
+from dashboard.models import Review_prdct,ReviewHelpful
 
 
 
@@ -213,18 +214,31 @@ def size_filter(request, size_id):
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     additional_images = ProductImages.objects.filter(product=product)
-    reviews = product.reviews.all()
+    reviews = product.reviews.select_related('user').prefetch_related('reviewhelpful_set')
     user_review = None
+    review_form = None
+    
+    
     if request.user.is_authenticated:
         user_review = product.reviews.filter(user=request.user).first()
-
+        review_form = ReviewForm(instance=user_review)
+        
+    # Calculate rating stats
+    rating_dist = product.rating_distribution()
+    total_reviews = product.total_reviews()
+    
+    # Get helpful reviews first
+    top_reviews = reviews.order_by('-helpful_votes', '-created_at')
 
     context = {
         'product': product,
         'aditional_img': additional_images,
-        'reviews': reviews,
+        'reviews': top_reviews,
         'user_review': user_review,
-        
+        'review_form': review_form,
+        'rating_distribution': rating_dist,
+        'total_reviews': total_reviews,
+        'average_rating': product.average_rating(),
     }
 
     return render(request, 'user_side/shop/single_product.html', context)
@@ -233,18 +247,21 @@ def add_review(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     
     if request.method == 'POST':
-        form = ReviewForm(request.POST)
+        form = ReviewForm(request.POST, request.FILES)
         if form.is_valid():
             review, created = Review_prdct.objects.update_or_create(
                 product=product,
                 user=request.user,
                 defaults={
                     'rating': form.cleaned_data['rating'],
-                    'comment': form.cleaned_data['comment']
+                    'comment': form.cleaned_data['comment'],
+                    'images': form.cleaned_data.get('images')
                 }
             )
             messages.success(request, 'Your review has been submitted successfully!')
             return redirect('product_detail', product_id=product_id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     
     return redirect('product_detail', product_id=product_id)
 
@@ -255,6 +272,31 @@ def delete_review(request, review_id):
     review.delete()
     messages.success(request, 'Your review has been deleted successfully!')
     return redirect('product_detail', product_id=product_id)
+
+@login_required
+def helpful_review(request, review_id):
+    review = get_object_or_404(Review_prdct, id=review_id)
+    
+    if request.user == review.user:
+        messages.error(request, "You cannot mark your own review as helpful.")
+        return redirect('product_detail', product_id=review.product.id)
+        
+    vote, created = ReviewHelpful.objects.get_or_create(
+        review=review,
+        user=request.user
+    )
+    
+    if created:
+        review.helpful_votes += 1
+        review.save()
+        messages.success(request, "Thank you for your feedback!")
+    else:
+        vote.delete()
+        review.helpful_votes -= 1
+        review.save()
+        messages.info(request, "You have removed your helpful vote.")
+        
+    return redirect('product_detail', product_id=review.product.id)
 
 
 @never_cache
@@ -429,6 +471,10 @@ def review_list(request):
 
 @login_required
 def create_review(request):
+    if Review.objects.filter(user=request.user).exists():
+        messages.warning(request, 'You have already posted a review.')
+        return redirect('review_list')
+
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
@@ -439,7 +485,9 @@ def create_review(request):
             return redirect('review_list')
     else:
         form = ReviewForm()
+
     return render(request, 'user_side/reviews/create_review.html', {'form': form})
+
 
 @login_required
 def vote_helpful(request, review_id):
