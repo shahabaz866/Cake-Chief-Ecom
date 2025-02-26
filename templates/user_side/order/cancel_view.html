@@ -1,0 +1,123 @@
+{% extends 'user_side/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #F8F9FA;
+    }
+    .order-header {
+        background: linear-gradient(90deg, #D33C3C, #A62C2C);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+    }
+    .order-summary {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .order-item {
+        border-bottom: 1px solid #ddd;
+        padding: 10px;
+    }
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    .btn-cancel {
+        background-color: #D33C3C;
+        color: white;
+        transition: 0.3s;
+    }
+    .btn-cancel:hover {
+        background-color: #A62C2C;
+    }
+    .modal-content {
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="order-summary">
+                <div class="order-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">Order Details</h4>
+                        <p class="mb-0">Order #{{ order.id }}</p>
+                    </div>
+                    <div>
+                        <p class="mb-0">Status: <strong>{{ order.order_status }}</strong></p>
+                        <p class="mb-0">Date: {{ order.created_at|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1">Total Amount</p>
+                            <h5>₹{{ order.total_amount }}</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1">Payment Method</p>
+                            <h5>{{ order.payment_method }}</h5>
+                        </div>
+                    </div>
+                    <hr>
+                    <h5 class="mb-3">Order Items</h5>
+                    {% for item in order.items.all %}
+                    <div class="order-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">{{ item.variants.product.name }}</h6>
+                            <small>Quantity: {{ item.quantity }}</small>
+                        </div>
+                        <h6 class="mb-0">₹{{ item.price }}</h6>
+                    </div>
+                    {% endfor %}
+                    {% if order.order_status in 'PROCESSING,SHIPPED' %}
+                    <div class="text-center mt-4">
+                        <button class="btn btn-cancel" onclick="openCancelModal()">Cancel Order</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'order_app:cancel_order' order.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="cancellation_reason">Reason for cancellation</label>
+                        <textarea class="form-control" id="cancellation_reason" name="cancellation_reason" rows="3" required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal">Keep Order</button>
+                        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function openCancelModal() {
+        $('#cancelModal').modal('show');
+    }
+</script>
+{% endblock %}
+{% endblock %}

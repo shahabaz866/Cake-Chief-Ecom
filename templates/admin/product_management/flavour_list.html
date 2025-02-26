@@ -1,9 +1,13 @@
 {% extends 'admin/bas.html' %}
+{% load static %}
+
+
 
 {% block title %}Flavour List{% endblock %}
 {% block extra_css %}
+<link rel="icon" href="{% static 'admin_assets\img\Starlogo.png' %}">
 
-</style>
+
 {% endblock %}
 
 {% block content %}
@@ -45,10 +49,10 @@
                                         <img src="{% static 'admin_assets/img/icons/edit.svg' %}" alt="Edit">
                                     </a>
                                     {% if flavour.is_active %}
-                                        <a href="{% url 'delete_flavour' flavour.id %}" class="btn btn-danger">Block</a>
-                                    {% else %}
-                                        <a href="{% url 'unblock_flavour' flavour.id %}" class="btn btn-success">Unblock</a>
-                                    {% endif %}
+                                    <a href="{% url 'delete_flavour' flavour.id %}" class="btn btn-danger">Block</a>
+                                {% else %}
+                                    <a href="{% url 'unblock_flavour' flavour.id %}" class="btn btn-success">Unblock</a>
+                                {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

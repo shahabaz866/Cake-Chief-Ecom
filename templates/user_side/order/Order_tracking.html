@@ -1,0 +1,169 @@
+{% extends 'user_side/base.html' %}
+{% load static %}
+
+{% block title %}Order Tracking - Cake Chief{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">Track Your Order</h2>
+                    
+                    <div class="tracking-form mb-4">
+                        <form method="GET" class="input-group">
+                            <input type="number" name="order_id" class="form-control" placeholder="Enter your order number" value="{{ request.GET.order_id }}" min="0">
+                            <button type="submit" class="btn" style="background-color: #b52a2a; color: white;">
+                                Track Order
+                            </button>
+                        </form>
+                    </div>
+
+                    {% if order %}
+                    <div id="trackingResult">
+                        <div class="tracking-timeline mb-4">
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar" style="background-color: #b52a2a; width: 
+                                    {% if order.order_status == 'PENDING' %}25%
+                                    {% elif order.order_status == 'PROCESSING' %}50%
+                                    {% elif order.order_status == 'SHIPPED' %}75%
+                                    {% elif order.order_status == 'DELIVERED' %}100%
+                                    {% else %}0%{% endif %}">
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-3">
+                                <div class="tracking-step {% if order.order_status != 'CANCELLED' %}active{% endif %}" data-step="1">
+                                    <div class="step-icon rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px; border: 2px solid #ddd; background: white;">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="step-label mt-2" style="font-size: 0.9rem;">Order Placed</div>
+                                </div>
+                                <div class="tracking-step {% if order.order_status in 'PROCESSING,SHIPPED,DELIVERED' %}active{% endif %}" data-step="2">
+                                    <div class="step-icon rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 40px; height: 40px; border: 2px solid #ddd; background: white;">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div class="step-label mt-2" style="font-size: 0.9rem;">Processing</div>
+                                </div>
+                                <div class="tracking-step {% if order.order_status in 'SHIPPED,DELIVERED' %}active{% endif %}" data-step="3">
+                                    <div class="step-icon rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 40px; height: 40px; border: 2px solid #ddd; background: white;">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                    <div class="step-label mt-2" style="font-size: 0.9rem;">Shipped</div>
+                                </div>
+                                <div class="tracking-step {% if order.order_status == 'DELIVERED' %}active{% endif %}" data-step="4">
+                                    <div class="step-icon rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 40px; height: 40px; border: 2px solid #ddd; background: white;">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="step-label mt-2" style="font-size: 0.9rem;">Delivered</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-details p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                            <h4 class="mb-3">Order Details</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Order Number:</strong> #{{ order.id }}</p>
+                                    <p><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y" }}</p>
+                                    <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Status:</strong> 
+                                        <span class="badge {% if order.order_status == 'CANCELLED' %}bg-danger
+                                            {% elif order.order_status == 'DELIVERED' %}bg-success
+                                            {% else %}bg-primary{% endif %}">
+                                            {{ order.order_status }}
+                                        </span>
+                                    </p>
+                                    <p><strong>Payment Status:</strong> 
+                                        <span class="badge {% if order.payment_status == 'PAID' %}bg-success
+                                            {% elif order.payment_status == 'REFUNDED' %}bg-warning
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ order.payment_status }}
+                                        </span>
+                                    </p>
+                                    {% comment %} <p><strong>Last Updated:</strong> {{ order.modified_at|date:"M d, Y H:i" }}</p> {% endcomment %}
+                                </div>
+                            </div>
+
+                            {% if order.items.all %}
+                            <div class="order-items mt-4">
+                                <h5 class="mb-3">Order Items</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Quantity</th>
+                                                <th>Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in order.items.all %}
+                                            <tr>
+                                                <td>{{ item.variants.product.title }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>₹{{ item.price }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if order.order_status == 'CANCELLED' %}
+                            <div class="cancellation-details mt-3 p-3 bg-light border rounded">
+                                <h5 class="text-danger mb-2">Order Cancelled</h5>
+                                {% if order.cancellation_reason %}
+                                <p><strong>Reason:</strong> {{ order.cancellation_reason }}</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% elif request.GET.order_id %}
+                    <div class="alert alert-danger" role="alert">
+                        Order not found. Please check the order number and try again.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tracking-step.active .step-icon {
+    border-color: #b52a2a !important;
+    background-color: #b52a2a !important;
+    color: white;
+}
+
+.tracking-step.active .step-label {
+    color: #b52a2a;
+    font-weight: bold;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .tracking-step .step-label {
+        font-size: 0.8rem !important;
+    }
+    
+    .tracking-step .step-icon {
+        width: 35px !important;
+        height: 35px !important;
+    }
+}
+</style>
+{% endblock %}

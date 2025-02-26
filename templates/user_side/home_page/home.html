@@ -3,6 +3,7 @@
 {% load static %}
 {% block extra_css %}
 {% endblock extra_css %}
+
 <div class="site-blocks-cover"  data-aos="fade">
   <div class="container">
     <div class="row align-items-start align-items-md-center justify-content-end">
@@ -102,14 +103,12 @@
         </a>
     </div>
 {% empty %}
-    <div>No categories available.</div>  {# Fallback if no categories are found #}
+    <div>No categories available.</div>
 {% endfor %}
 
     </div>
   </div>
 </div>
-
-
 
 
 {% comment %} <div class="site-section block-8">

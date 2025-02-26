@@ -306,6 +306,21 @@
         .toastify.on {
           opacity: 1;
         }
+        .payment-option {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px;
+          background-color: #f9f9f9;
+          border-radius: 6px;
+          cursor: pointer;
+      }
+      
+      .balance {
+          color: #666;
+          font-size: 0.9em;
+          margin-left: 4px;
+      }
       </style>
     </style>
   </head>
@@ -449,12 +464,19 @@
                       <td>Tax</td>
                       <td>₹{{ tax }}<td>
                     </tr>
-                    <!-- Shipping -->
+                    
                     <tr>
-                        <td><strong>Shipping</strong></td>
+                        <td>Delivery Charge</td>
                         <td>₹{{ delivery_charge }}</td>
                     </tr>
-                    <!-- Total -->
+                    <tr>
+                      <td>Packaging Charge</td>
+                      <td>₹{{ packaging_charge }}<td>
+                    </tr>
+                    <tr>
+                      <td>Discount</td>
+                      <td>-₹{{ discount }}<td>
+                    </tr>
                     <tr>
                         <td><strong>Total</strong></td>
                         <td><strong>₹{{ grand_total }}</strong></td>
@@ -462,42 +484,83 @@
                 </tbody>
               </table>
 
-              <h3 class="payment-title">Payment Options</h3>
-              <div class="payment-options">
-                <label class="payment-option">
-                    <input type="radio" name="payment_method" value="cod" required> <i class="fas fa-money-bill-wave"></i>
-                    Cash on Delivery (COD)
-                </label>
-                
-                <label class="payment-option">
-                  <input type="radio" name="payment_method" value="wallet" required> <i class="fas fa-wallet"></i>Pay with Wallet
-              </label>
-                
-                <label class="payment-option">
-                  <input type="radio" name="payment_method" value="paypal" required><i class="fab fa-paypal"></i> Paypal
-                  {{ paypal.render }}
-              </label>
-              
-              
+              <form method="POST" id="checkoutForm">
+                {% csrf_token %}
+                <h3 class="payment-title">Payment Options</h3>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="cod" required> 
+                        <i class="fas fa-money-bill-wave"></i>
+                        Cash on Delivery (COD)
+                    </label>
             
-  
-                <!-- Place Order Button -->
-                <div class="place-order-btn">
-                  <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-check-circle"></i> Place Order
-                  </button>
+                    <label class="payment-option">
+                      <input type="radio" name="payment_method" value="wallet" required>
+                      <i class="fas fa-wallet"></i>
+                      Pay with Wallet
+                      <span class="balance">(₹{{wallel_balance}})</span>
+                  </label>
+            
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="paypal" required>
+                        <i class="fab fa-paypal"></i> PayPal
+                    </label>
+            
+                    <!-- PayPal form container -->
+                    <div id="paypal-form" style="display: none;">
+                        {{ paypal.render }}
+                    </div>
+            
+                    <!-- Place Order Button -->
+                    <div class="place-order-btn">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-check-circle"></i> Place Order
+                        </button>
+                    </div>
                 </div>
+            </form>
               </div>
             </div>
           </div>
         </form>
       </div>
 
-      <div class="toastify" id="toastSuccess">
-        <span>Order placed successfully!</span>
-      </div>
+    
+<div class="toastify" id="toastSuccess">
+  <span>Order placed successfully!</span>
+</div>
   
+      <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const paypalRadio = document.querySelector('input[value="paypal"]');
+        const paypalForm = document.getElementById('paypal-form');
+        const checkoutForm = document.getElementById('checkoutForm');
 
+        if (paypalRadio && paypalForm) {
+            paypalRadio.addEventListener('change', function () {
+                paypalForm.style.display = this.checked ? 'block' : 'none';
+            });
+        } else {
+            console.error('PayPal radio button or form not found');
+        }
+
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function (e) {
+                if (paypalRadio && paypalRadio.checked) {
+                    e.preventDefault();
+                    const paypalFormElement = document.querySelector('#paypal-form form');
+                    if (paypalFormElement) {
+                        paypalFormElement.submit();
+                    } else {
+                        console.error('PayPal form not found');
+                    }
+                }
+            });
+        } else {
+            console.error('Checkout form not found');
+        }
+    });
+</script>
     <script>
       function updateOrderTotals() {
         const totalElements = document.querySelectorAll('[id^="total_"]');

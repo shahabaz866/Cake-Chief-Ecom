@@ -1,10 +1,18 @@
 
-from django.urls import path
+from django.urls import path,re_path
 from . import views
+from django.shortcuts import render
+from django.views.decorators.cache import never_cache
+
+
+
+@never_cache
+def catch_all_view(request, path=None):
+    return render(request, 'user_side/error/error_page.html',{'error_code': 404},status=404)
 
 urlpatterns = [
 
-    path(' ', views.dashboard, name='dashboard'), 
+    path('', views.dashboard, name='dashboard'), 
     path('user_management/', views.userManagement, name='user_management'),
     path('product_list/',views.product_list, name='product_list'),
     path('variant/<int:variant_id>/delete/', views.delete_variant, name='delete_variant'),
@@ -32,8 +40,11 @@ urlpatterns = [
     path('coupons/edit/<int:pk>/', views.coupon_edit, name='coupon_edit'),
     path('coupons/delete/<int:pk>/', views.coupon_delete, name='coupon_delete'),
 
+path('admin/product/<int:product_id>/', views.admin_product_detail, name='admin_product_detail'),
+path('admin/product/<int:product_id>/toggle/', views.toggle_product_status, name='toggle_product_status'),
 
     path('sales-report/', views.sales_report, name='sales_report'),
 
+    re_path(r'^.*$', catch_all_view),
 
 ]

@@ -4,83 +4,293 @@
 {% load cart_filters %}
 {% block extra_css %}
 <style>
-  .quantity-control h3 {
-    color:#b52a2a !important;
-    margin: 0;
-  }
+  .btn-open-coupon {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
 
-  .coupon-section {
-    margin-top: 20px;
-  }
-  .coupon-section .form-control {
-    width: auto;
-    max-width: 250px;
-    display: inline-block;
-  }
-  .coupon-section .btn {
-    font-size: 0.8rem;
-  }
-  
-  /* New styles for coupon display */
-  .available-coupons {
-    margin: 20px 0;
+.btn-open-coupon:hover {
+    background: #c82333;
+}
+
+.coupon-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.coupon-modal-content {
+    background-color: white;
+    margin: 5% auto;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.coupon-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.coupon-modal-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.25rem;
+}
+
+.close-modal {
+    font-size: 28px;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-modal:hover {
+    color: #dc3545;
+}
+
+.coupon-modal-body {
+    padding: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.coupon-card {
+    display: flex;
+    justify-content: space-between;
     padding: 15px;
-    border: 1px solid #dee2e6;
+    border: 2px dashed #ddd;
     border-radius: 8px;
-  }
-  
-  .coupon-card {
-    border: 1px dashed #dc3545;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    background-color: #fff;
-    position: relative;
-  }
-  
-  .coupon-code {
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.coupon-card:hover {
+    border-color: #dc3545;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.coupon-card-left {
+    flex: 1;
+}
+
+.coupon-code {
+    font-size: 18px;
     font-weight: bold;
     color: #dc3545;
-    background-color: #fff;
-    padding: 2px 8px;
-    border: 1px solid #dc3545;
+    margin-bottom: 5px;
+}
+
+.coupon-discount {
+    color: #666;
+    font-size: 14px;
+}
+
+.coupon-card-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.minimum-spend, .expiry-date {
+    font-size: 12px;
+    color: #666;
+}
+
+.apply-coupon-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
-  }
-  
-  .coupon-details {
-    margin-top: 5px;
-    font-size: 0.9rem;
-    color: #6c757d;
-  }
-  
-  .coupon-expiry {
-    font-size: 0.8rem;
-    color: #dc3545;
-  }
-  .available-coupons {
-    margin: 20px 0;
-    padding: 15px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-}
-
-.coupon-details {
+    font-size: 13px;
+    transition: background-color 0.3s ease;
     margin-top: 10px;
-    padding: 10px;
-    border: 1px dashed #dc3545;
-    border-radius: 5px;
-    background-color: #fff;
 }
 
-.coupon-expiry {
-    font-size: 0.8rem;
-    color: #dc3545;
+.apply-coupon-btn:hover {
+    background: #c82333;
+}
+
+.coupon-modal-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+}
+
+.manual-coupon-input {
+    display: flex;
+    gap: 10px;
+}
+
+.manual-coupon-input input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #eee;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.manual-coupon-input input:focus {
+    outline: none;
+    border-color: #dc3545;
+}
+
+.apply-manual-coupon {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.apply-manual-coupon:hover {
+    background: #c82333;
+}
+
+.no-coupons {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.no-coupons i {
+    color: #ddd;
+    margin-bottom: 15px;
+}
+.applied-coupon-section {
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.applied-coupon-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #d4edda;
+  border-radius: 6px;
+}
+
+.applied-coupon-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.applied-label {
+  color: #155724;
+  font-size: 14px;
+}
+
+.applied-code {
+  color: #155724;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.discount-amount {
+  color: #155724;
+  font-size: 14px;
+}
+
+.remove-coupon-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.remove-coupon-btn:hover {
+  background: #c82333;
+}
+.site-section{
+  padding-bottom: 0px;
+}
+/* New cart styles */
+.cart-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 10px;
+}
+
+.cart-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color:#b52a2a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.cart-button:hover {
+  background-color: #b33232;
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  background-color: white;
+  color:#b52a2a;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 </style>
 {% endblock %}
 {% block content %}
-
+<div class="cart-container">
+    <a href="{% url 'cart_app:cart' %}" class="cart-button">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cart-count">{{ request.session.cart_count|default:0 }}</span>
+    </a>
+    
+  </div>
 <div class="bg-light py-3">
   <div class="container">
     <div class="row">
@@ -94,172 +304,180 @@
 
 <div class="site-section">
   <div class="container">
+    <!-- Main Cart Section -->
     <div class="row mb-5">
-      <div class="col-md-12">
-        <div class="site-blocks-table">
-          <table class="table table-bordered table-responsive-md">
-            <thead>
-              <tr>
-                <th class="product-thumbnail">Image</th>
-                <th class="product-name">Product</th>
-                <th class="product-price">Price</th>
-                <th class="product-quantity">Quantity</th>
-                <th class="product-size">Size</th>
-                <th class="product-price">Total</th>
-                <th class="product-remove">Remove</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in cart_items %}
-              <tr>
-                <td class="product-thumbnail">
-                  <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="img-fluid rounded shadow" />
-                </td>
-                <td class="product-name">
-                  <h5 class="text-black">{{ item.product.title }}</h5>
-                </td>
-                <td><p class="text-black font-weight-bold">₹{{ item.price }}</p></td>
-                <td>
-                  <div class="d-flex justify-content-center align-items-center">
-                    <a href="#" style="text-decoration: none;" class="quantity-control" data-action="minus" data-item-id="{{ item.id }}"><h3>-</h3></a>
-                    <div id="quantity-{{ item.id }}" class="detail-qty border radius m-auto">
-                      <span>{{ item.quantity }}</span>
-                    </div>
-                    <a href="#" style="text-decoration: none;" class="quantity-control" data-action="plus" data-item-id="{{ item.id }}"><h3>+</h3></a>
-                  </div>
-                </td>
-                <td>
-                  <p class="text-black">{{ item.variant.weight }}</p>
-                </td>
-                <td>
-                  
-                    <strong class="text-black" id="cart-subtotal">₹{{ cart_subtotal|floatformat:2 }}</strong>
-                
-                </td>
-                <td>
-                  <form method="POST" action="{% url 'cart_app:remove_from_cart' item.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="7" class="text-center">
-                  <h4 class="text-muted">Your cart is empty.</h4>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <!-- Cart Items Table -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="product-thumbnail">Image</th>
+                                <th class="product-name">Product</th>
+                                <th class="product-price">Price</th>
+                                <th class="product-quantity">Quantity</th>
+                                <th class="product-size">Size</th>
+                                <th class="product-price">Total</th>
+                                <th class="product-remove">Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr id="cart-item-{{ item.id }}">
+                                <td class="product-thumbnail">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" 
+                                         class="img-fluid rounded" style="max-width: 80px;" />
+                                </td>
+                                <td class="product-name">
+                                    <h6 class="mb-0">{{ item.product.title }}</h6>
+                                </td>
+                                <td>₹{{ item.price }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+                                        <a href="#" class="quantity-control btn btn-sm btn-outline-secondary" 
+                                           data-action="minus" data-item-id="{{ item.id }}">-</a>
+                                        <span id="quantity-{{ item.id }}" class="px-2">{{ item.quantity }}</span>
+                                        <a href="#" class="quantity-control btn btn-sm btn-outline-secondary" 
+                                           data-action="plus" data-item-id="{{ item.id }}">+</a>
+                                    </div>
+                                </td>
+                                <td>{{ item.variant.weight }}</td>
+                                <td>
+                                    <strong id="subtotal-{{ item.id }}">₹{{ item.quantity|multiply:item.price|floatformat:2 }}</strong>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm remove-btn" data-item-id="{{ item.id }}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <h5 class="text-muted mb-0">Your cart is empty.</h5>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- Cart Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title border-bottom pb-3">Cart Summary</h5>
+                    <div class="summary-item d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <strong id="cart-total-subtotal">₹{{ cart_subtotal|floatformat:2 }}</strong>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between mb-2">
+                        <span>Tax (3%)</span>
+                        <strong id="tax">₹{{ tax|floatformat:2 }}</strong>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between mb-2">
+                        <span>Delivery Charge</span>
+                        <strong id="delivery-charge">₹{{ delivery_charge|floatformat:2 }}</strong>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between mb-2">
+                        <span>Packaging Charge</span>
+                        <strong id="packaging-charge">₹{{ packaging_charge|floatformat:2 }}</strong>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between mb-3">
+                        <span>Discount</span>
+                        <strong>-₹{{ discount|floatformat:2 }}</strong>
+                    </div>
+                    <hr>
+                    <div class="summary-item d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Grand Total</span>
+                        <strong id="grand-total" class="text-danger">₹{{ grand_total|floatformat:2 }}</strong>
+                    </div>
+                    <a href="{% url 'cart_app:checkout' %}" class="btn btn-danger w-100 mb-3">
+                        <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary w-100 mb-3" onclick="openCouponModal()">
+                        <i class="fas fa-ticket-alt me-2"></i>View Available Coupons
+                    </button>
+                    <a href="{% url 'shop' %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
     
-<div class="row">
-  <div class="col-md-12">
-    <div class="available-coupons">
-      <h5 class="mb-3">Available Coupons</h5>
-      {% if available_coupons %}
-        <select class="form-select form-select-sm mb-3 danger" id="couponSelect" onchange="handleCouponSelect(this.value)">
-          <option value="">Select a coupon</option>
-          {% for coupon in available_coupons %}
-            <option value="{{ coupon.code }}" data-description="{{ coupon.description }}" 
-                    data-minimum="{{ coupon.minimum_amount }}" 
-                    data-expiry="{{ coupon.valid_to|date:'d M Y' }}">
-              {{ coupon.code }}  {{ coupon.description }}
-            </option>
-          {% endfor %}
-        </select>
-        <div id="couponDetails" class="coupon-details" style="display: none;">
-          <p class="mb-1" id="couponDescription"></p>
-          <small id="minimumAmount"></small>
-          <div class="coupon-expiry mt-1" id="couponExpiry"></div>
-        </div>
-      {% else %}
-        <p class="text-muted">No coupons available at the moment.</p>
-      {% endif %}
-    </div>
-  </div>
-</div>
-    <!-- Coupon Section -->
-    <div class="row coupon-section">
-      <div class="col-md-12">
-        <form method="POST" action="{% url 'cart_app:apply_coupon' %}">
-          {% csrf_token %}
-          <div class="input-group mb-2">
-            <input type="text" class="form-control form-control-sm" placeholder="Enter Coupon Code" name="coupon_code" required>
-            <div class="input-group-append">
-              <button class="btn btn-outline-danger btn-sm" type="submit">Apply</button>
-            </div>
-          </div>
-        </form>
-        {% if coupon %}
-        <div class="d-flex justify-content-between align-items-center mt-2">
-           
-            <span class="text-success">
-              <strong>{{ coupon.code }}</strong> applied! 
-              (₹{{ discount }} off)
-            </span>
-            <form method="POST" action="{% url 'cart_app:remove_coupon' %}">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-            </form>
-          </div>
-        {% endif %}
-      </div>
-    </div>
+    
     
 
     <div class="row">
-      <div class="col-md-6">
-        <a href="{% url 'shop' %}" class="btn btn-outline-danger btn-sm btn-block">
-          <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
-        </a>
+
+      <!-- The Modal -->
+      <div id="couponModal" class="coupon-modal">
+          <div class="coupon-modal-content">
+              <div class="coupon-modal-header">
+                  <h4>Available Coupons</h4>
+                  <span class="close-modal" onclick="closeCouponModal()">&times;</span>
+              </div>
+              
+              <!-- Applied Coupon Section (if exists) -->
+              {% if coupon %}
+              <div class="applied-coupon-section">
+                  <div class="applied-coupon-card">
+                      <div class="applied-coupon-info">
+                          <span class="applied-label">Applied Coupon:</span>
+                          <span class="applied-code">{{ coupon.code }}</span>
+                          <span class="discount-amount">(₹{{ discount }} off)</span>
+                      </div>
+                      <button class="remove-coupon-btn" onclick="removeCoupon()">
+                          <i class="fas fa-times"></i> Remove
+                      </button>
+                  </div>
+              </div>
+              {% endif %}
+              
+              <div class="coupon-modal-body">
+                  {% if available_coupons %}
+                      {% for coupon in available_coupons %}
+                      <div class="coupon-card">
+                          <div class="coupon-card-left">
+                              <div class="coupon-code">{{ coupon.code }}</div>
+                              <div class="coupon-discount">{{ coupon.description }}</div>
+                          </div>
+                          <div class="coupon-card-right">
+                              <div class="minimum-spend">Value: ₹{{ coupon.discount }}</div>
+                              <div class="expiry-date">Valid till: {{ coupon.valid_to|date:'d M Y' }}</div>
+                              {% csrf_token %}
+
+                              <button class="apply-coupon-btn" 
+                                      onclick="applyCoupon('{{ coupon.code }}')"
+                                      data-code="{{ coupon.code }}">
+                                  Apply Coupon
+                              </button>
+                          </div>
+                      </div>
+                      {% endfor %}
+                  {% else %}
+                      <div class="no-coupons">
+                          <i class="fas fa-ticket-alt fa-3x mb-3"></i>
+                          <p>No coupons available at the moment.</p>
+                      </div>
+                  {% endif %}
+              </div>
+      
+              <div class="coupon-modal-footer">
+                  <div class="manual-coupon-input">
+                      <input type="text" id="manualCouponInput" placeholder="Enter coupon code">
+                      <button onclick="applyManualCoupon()" class="apply-manual-coupon">Apply</button>
+                  </div>
+              </div>
+          </div>
       </div>
-      <div class="col-md-6 pl-5">
-        <div class="row justify-content-end">
-            <div class="col-md-7">
-                <div class="border-bottom mb-5">
-                    <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6"><span class="text-black">Subtotal</span></div>
-                    <div class="col-md-6 text-right">
-                        <strong class="text-black" id="cart-subtotal">₹{{ cart_subtotal|floatformat:2 }}</strong>
-                    </div>
-                    <div class="col-md-6"><span class="text-black">Tax (3%)</span></div>
-                    <div class="col-md-6 text-right">
-                        <strong class="text-black" id="tax">₹{{ tax|floatformat:2 }}</strong>
-                    </div>
-                    <div class="col-md-6"><span class="text-black">Delivery Charge</span></div>
-                    <div class="col-md-6 text-right">
-                        <strong class="text-black" id="delivery-charge">₹{{ delivery_charge|floatformat:2 }}</strong>
-                    </div>
-                    <div class="col-md-6"><span class="text-black">Packaging Charge</span></div>
-                    <div class="col-md-6 text-right">
-                        <strong class="text-black" id="packaging-charge">₹{{ packaging_charge|floatformat:2 }}</strong>
-                    </div>
-                    <div class="col-md-6"><span class="text-black">Discount</span></div>
-                    <div class="col-md-6 text-right">
-                        <strong class="text-black">₹{{ discount|floatformat:2 }}</strong>
-                    </div>
-                    <hr>
-               
-                    <div class="col-md-6"><span class="text-black font-weight-bold">Grand Total</span></div>
-                    <div class="col-md-6 text-right">
-                        <strong class="text-black font-weight-bold" id="grand-total">₹{{ grand_total|floatformat:2 }}</strong>
-                    </div>
-                </div>
-                <a href="{% url 'cart_app:checkout' %}" class="btn btn-outline-danger btn-sm btn-block">
-                    <i class="fas fa-check-circle me-2"></i>Proceed To Checkout
-                </a>
-            </div>
-        </div>
-      </div>
+      
     </div>
+    
 
   </div>
 </div>
@@ -268,70 +486,211 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script type="text/javascript">
-  $(document).ready(function(){
-      $('.quantity-control').click(function(e){
-          e.preventDefault();
-          var action = $(this).data('action'); // Either 'plus' or 'minus'
-          var itemId = $(this).data('item-id'); // Item ID from data attribute
-          
-          var url = action === 'plus' 
-              ? "{% url 'cart_app:quantity_plus' 0 %}".replace('0', itemId) 
-              : "{% url 'cart_app:quantity_minus' 0 %}".replace('0', itemId);
+    $(document).ready(function(){
+        function checkGrandTotalAndRefreshModal(grandTotal) {
+            if (grandTotal > 1000 || grandTotal > 400 || grandTotal < 300) {
+                location.reload();
+            }
+        }
+        $('.quantity-control').click(function(e){
+            e.preventDefault();
+            var action = $(this).data('action');
+            var itemId = $(this).data('item-id');
+    
+            var url = action === 'plus' 
+                ? "{% url 'cart_app:quantity_plus' 0 %}".replace('0', itemId) 
+                : "{% url 'cart_app:quantity_minus' 0 %}".replace('0', itemId);
+    
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data: {'item_id': itemId},
+                success: function(response) {
+                    if (response.error) {
+                        Swal.fire(response.error);
+                        return;
+                    }
+    
+                   
+                    if (response.grand_total) {
+                    checkGrandTotalAndRefreshModal(response.grand_total);
+                }
+    
+                    $('#quantity-' + itemId).text(response.quantity);
+                    $('#subtotal-' + itemId).text('₹' + response.item_subtotal.toFixed(2));
+                    $('#cart-total-subtotal').text('₹' + response.cart_subtotal.toFixed(2));
+                    $('#tax').text('₹' + response.tax.toFixed(2));
+                    $('#delivery-charge').text('₹' + response.delivery_charge.toFixed(2));
+                    $('#packaging-charge').text('₹' + response.packaging_charge.toFixed(2));
+                    $('#grand-total').text('₹' + response.grand_total.toFixed(2));
+                    $('#cart-total-items').text(response.cart_total_items);
+                    console.log(response.grandTotal);
 
-          $.ajax({
-              type: 'GET',
-              url: url,
-              data: {
-                  'item_id': itemId,
-              },
-              success: function(response) {
-                console.log(response);
-                  if (response.error) {
-                      Swal.fire(response.error); 
-                      return;
-                  }
-
-                  $('#quantity-' + itemId + ' span').text(response.quantity);
-                  $('#subtotal-' + itemId).text('₹' + response.item_subtotal.toFixed(2));
-
-                  $('#cart-subtotal').text('₹' + response.cart_subtotal.toFixed(2));
-                  $('#tax').text('₹' + response.tax.toFixed(2));
-                  $('#delivery-charge').text('₹' + response.delivery_charge.toFixed(2));
-                  $('#packaging-charge').text('₹' + response.packaging_charge.toFixed(2));
-                  $('#grand-total').text('₹' + response.grand_total.toFixed(2));
-              },
-              error: function(xhr) {
-                  console.error(xhr.responseText);
-              }
-          });
-      });
-  });
-</script>
-<script>
-  function handleCouponSelect(code) {
-      if (!code) {
-          document.getElementById('couponDetails').style.display = 'none';
-          return;
-      }
-      
-      const selectedOption = document.querySelector(`option[value="${code}"]`);
-      const description = selectedOption.dataset.description;
-      const minimum = selectedOption.dataset.minimum;
-      const expiry = selectedOption.dataset.expiry;
-      
-      document.getElementById('couponDescription').textContent = description;
-      document.getElementById('minimumAmount').textContent = minimum ? `Minimum purchase: ₹${minimum}` : '';
-      document.getElementById('couponExpiry').textContent = `Valid till: ${expiry}`;
-      document.getElementById('couponDetails').style.display = 'block';
-      
-      // Auto-fill the coupon input
-      document.querySelector('input[name="coupon_code"]').value = code;
-  }
-  
-  // Add this to your existing document ready function
-  $(document).ready(function(){
-      // Your existing JavaScript remains the same
-  });
+                    
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    Swal.fire('An error occurred while updating the cart.');
+                }
+            });
+        });
+    
+        $('.remove-btn').click(function(e){
+            e.preventDefault();
+    
+            var itemId = $(this).data('item-id');  
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, remove it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',  
+                        url: "{% url 'cart_app:remove_from_cart' 0 %}".replace('0', itemId), 
+                        data: {
+                            'csrfmiddlewaretoken': "{{ csrf_token }}", 
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                $('#cart-item-' + itemId).fadeOut(100, function() {
+                                    $(this).remove();
+                                }); 
+                                $('#cart-total-items').text(response.cart_total_items); // Update cart count
+                               
+                                if (response.cart_total_items === 0) {
+                                    $('#cart-container').html('<p>Your cart is empty.</p>');
+                                }
+                                Swal.fire('Removed!', 'Item has been removed.', 'success');
+                                location.reload();
+                            } else {
+                                Swal.fire('Error!', response.error, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error(xhr.responseText);
+                            Swal.fire('Oops!', 'Something went wrong.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+    });
+    
+    
+    function openCouponModal() {
+        document.getElementById('couponModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeCouponModal() {
+        document.getElementById('couponModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    function applyCoupon(code) {
+        console.log("Applying coupon:", code);  // Debugging
+    
+        const csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfTokenElement) {
+            console.error("CSRF token not found!");  // Debugging message
+            return;
+        }
+    
+        const csrfToken = csrfTokenElement.value;
+    
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'cart_app:apply_coupon' %}";  // Ensure URL is correct
+    
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+    
+        const codeInput = document.createElement('input');
+        codeInput.type = 'hidden';
+        codeInput.name = 'coupon_code';
+        codeInput.value = code;
+    
+        form.appendChild(csrfInput);
+        form.appendChild(codeInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    
+    
+    
+    function applyManualCoupon() {
+        const code = document.getElementById('manualCouponInput').value;
+        if (code.trim()) {
+            applyCoupon(code);
+        }
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('couponModal');
+        if (event.target == modal) {
+            closeCouponModal();
+        }
+    };
+    
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeCouponModal();
+        }
+    });
+    function updateCouponModalContent(response) {
+        // Clear the existing coupon content
+        let couponModalBody = document.querySelector('.coupon-modal-body');
+        couponModalBody.innerHTML = ''; // Clear existing content
+    
+        // Check if there are available coupons
+        if (response.available_coupons && response.available_coupons.length > 0) {
+            // Add each coupon to the modal
+            response.available_coupons.forEach(coupon => {
+                const couponCard = document.createElement('div');
+                couponCard.classList.add('coupon-card');
+                couponCard.innerHTML = `
+                    <div class="coupon-card-left">
+                        <div class="coupon-code">${coupon.code}</div>
+                        <div class="coupon-discount">${coupon.description}</div>
+                    </div>
+                    <div class="coupon-card-right">
+                        <div class="minimum-spend">Value: ₹${coupon.discount}</div>
+                        <div class="expiry-date">Valid till: ${coupon.valid_to}</div>
+                        <button class="apply-coupon-btn" onclick="applyCoupon('${coupon.code}')">Apply Coupon</button>
+                    </div>
+                `;
+                couponModalBody.appendChild(couponCard);
+            });
+        } else {
+            // If no coupons are available, display a message
+            couponModalBody.innerHTML = '<p>No coupons available at the moment.</p>';
+        }
+    }
+    
+    
+    function removeCoupon() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'cart_app:remove_coupon' %}";
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    
   </script>
+  
 
 {% endblock %}

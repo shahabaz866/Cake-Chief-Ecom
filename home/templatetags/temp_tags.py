@@ -20,7 +20,3 @@ def tags(list_data,tag_size):
     if tag :
         yield tag
 
-@register.filter(name='get_item')
-def get_item(dictionary, key):
-    """ Custom filter to get a dictionary value by key """
-    return dictionary.get(key)

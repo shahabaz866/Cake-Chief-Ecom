@@ -410,13 +410,13 @@
                     </form>
                     {% endif %}
                     
-                    <!-- Remove Button -->
-                    <button class="remove-btn" onclick="showConfirmModal({{ item.product.id }}, {{ item.variant.id|default:0 }})">
-                        <svg class="remove-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <span>Remove</span>
-                    </button>
+                   
+<button class="remove-btn" onclick="showConfirmModal({{ item.id }})">
+    <svg class="remove-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Remove</span>
+</button>
                 </div>
             </div>
         </div>
@@ -426,36 +426,37 @@
     </div>
 </div>
 
-<!-- Modal for Confirm Remove -->
 <div id="confirmModal" class="modal">
     <div class="modal-content">
         <h3>Remove from Wishlist</h3>
         <p>Are you sure you want to remove this item from your wishlist?</p>
         <div class="modal-actions">
             <button class="cancel-btn" onclick="hideConfirmModal()">Cancel</button>
-            <a id="confirmRemove" href="" class="confirm-btn">Remove</a>
+            <a id="confirmRemove" href="#" class="confirm-btn">Remove</a>
         </div>
     </div>
 </div>
 
 <script>
-    function showConfirmModal(productId, variantId) {
+    function showConfirmModal(wishlistItemId) {
+        if (!wishlistItemId) {
+            console.error('No wishlist item ID provided');
+            return;
+        }
         const modal = document.getElementById('confirmModal');
         const confirmBtn = document.getElementById('confirmRemove');
-    
-        // Update the href with both productId and variantId
-        confirmBtn.href = "{% url 'wishlist_app:remove_from_wishlist' 0 0 %}"
-            .replace('0/0', `${productId}/${variantId}`);
+        
+        const removeUrl = "{% url 'wishlist_app:remove_from_wishlist' '0' %}".replace('0', wishlistItemId);
+        confirmBtn.href = removeUrl;
         
         modal.classList.add('show');
     }
     
-
     function hideConfirmModal() {
         const modal = document.getElementById('confirmModal');
         modal.classList.remove('show');
     }
-
+    
     // Close modal when clicking outside
     window.onclick = function(event) {
         const modal = document.getElementById('confirmModal');

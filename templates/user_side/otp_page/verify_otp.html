@@ -170,107 +170,96 @@
 </head>
 <body>
     <div class="container">
-        <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+        <!-- Changed the form action to verify_otp -->
+        <form method="post" action="{% url 'verify_otp' %}">
             {% csrf_token %}
             <div class="logo-container">
                 <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo">
             </div>
+            <h3>OTP Verification</h3>
             <label for="email">Email</label>
-            <input readonly type="email" placeholder="email" id="email" value="{{ email }}">
-            <label for="OTP">OTP</label>
-            <input type="text" placeholder="Enter OTP" id="otp" name="otp">
-
-            {% if request.GET.next %}
-                <input type="hidden" name="next" value="{{ request.GET.next }}">
-            {% endif %}
+            <input readonly type="email" placeholder="email" id="email" name="email" value="{{ email }}">
+            <label for="otp">OTP</label>
+            <!-- Added name attribute to make it work with request.POST -->
+            <input type="number" placeholder="Enter OTP" id="otp" name="otp" required>
 
             <button type="submit">Verify</button>
             
+            <!-- Changed the resend OTP button to use the correct URL -->
             <button type="button" id="resendOtpButton" style="display: none;" 
-                    onclick="window.location.href='{% url 'verify_otp' %}?email={{ email }}'">
+                    onclick="window.location.href='{% url 'resend_otp' %}'">
                 Resend OTP
             </button>
             
-            <p id="timerDisplay">You can resend the OTP in <span id="countdown">60</span> seconds.</p>
+            <p id="timerDisplay">You can resend the OTP in <span id="countdown">30</span> seconds.</p>
             
             <p style="text-align: center; margin-top: 10px;">
                 Don't you receive the OTP? <a href="{% url 'SignupPage' %}" style="color:#b52a2a;">Sign up</a>
             </p>
         </form>
-
-      
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-
+    <!-- Scripts section -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if there are any messages inside the modal to show it
-            if (document.querySelectorAll('.bd-example-modal-sm .alert').length > 0) {
-                var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
-                messageModal.show();
-            }
-
-            var countdownDuration = 60;
+            var countdownDuration = 30; // Changed to match your view's timeout
             var countdownDisplay = document.getElementById('countdown');
             var resendOtpButton = document.getElementById('resendOtpButton');
             var timerDisplay = document.getElementById('timerDisplay');
-
+        
             function updateCountdown() {
-                countdownDuration--;
                 countdownDisplay.textContent = countdownDuration;
-
                 if (countdownDuration <= 0) {
                     clearInterval(countdownInterval);
                     timerDisplay.style.display = 'none';
                     resendOtpButton.style.display = 'block';
                 }
+                countdownDuration--;
             }
-
+        
+            // Start countdown immediately
+            updateCountdown();
             var countdownInterval = setInterval(updateCountdown, 1000);
         });
-    </script>
 
-    <script>
+        // Toast notification function
         function showToast(message, type) {
-          let backgroundColor = "#000";
-          switch(type) {
-            case 'success':
-            backgroundColor = "#0BDA51"; 
-            break;
-          case 'error':
-            backgroundColor = "#D33C3C";
-            break;
-          case 'warning':
-            backgroundColor = "#FFB347"; 
-            break;
-          case 'info':
-            backgroundColor = "#9B6A6C";
-            break;
-          }
-      
-          Toastify({
-            text: message,
-            duration: 3000,
-            gravity: "top",
-            position: "right",
-            style: {
-              background: backgroundColor,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              borderRadius: "8px",
-              fontWeight: "500",
-            },
-          }).showToast();
+            let backgroundColor = "#000";
+            switch(type) {
+                case 'success':
+                    backgroundColor = "#0BDA51"; 
+                    break;
+                case 'error':
+                    backgroundColor = "#D33C3C";
+                    break;
+                case 'warning':
+                    backgroundColor = "#FFB347"; 
+                    break;
+                case 'info':
+                    backgroundColor = "#9B6A6C";
+                    break;
+            }
+        
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: backgroundColor,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    borderRadius: "8px",
+                    fontWeight: "500",
+                },
+            }).showToast();
         }
-      
-        // For Django messages
+        
+        // Display Django messages as toasts
         {% if messages %}
-          {% for message in messages %}
-            showToast("{{ message }}", "{{ message.tags }}");
-          {% endfor %}
+            {% for message in messages %}
+                showToast("{{ message }}", "{{ message.tags }}");
+            {% endfor %}
         {% endif %}
-      </script>
+    </script>
 </body>
 </html>

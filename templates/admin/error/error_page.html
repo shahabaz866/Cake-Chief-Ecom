@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oops! - Page Not Found</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            background-color: #fff5f5;
+            color: #4a5568;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
+
+        .cake {
+            font-size: 100px;
+            margin-bottom: 1rem;    
+            animation: bounce 2s infinite;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background-color: #ed64a6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #d53f8c;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+    <link rel="icon" href="{% static 'admin_assets\img\Starlogo.png' %}">
+
+</head>
+<body>
+    <div class="container">
+        <div class="cake">🎂</div>
+        <h1>Oops! This slice is missing</h1>
+        <p>Looks like the page you're looking for has been eaten or moved to a different bakery shelf. Don't worry though, we have plenty more delicious pages to explore!</p>
+        <a href="{% url "dashboard" %}" class="button">Back to the Bakery</a>
+    </div>
+</body>
+</html>

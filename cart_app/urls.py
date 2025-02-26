@@ -1,6 +1,13 @@
-from django.urls import path
+from django.urls import path,include,re_path
 from . import views
+from django.shortcuts import render
+from django.views.decorators.cache import never_cache
+
+
 app_name = 'cart_app'
+@never_cache
+def catch_all_view(request, path=None):
+    return render(request, 'user_side/error/error_page.html',{'error_code': 404},status=404)
 
 urlpatterns = [
     path('cart/', views.cart_view, name='cart'),
@@ -18,15 +25,16 @@ urlpatterns = [
     
     path('order-confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
     
-    # path('varify_payment/', views.verify_payment , name="varify_payment"),
+    path('refresh-coupon/', views.refresh_coupon, name='refresh_coupon'),
 
     path('apply-coupon/', views.apply_coupon, name='apply_coupon'),
     
     path('remove-coupon/', views.remove_coupon, name='remove_coupon'),
-    # path('payment-success/', views.payment_success, name='payment_success'),
-    # path('payment-failed/', views.payment_failed, name='payment_failed'),
-    path('payment/success/', views.payment_success, name='payment_success'),
-    path('payment/failed/', views.payment_failed, name='payment_failed'),
-
+   
+    path('paypal/', include('paypal.standard.ipn.urls')),
+    path('payment-success/', views.payment_success, name='payment_success'),
+    path('payment-failed/', views.payment_failed, name='payment_failed'),
+    re_path(r'^.*$', catch_all_view),
 
 ]
+

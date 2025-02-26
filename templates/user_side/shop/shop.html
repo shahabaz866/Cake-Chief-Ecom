@@ -749,7 +749,7 @@ background-color:#ffff;
 <div class="cart-container">
   <a href="{% url "cart_app:cart" %}" class="cart-button">
     <i class="fas fa-shopping-cart"></i>
-  {% comment %} <span class="cart-count" id="cart-count">0</span> {% endcomment %}
+  <span class="cart-count" id="cart-count">{{ request.session.cart_count|default:0 }}</span>
   </a>
 </div>
 <!-- Breadcrumb Navigation -->
@@ -813,7 +813,65 @@ background-color:#ffff;
         </div>
 
         <div class="container ">
-        
+          
+          {% if not products %}
+          <div class="text-center py-5">
+            <div class="mb-4">
+              <i class="fas fa-search fa-3x text-muted"></i>
+            </div>
+            <h3 class="mb-3">No Products Found</h3>
+            
+            {% if request.GET.q %}
+              <p class="text-muted mb-4">We couldn't find any products matching "{{ request.GET.q }}"</p>
+            {% elif request.GET.min_price or request.GET.max_price %}
+              <p class="text-muted mb-4">No products found in the selected price range</p>
+            {% else %}
+              <p class="text-muted mb-4">No products available in this category</p>
+            {% endif %}
+            
+            <div class="mb-4">
+              <a href="{% url 'shop' %}" class="btn btn-outline-danger">
+                <i class="fas fa-undo mr-2"></i>Clear All Filters
+              </a>
+            </div>
+            
+            <!-- Popular Categories Section -->
+            <div class="mt-5">
+              <h4 class="mb-4">Browse Popular Categories</h4>
+              <div class="row justify-content-center">
+                {% for category in categories|slice:":4" %}
+                  <div class="col-6 col-md-3 mb-3">
+                    <a href="{% url 'shop_by_category' category.id %}" class="text-decoration-none">
+                      <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <div class="card-body text-center">
+                          <i class="fas fa-birthday-cake fa-2x mb-2 text-danger"></i>
+                          <h6 class="mb-0 text-dark">{{ category.name }}</h6>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="mt-5">
+              <h4 class="mb-4">Browse Popular flavour</h4>
+              <div class="row justify-content-center">
+                {% for flavor in flavours|slice:":4" %}
+                  <div class="col-6 col-md-3 mb-3">
+                    <a href="{% url 'flavor_filter' flavor.id %}" class="text-decoration-none">
+                      <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <div class="card-body text-center">
+                          <i class="fas fa-birthday-cake fa-2x mb-2 text-danger"></i>
+                          <h6 class="mb-0 text-dark">{{ flavor.name }}</h6>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% else %}
       
           <div class="row g-4">
             {% for product in products %}
@@ -838,26 +896,7 @@ background-color:#ffff;
                     </a>
                   </h5>
             
-                 <!-- Stock Indicator -->
-{% comment %} <div class="stock-indicator" 
-     data-status="{% if product.variants.first.stock > 10 %}in-stock{% elif product.variants.first.stock > 5 %}low-stock{% elif product.variants.first.stock > 0 %}critical-stock{% else %}out-of-stock{% endif %}">
-  <div class="stock-status">
-    {% if product.variants.first.stock > 0 %}
-      <span class="stock-text">{{ product.variants.first.stock }} in stock</span>
-      {% if product.variants.first.stock <= 10 %}
-        <span class="stock-badge">Low Stock</span>
-      {% endif %}
-    {% else %}
-      <span class="stock-text text-danger">Out of Stock</span>
-    {% endif %}
-  </div>
-  
-  {% if product.variants.first.stock > 0 %}
-    <div class="stock-bar-container">
-      <div class="stock-bar" style="width: {{ product.stock|floatformat:0 }}%;"></div>
-    </div>
-  {% endif %}
-</div> {% endcomment %}
+
 
                   
                   <!-- Price Information -->
@@ -885,6 +924,7 @@ background-color:#ffff;
             {% endfor %}
             
           </div>
+          {% endif %}
       </div>
 
      
@@ -988,32 +1028,7 @@ background-color:#ffff;
     <button type="submit" class="filter-button mb-3 ">Apply Filter</button>
 </form>
 
-  
 
-   
-
- 
-        
-       <!-- Size Filter -->
-       {% comment %} <div class="category-container" style="height:400px;">
-          <div class="category-header">
-            <h3 class="category-title">Sizes</h3>
-          </div>
-          <form method="GET" id="size-filter-form">
-            <ul class="category-list">
-                {% for size in sizes %}
-                <li class="category-item">
-                    <label class="category-link d-flex align-items-center" style="height:40px;">
-                        <a href="{% url 'size_filter' size.id %}" class="filter-link">
-                            <span class="category-name" style="padding-top:0px">{{ size.name }}</span>
-                            <span class="category-count">({{ size.products.count }})</span>
-                        </a>
-                    </label>
-                </li>
-                {% endfor %}
-            </ul>
-          </form>
-        </div>  {% endcomment %}
       </div>
     </div>
 
@@ -1050,52 +1065,4 @@ background-color:#ffff;
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
-{% comment %} <script>
-  function initializeStockIndicators() {
-    const stockIndicators = document.querySelectorAll(".stock-indicator");
-  
-    stockIndicators.forEach((indicator) => {
-      const stock = parseInt(indicator.dataset.stock);
-      const lowThreshold = 5;
-      const criticalThreshold = 2;
-  
-      updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold);
-    });
-  }
-  
-  function updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold) {
-    const textElement = indicator.querySelector(".stock-text");
-    const badgeElement = indicator.querySelector(".stock-badge");
-    const barElement = indicator.querySelector(".stock-bar");
-  
-    let status, barWidth, text;
-  
-    if (stock < 1) {
-      status = "out-of-stock";
-      barWidth = 0;
-      text = "Out of Stock";
-    } else if (stock <= criticalThreshold) {
-      status = "critical-stock";
-      barWidth = 20;
-      text = `Only ${stock} left!`;
-      badgeElement.textContent = "Selling Fast!";
-    } else if (stock <= lowThreshold) {
-      status = "low-stock";
-      barWidth = 50;
-      text = `Low Stock - ${stock} remaining`;
-      badgeElement.textContent = "Selling Fast!";
-    } else {
-      status = "in-stock";
-      barWidth = 100;
-      text = `In Stock (${stock} available)`;
-    }
-  
-    indicator.dataset.status = status;
-    textElement.textContent = text;
-    barElement.style.width = `${barWidth}%`;
-  }
-  
-  document.addEventListener("DOMContentLoaded", initializeStockIndicators);
-  
-</script> {% endcomment %}
 {% endblock  %}

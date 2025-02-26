@@ -52,12 +52,15 @@ INSTALLED_APPS = [
     'cart_app',
     'user_app',
     'wishlist_app', 
-    'payment',
     'wallet_app',
      'tailwind',
  
 ]
-
+CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1",
+]
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
@@ -78,6 +81,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',  
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
+
+
     
   
 ]
@@ -115,8 +122,7 @@ DATABASES = {
     }
 }
 
-RAZORPAY_KEY_ID = 'rzp_test_blN5WtOvlsANBC'
-RAZORPAY_KEY_SECRET = 'cU2FoFBggCQl0724Y1DJaFNr'
+
 PAYPAL_CLIENT_ID = 'ARuGZDAxMltyG-esdCOQ9-CP47h3iHk8FfZ4LlJqrjNUdFXVAayNFSXI_jLJZ3RgBKmfhg35DQML01hH'
 PAYPAL_CLIENT_SECRET = 'EHHBjjqQ0DBw_SljpWaN09YpXyilus-TqiK4tA2VYRW14qoxZ8us0PSU4IKNygwIt_CP1FzVuMr8hVTC'
 PAYPAL_MODE = 'sandbox'
@@ -158,13 +164,13 @@ USE_TZ = True
 
 
 
+STATIC_URL = '/static/'
 
-STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-            os.path.join(BASE_DIR / 'static')
-            ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    BASE_DIR.joinpath('static'),
+]
 
+STATIC_ROOT = BASE_DIR.joinpath('staticfiles')
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

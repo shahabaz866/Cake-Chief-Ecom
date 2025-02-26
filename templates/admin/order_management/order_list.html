@@ -11,53 +11,131 @@
         <!-- Header Section -->
         <div class="page-header d-flex justify-content-between align-items-center">
             <div class="page-title">
-                <h4>Order Management</h4>
+                <h4>Order Management</h4>               
                 <h6>Manage your orders</h6>
             </div>
         </div>
 
-        <!-- Messages Modal -->
-        <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="mySmallModalLabel">Messages</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p>No messages to display.</p>
-                        {% endif %}
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Search and Filter Form -->
-        <div class="card mb-4" id="filter_inputs">
-            <div class="card-body">
-                <form method="get" class="search-form">
-                    <div class="form-row d-flex gap-3 align-items-center">
-                        <input type="text" name="search" value="{{ search_query }}" placeholder="Search orders..." class="form-control">
-                        <select name="status" class="form-select">
-                            <option value="">All Status</option>
-                            {% for status_code, status_label in status_choices %}
-                                <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>{{ status_label }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn btn-primary">Filter</button>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ pending_count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
 
-        <!-- Orders Table -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Delivered Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ delivered_count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-truck fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Cancelled Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ cancelled_count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group mb-3">
+                    {% comment %} <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div> {% endcomment %}
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Search Orders" 
+                           value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="order_status" class="form-control">
+                    <option value="">All Order Statuses</option>
+                    {% for status_code, status_label in status_choices %}
+                        <option value="{{ status_code }}" 
+                                {% if order_status_filter == status_code %}selected{% endif %}>
+                            {{ status_code }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="payment_status" class="form-control">
+                    <option value="">All Payment Statuses</option>
+                    {% for status_code, status_label in payment_status_choices %}
+                        <option value="{{ status_code }}" 
+                                {% if payment_status_filter == status_code %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-filter"></i> Apply
+                </button>
+            </div>
+        </div>
+    </form>
         <!-- Orders Table -->
 <div class="card">
     <div class="card-body">
@@ -81,39 +159,49 @@
                             <td>{{ order.user.email }}</td>
                             <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
                             
-                            <!-- Order Status Dropdown -->
                             <td>
-                                <!-- Order Status Form -->
-                                <form method="POST" action="{% url 'order_app:update_order_status' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="order_id" value="{{ order.id }}">
-                                    <select name="new_order_status" class="form-select mb-1" required  onchange="this.form.submit()">
-                                        {% for status_code, status_label in status_choices %}
-                                            <option value="{{ status_code }}" {% if order.order_status == status_code %}selected{% endif %}>
-                                                {{ status_label }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                  
-                                    {% comment %} <button type="submit" class="btn btn-success">Update</button> {% endcomment %}
-                                </form>
+                                {% if order.order_status != "CANCELLED" and order.order_status != "DELIVERED" %}
+                                    <!-- Order Status Form -->
+                                    <form method="POST" action="{% url 'order_app:update_order_status' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <select name="new_order_status" class="form-select mb-1" required onchange="this.form.submit()">
+                                            {% for status_code, status_label in status_choices %}
+                                                {% if order.order_status != "SHIPPED" or status_code != "CANCELLED" %}
+                                                    <option value="{{ status_code }}" {% if order.order_status == status_code %}selected{% endif %}>
+                                                        {{ status_code }}
+                                                    </option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">{{ order.order_status }}</span>
+                                {% endif %}
                             </td>
                             
-
-                             <!-- Payment Status Dropdown -->
+                            
+                            
+                            <!-- Payment Status Dropdown -->
                             <td>
-                                <form method="POST" action="{% url 'order_app:update_payment_status' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="order_id" value="{{ order.id }}">
-                                    <select name="new_payment_status" class="form-select" onchange="this.form.submit()">
-                                        {% for payment_status_code, payment_status_label in payment_status_choices %}
+                                {% if order.payment_status != "Completed" and order.payment_status != "Refunded" and order.order_status != "CANCELLED" and order.order_status != "DELIVERED" %}   
+                                    <form method="POST" action="{% url 'order_app:update_payment_status' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <select name="new_payment_status" class="form-select" onchange="this.form.submit()">
+                                            {% for payment_status_code, payment_status_label in payment_status_choices %}
                                             <option value="{{ payment_status_code }}" {% if order.payment_status == payment_status_code %}selected{% endif %}>
                                                 {{ payment_status_label }}
                                             </option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
+                                            
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">{{ order.payment_status }}</span>
+                                {% endif %}
                             </td>
+                            
 
                             <!-- Total Amount -->
                             <td>₹{{ order.total_amount }}</td>
@@ -123,8 +211,19 @@
                                 <form method="POST" action="{% url 'order_app:delete_order' order.id %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="order_id" value="{{ order.id }}">
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                </form>
+                                    <button class="btn btn-danger delete-order" 
+                                    data-order-id="{{ order.id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>                                </form>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'order_app:admin_order_detail' order.id %}" 
+                                       class="btn btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
@@ -139,24 +238,27 @@
 </div>
 
 
-        <!-- Pagination -->
-        {% if orders.paginator.num_pages > 1 %}
-            <div class="pagination d-flex justify-content-center mt-4">
-                <nav>
-                    <ul class="pagination">
-                        {% if orders.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo; first</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ orders.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">previous</a></li>
-                        {% endif %}
-                        <li class="page-item disabled"><span class="page-link">Page {{ orders.number }} of {{ orders.paginator.num_pages }}</span></li>
-                        {% if orders.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ orders.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">next</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ orders.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">last &raquo;</a></li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            </div>
+{% if orders.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if orders.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">&laquo; First</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ orders.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a></li>
         {% endif %}
+
+         {% for num in orders.paginator.page_range %}
+            <li class="page-item {% if orders.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+            </li>
+        {% endfor %} 
+
+        {% if orders.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ orders.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ orders.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last &raquo;</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
     </div>
 </div>
 

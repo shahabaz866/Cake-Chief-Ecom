@@ -1,9 +1,100 @@
 {% extends 'user_side/base.html' %}
 {% block content %}
 {% load static %}
-{% load temp_tags %}
+
+<div class="about-container">
+    <!-- Hero Section -->
+    <div class="hero-section" style="background: linear-gradient(135deg, #ff9a9e, #fad0c4);">
+        <h1 class="hero-title">{{ hero.title }}</h1>
+        <p class="hero-subtitle">{{ hero.subtitle }}</p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+        {% for key, stat in stats.items %}
+        <div class="stat-card" style="border-bottom: 3px solid #ff9a9e;">
+            <div class="stat-number" style="color: #ff6b6b;">{{ stat.number }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Content Section -->
+    <div class="content-section">
+        {% comment %} <div class="content-image">
+            <img src="{% static 'user_assets/images/bakery-story.jpg' %}" alt="{{ story.title }}">
+        </div> {% endcomment %}
+        <div class="content-text">
+            <h2 class="content-title" style="color: #ff6b6b;">{{ story.title }}</h2>
+            {% for paragraph in story.paragraphs %}
+            <p class="content-description">{{ paragraph }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Core Values Section -->
+    <div class="values-section">
+        {% for value in values %}
+        <div class="value-card">
+            <div class="value-icon" style="background: #ff9a9e;">
+                <i class="{{ value.icon }}"></i>
+            </div>
+            <h3 class="value-title" style="color: #ff6b6b;">{{ value.title }}</h3>
+            <p class="value-description">{{ value.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Features Section -->
+    <div class="team-section">
+        <h2 class="team-title" style="color: #ff6b6b;">Why Choose Cake Chief?</h2>
+        <div class="team-grid">
+            {% for feature in features %}
+            <div class="team-member">
+                {% comment %} <div class="member-image">
+                    {% comment %} <img src="{% static feature.image %}" alt="{{ feature.title }}"> {% endcomment %}
+                {% comment %} </div>  {% endcomment %}
+                <div class="member-info">
+                    <h3 class="member-name" style="color: #ff6b6b;">{{ feature.title }}</h3>
+                    <p class="member-role">{{ feature.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% block extra_css %}
 <style>
+    /* Previous CSS styles remain unchanged, just adding some bakery-specific colors */
+    .hero-section {
+        background-blend-mode: soft-light;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-bottom-color: #ff6b6b;
+    }
+    
+    .value-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(255, 107, 107, 0.1);
+    }
+    
+    .team-member:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(255, 107, 107, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5em;
+        }
+        
+        .content-section {
+            grid-template-columns: 1fr;
+        }
+    }
     .about-container {
         max-width: 1200px;
         margin: 50px auto;
@@ -257,111 +348,10 @@
 </style>
 {% endblock %}
 
-<div class="about-container">
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <h1 class="hero-title">About Us</h1>
-        <p class="hero-subtitle">We are a passionate team dedicated to creating innovative solutions that make a difference in people's lives. Our journey began with a simple idea and has grown into a mission to transform the digital landscape.</p>
-    </div>
-
-    <!-- Stats Section -->
-    <div class="stats-section">
-        <div class="stat-card">
-            <div class="stat-number">10+</div>
-            <div class="stat-label">Years Experience</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">500+</div>
-            <div class="stat-label">Projects Completed</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">100+</div>
-            <div class="stat-label">Team Members</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">50+</div>
-            <div class="stat-label">Countries Served</div>
-        </div>
-    </div>
-
-    <!-- Content Section -->
-    <div class="content-section">
-        <div class="content-image">
-            <img src="/api/placeholder/600/400" alt="Our Story">
-        </div>
-        <div class="content-text">
-            <h2 class="content-title">Our Story</h2>
-            <p class="content-description">Founded in 2013, we began our journey with a vision to revolutionize how businesses approach digital solutions. What started as a small team of passionate innovators has grown into a global community of problem solvers, creators, and visionaries.</p>
-            <p class="content-description">Today, we continue to push boundaries and explore new possibilities, always staying true to our core mission of delivering excellence and innovation to our clients worldwide.</p>
-        </div>
-    </div>
-
-    <!-- Core Values Section -->
-    <div class="values-section">
-        <div class="value-card">
-            <div class="value-icon">
-                <i class="fas fa-star"></i>
-            </div>
-            <h3 class="value-title">Excellence</h3>
-            <p class="value-description">We strive for excellence in everything we do, setting high standards and consistently delivering quality results.</p>
-        </div>
-        <div class="value-card">
-            <div class="value-icon">
-                <i class="fas fa-lightbulb"></i>
-            </div>
-            <h3 class="value-title">Innovation</h3>
-            <p class="value-description">We embrace creativity and forward-thinking approaches to solve complex challenges and drive progress.</p>
-        </div>
-        <div class="value-card">
-            <div class="value-icon">
-                <i class="fas fa-handshake"></i>
-            </div>
-            <h3 class="value-title">Integrity</h3>
-            <p class="value-description">We maintain the highest standards of integrity in all our interactions, building trust through transparency and honesty.</p>
-        </div>
-    </div>
-
-    <!-- Team Section -->
-    <div class="team-section">
-        <h2 class="team-title">Our Leadership Team</h2>
-        <div class="team-grid">
-            <div class="team-member">
-                <div class="member-image">
-                    <img src="/api/placeholder/300/300" alt="Team Member 1">
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">John Smith</h3>
-                    <p class="member-role">Chief Executive Officer</p>
-                </div>
-            </div>
-            <div class="team-member">
-                <div class="member-image">
-                    <img src="/api/placeholder/300/300" alt="Team Member 2">
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Sarah Johnson</h3>
-                    <p class="member-role">Chief Technology Officer</p>
-                </div>
-            </div>
-            <div class="team-member">
-                <div class="member-image">
-                    <img src="/api/placeholder/300/300" alt="Team Member 3">
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Michael Chen</h3>
-                    <p class="member-role">Chief Design Officer</p>
-                </div>
-            </div>
-            <div class="team-member">
-                <div class="member-image">
-                    <img src="/api/placeholder/300/300" alt="Team Member 4">
-                </div>
-                <div class="member-info">
-                    <h3 class="member-name">Emily Davis</h3>
-                    <p class="member-role">Chief Marketing Officer</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Meta tags for SEO -->
+{% block extra_meta %}
+<meta name="description" content="{{ meta.description }}">
+<meta name="keywords" content="{{ meta.keywords }}">
+<title>{{ meta.title }}</title>
+{% endblock %}
 {% endblock %}

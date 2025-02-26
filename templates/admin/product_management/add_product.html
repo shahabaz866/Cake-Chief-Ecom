@@ -12,7 +12,7 @@
         content="admin, estimates, bootstrap, business, corporate, creative, invoice, html5, responsive, Projects">
     <meta name="author" content="Dreamguys - Bootstrap Admin Template">
     <meta name="robots" content="noindex, nofollow">
-    <title>Dreams Pos admin template</title>
+    <title>cake chief admin </title>
 
     <style>
     .image-upload {
@@ -31,6 +31,56 @@
         margin-bottum: 10px;
         display: none; /* Hide by default, show when an image is uploaded */
     }
+    .header-left {
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        width: 100%; /* Ensure it takes full width */
+        height: 80px; /* Set a fixed height for the header */
+        background-color: #f8f8f8; /* Optional: Add a background color */
+    }
+
+    /* Style for the Cake Chief heading */
+    .cake-chief-heading {
+        font-family: 'Poppins', sans-serif; /* Modern and clean font */
+        font-size: 26px; /* Large size for impact */
+        color: #1b2850;
+        font-weight: 700; /* Bold weight */
+        text-transform: uppercase; /* Uppercase for a strong look */
+        letter-spacing: 2px; /* Spacing between letters */
+        text-align: center; /* Center the text */
+        transition: transform 0.3s ease, color 0.3s ease; /* Smooth transitions */
+    }
+
+    /* Add a glowing effect */
+    .cake-chief-heading::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(211, 60, 60, 0.3), transparent 70%); /* Glow effect */
+        transform: translate(-50%, -50%) scale(0); /* Start with no glow */
+        transition: transform 0.5s ease; /* Smooth glow animation */
+        z-index: -1; /* Place behind the text */
+    }
+
+    /* Hover effect */
+    .cake-chief-heading:hover {
+        color: #1b2850;
+         /* Lighter shade of red on hover */
+        transform: scale(1.05); /* Slightly enlarge on hover */
+    }
+
+    .cake-chief-heading:hover::before {
+        transform: translate(-50%, -50%) scale(1); /* Expand glow on hover */
+    }
+
+    /* Add a subtle shadow for depth */
+    .cake-chief-heading {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
 </style>
 
     <link rel="icon" href="{% static 'admin_assets\img\Starlogo.png' %}">
@@ -44,7 +94,7 @@
     <link rel="stylesheet" href="{% static 'admin_assets/css/style.css' %}">
     <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    <link rel="stylesheet" href="path/to/cropper.css">
+    {% comment %} <link rel="stylesheet" href="path/to/cropper.css"> {% endcomment %}
     <link rel="stylesheet" href="{% static 'path/to/cropper.css' %}">
 
 
@@ -61,11 +111,12 @@
         <div class="header">
 
             <div class="header-left active">
-                <a href="index.html" class="logo">
-                    <h2 style="color:#b52a2a;">Cake Chief</h2>
-                </a>
-                <a href="index.html" class="logo-small">
-                    <img src="{% static 'admin_assets/img/logo-small.png' %}" alt="">
+                <a href="{% url "dashboard" %}" class="logo">
+                    <h2 class="cake-chief-heading">Cake Chief</h2>           
+                  </a>
+                <a href="{% url 'dashboard' %}" class="logo-small">
+                    <img src="{% static 'admin_assets\img\logo\logo-small.png' %}" alt="">
+
                 </a>
                 <a id="toggle_btn" href="javascript:void(0);">
                 </a>
@@ -80,68 +131,6 @@
             </a>
 
             <ul class="nav user-menu">
-
-                <li class="nav-item">
-                    <div class="top-nav-search">
-                        <a href="javascript:void(0);" class="responsive-search">
-                            <i class="fa fa-search"></i>
-                        </a>
-                        <form action="#">
-                            <div class="searchinputs">
-                                <input type="text" placeholder="Search Here ...">
-                                <div class="search-addon">
-                                    <span><img src="{% static 'admin_assets/img/icons/closes.svg' %}" alt="img"></span>
-                                </div>
-                            </div>
-                            <a class="btn" id="searchdiv"><img src="{% static 'admin_assets/img/icons/search.svg' %}"
-                                    alt="img"></a>
-                        </form>
-                    </div>
-                </li>
-
-                <li class="nav-item dropdown has-arrow flag-nav">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);"
-                        role="button">
-                        <img src="{% static 'admin_assets/img/flags/us1.png' %}" alt="" height="20">
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <a href="javascript:void(0);" class="dropdown-item">
-                            <img src="{% static 'admin_assets/img/flags/us.png' %}" alt="" height="16">
-                            English
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item">
-                            <img src="{% static 'admin_assets/img/flags/fr.png' %}" alt="" height="16">
-                            French
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item">
-                            <img src="{% static 'admin_assets/img/flags/es.png' %}" alt="" height="16">
-                            Spanish
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item">
-                            <img src="{% static 'admin_assets/img/flags/de.png' %}" alt="" height="16">
-                            German
-                        </a>
-                    </div>
-                </li>
-
-
-                <li class="nav-item dropdown">
-                    <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
-                        <img src="{% static 'admin_assets/img/icons/notification-bing.svg' %}" alt="img">
-                         <span class="badge rounded-pill">4</span>
-                    </a>
-                    <div class="dropdown-menu notifications">
-                        <div class="topnav-dropdown-header">
-                            <span class="notification-title">Notifications</span>
-                            <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
-                        </div>
-                        
-                        <div class="topnav-dropdown-footer">
-                            <a href="activities.html">View all Notifications</a>
-                        </div>
-                    </div>
-                </li>
-
                 <li class="nav-item dropdown has-arrow main-drop">
                     <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
                         <span class="user-img"><img src="{% static 'admin_assets/img/profiles/avatoradmn.jpg' %}" alt="">
@@ -150,20 +139,14 @@
                     <div class="dropdown-menu menu-drop-user">
                         <div class="profilename">
                             <div class="profileset">
-                                <span class="user-img"><img src="{% static 'admin_assets/img/profiles/avator1.jpg' %}" alt="">
+                                <span class="user-img"><img src="{% static 'admin_assets/img/profiles/avatoradmn.jpg' %}" alt="">
                                     <span class="status online"></span></span>
-                                <div class="profilesets">
-                                    <h6>John Doe</h6>
-                                    <h5>Admin</h5>
-                                </div>
+                              
                             </div>
                             <hr class="m-0">
-                            <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> My
-                                Profile</a>
-                            <a class="dropdown-item" href="generalsettings.html"><i class="me-2"
-                                    data-feather="settings"></i>Settings</a>
+                             
                             <hr class="m-0">
-                            <a class="dropdown-item logout pb-0" href="signin.html"><img
+                            <a class="dropdown-item logout pb-0" href="{% url "home:logout" %}"><img
                                     src="{% static 'admin_assets/img/icons/log-out.svg' %}" class="me-2" alt="img">Logout</a>
                         </div>
                     </div>
@@ -177,8 +160,8 @@
                 <div class="dropdown-menu dropdown-menu-right">
                     <a class="dropdown-item" href="profile.html">My Profile</a>
                     <a class="dropdown-item" href="generalsettings.html">Settings</a>
-                    <a class="dropdown-item" href="signin.html">Logout</a>
-                </div>
+                    <a class="dropdown-item logout pb-0" href="{% url "home:logout" %}"><img
+                        src="{% static 'admin_assets/img/icons/log-out.svg' %}" class="me-2" alt="img">Logout</a>                                </div>
             </div>
 
         </div>
@@ -194,32 +177,48 @@
                             </a>
                         </li>
                         <li class="submenu">
-                            <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/product.svg' %}" alt="img">
-                                    <span>Product</span>
-                                <span class="menu-arrow"></span>
+                            <a href="javascript:void(0);">
+                                <img src="{% static 'admin_assets/img/icons/product.svg' %}" alt="img">
+                                <span>Product </span> <span class="menu-arrow"></span>
                             </a>
-                            <ul>
-                                <li>
-                                    <a href="{% url "product_list" %}">Product List</a>
-                                </li>
-                                <li><a href="{% url "add_products" %}">Add
-                                        Product</a>
-                                </li>
-                                <li><a href="{% url "category_list" %}">Category
-                                        List</a>
-                                </li>
-                                <li><a href="{% url "add_category" %}">Add
-                                        Category</a>
-                                </li>
-                                <li><a href="{% url "flavour_list" %}">Flavour
-                                        List</a>
-                                </li>
-                                <li><a href="{% url "add_flavour" %}">Add
-                                    Flavour</a>
-                                </li>
-                                
+                            <ul class="submenu-content">
+                                <li><a href="{% url 'product_list' %}">Product List</a></li>
+                                <li><a href="{% url 'add_products' %}">Add Product</a></li>
                             </ul>
                         </li>
+
+                        <li class="submenu">
+                            <a href="javascript:void(0);">
+                                <img src="{% static 'admin_assets/img/icons/category.svg' %}" alt="img">
+                                <span>Category </span> <span class="menu-arrow"></span>
+                            </a>
+                            <ul class="submenu-content">
+                                <li><a href="{% url 'category_list' %}">Category List</a></li>
+                                <li><a href="{% url 'add_category' %}">Add Category</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="submenu">
+                            <a href="javascript:void(0);">
+                                <img src="{% static 'admin_assets/img/icons/flavour.svg' %}" alt="img">
+                                <span>Flavour </span> <span class="menu-arrow"></span>
+                            </a>
+                            <ul class="submenu-content">
+                                <li><a href="{% url 'flavour_list' %}">Flavour List</a></li>
+                                <li><a href="{% url 'add_flavour' %}">Add Flavour</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="submenu">
+                            <a href="javascript:void(0);">
+                                <img src="{% static 'admin_assets/img/icons/coupon.svg' %}" alt="img">
+                                <span>Coupon </span> <span class="menu-arrow"></span>
+                            </a>
+                            <ul class="submenu-content">
+                                <li><a href="{% url 'coupon_list' %}">List Coupons</a></li>
+                            </ul>
+                        </li>
+
                      
                         <li class="submenu">
                             <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/users1.svg' %}"
@@ -231,6 +230,14 @@
                                 <li><a href="{% url "user_management" %}">Users
                                         List</a>
                                 </li>
+                            </ul>
+                        </li>
+                        <li class="submenu">
+                            <a href="javascript:void(0);"><img src="{% static 'admin_assets/img/icons/order.svg' %}" alt="img">
+                                <span>order</span> <span class="menu-arrow"></span>
+                            </a>
+                            <ul class="submenu-content">
+                                <li><a href="{% url 'order_app:admin_order_list' %}">Order List</a></li>
                             </ul>
                         </li>
                         <li>{% if messages %}
@@ -302,41 +309,14 @@
                                         </select>
                                     </div>
                                 </div>
-                                {% comment %} <div class="col-lg-3 col-sm-6 col-12">
-                                    <div class="form-group">
-                                        <label>Size</label>
-                                        <select name="sizes" class="select form-control" multiple required>
-                                            <option value="" disabled>Select Sizes</option>
-                                            {% for size in sizes %}
-                                                <option value="{{ size.id }}">{{ size.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div> {% endcomment %}
-                                
-        
-                                {% comment %} <div class="col-lg-3 col-sm-6 col-12">
-                                    <div class="form-group">
-                                        <label>Quantity</label>
-                                        <input type="number" name="quantity" class="form-control" placeholder="0" required>
-                                    </div>
-                                </div> {% endcomment %}
-        
+                             
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label>Description</label>
                                         <textarea name="description" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
-        
-                                {% comment %} <div class="col-lg-3 col-sm-6 col-12">
-                                    <div class="form-group">
-                                        <label>Price</label>
-                                        <input type="number" name="price" step="0.01" class="form-control" placeholder="0" required>
-                                    </div>
-                                </div> {% endcomment %}
 
-                                
                                 <!-- Variants Card -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -360,11 +340,11 @@
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">Price</label>
-                                <input type="number" class="form-control" name="varient_price[]" value="{{ varient.price }}" required>
+                                <input type="number" class="form-control" name="varient_price[]" value="{{ varient.price }}" min="0" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">Stock</label>
-                                <input type="number" class="form-control" name="varient_stock[]" value="{{ varient.stock }}" required>
+                                <input type="number" class="form-control" name="varient_stock[]" value="{{ varient.stock }}" min="0" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">&nbsp;</label>
@@ -389,31 +369,29 @@
                                     </div>
                                 </div>
 
-                                        
-                                                            <!-- Additional Product Images -->
-                                                            <div class="col-lg-12">
-                                                                <div class="form-group">
-                                                                    <label>Additional Product Images (Upload at least 3 images):</label>
-                                                                    <div id="additionalImageInputs" class="d-flex flex-wrap">
-                                                                        {% for i in 3|range %}
-                                                                        <div class="image-upload me-2">
-                                                                            <input type="file" name="additional_product_image_{{i}}" id="additionalImageInput{{i}}" 
-                                                                                   accept="image/*" class="form-control" required onchange="previewImage(this, {{i}})">
-                                                                            <div class="image-uploads">
-                                                                                <img src="{% static 'admin_assets/img/icons/upload.svg' %}" alt="img" style="width: 40px; height: auto;">
-                                                                                <h4>Drag and drop files to upload</h4>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div id="additionalImagePreview{{i}}" class="mt-2" style="width:300px">
-                                                                            <!-- Image preview will be displayed here -->
-                                                                        </div>
-                                                                        {% endfor %}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+            
+                                <!-- Additional Product Images -->
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Additional Product Images (Upload at least 3 images):</label>
+                                        <div id="additionalImageInputs" class="d-flex flex-wrap">
+                                            {% for i in 3|range %}
+                                            <div class="image-upload me-2">
+                                                <input type="file" name="additional_product_image_{{i}}" id="additionalImageInput{{i}}" 
+                                                        accept="image/*" class="form-control" required onchange="previewImage(this, {{i}})">
+                                                <div class="image-uploads">
+                                                    <img src="{% static 'admin_assets/img/icons/upload.svg' %}" alt="img" style="width: 40px; height: auto;">
+                                                    <h4>Drag and drop files to upload</h4>
+                                                </div>
+                                            </div>
+                                            <div id="additionalImagePreview{{i}}" class="mt-2" style="width:300px">
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div id="cropContainer" style="display:none; position: relative; ">
-                                    <!-- Cropped image will be displayed here -->
                                 </div>
         
                                 <div class="col-lg-12">
@@ -429,7 +407,6 @@
     </div>
 
     <script>
-      // Constants for image requirements
 const IMAGE_CONFIG = {
     main: {
         width: 539,
@@ -671,7 +648,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     variantsContainer.insertAdjacentHTML('beforeend', variantHTML);
                 });
             
-                // Event delegation for remove buttons
                 variantsContainer.addEventListener('click', function(e) {
                     if (e.target.closest('.remove-variant')) {
                         e.target.closest('.variant-item').remove();

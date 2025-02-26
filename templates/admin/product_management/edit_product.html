@@ -181,12 +181,12 @@
                                     
                                     <div class="col-md-4 mb-3">
                                         <label for="new_variant_price" class="form-label">Price</label>
-                                        <input type="text" class="form-control" id="new_variant_price" name="new_variant_price[]" required>
+                                        <input type="text" class="form-control" id="new_variant_price" name="new_variant_price[]" min="0" required>
                                     </div>
                                     
                                     <div class="col-md-4 mb-3">
                                         <label for="new_variant_stock" class="form-label">Stock</label>
-                                        <input type="number" class="form-control" id="new_variant_stock" name="new_variant_stock[]" required>
+                                        <input type="number" class="form-control" id="new_variant_stock" name="new_variant_stock[]" min="0" required>
                                     </div>
                                 </div>
                             </div>
@@ -220,9 +220,49 @@
                     event.preventDefault()
                     event.stopPropagation()
                 }
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })()
+
+                // Custom validation to prevent negative values
+                var weightInputs = form.querySelectorAll('input[name*="variant_weight"], input[name*="new_variant_weight"]');
+                var priceInputs = form.querySelectorAll('input[name*="variant_price"], input[name*="new_variant_price"]');
+                var stockInputs = form.querySelectorAll('input[name*="variant_stock"], input[name*="new_variant_stock"]');
+
+                var isValid = true;
+
+                weightInputs.forEach(function(input) {
+                    if (parseFloat(input.value) < 0) {
+                        isValid = false;
+                        input.setCustomValidity("Weight cannot be negative.");
+                    } else {
+                        input.setCustomValidity("");
+                    }
+                });
+
+                priceInputs.forEach(function(input) {
+                    if (parseFloat(input.value) < 0) {
+                        isValid = false;
+                        input.setCustomValidity("Price cannot be negative.");
+                    } else {
+                        input.setCustomValidity("");
+                    }
+                });
+
+                stockInputs.forEach(function(input) {
+                    if (parseInt(input.value) < 0) {
+                        isValid = false;
+                        input.setCustomValidity("Stock cannot be negative.");
+                    } else {
+                        input.setCustomValidity("");
+                    }
+                });
+
+                if (!isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
 </script>
 {% endblock %}

@@ -1,69 +1,73 @@
 {% extends 'admin/bas.html' %}
-
-{% block content %}
+ {% block content %}
 <div class="page-wrapper">
-    <div class="content">
-        <div class="page-header">
-            <div class="page-title">
-                <h4>Delete Coupon</h4>
-                <h6>Remove coupon from your store</h6>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <div class="alert alert-custom alert-danger">
-                    <div class="alert-icon">
-                        <i data-feather="alert-triangle"></i>
-                    </div>
-                    <div class="alert-text">
-                        <h5>Are you sure you want to delete the coupon "{{ coupon.code }}"?</h5>
-                        <p>This action cannot be undone. The coupon will be permanently removed from your system.</p>
-                    </div>
-                </div>
-
-                <form method="post" class="delete-form">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-danger me-2">
-                            <i data-feather="trash-2" class="me-2"></i>
-                            Confirm Delete
-                        </button>
-                        <a href="{% url 'coupon_list' %}" class="btn btn-cancel">
-                            <i data-feather="x" class="me-2"></i>
-                            Cancel
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
+  <div class="content">
+    <div class="page-header">
+      <div class="page-title">
+        <h4>Delete Coupon</h4>
+        <h6>Remove coupon from your store</h6>
+      </div>
     </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-custom alert-danger">
+          <div class="alert-icon">
+            <i data-feather="alert-triangle"></i>
+          </div>
+          <div class="alert-text">
+            <h5>
+              Are you sure you want to delete the coupon "{{ coupon.code }}"?
+            </h5>
+            <p>
+              This action cannot be undone. The coupon will be permanently
+              removed from your system.
+            </p>
+          </div>
+        </div>
+
+        <form method="post" class="delete-form">
+          {% csrf_token %}
+          <div class="form-group">
+            <button type="submit" class="btn btn-danger me-2">
+              <i data-feather="trash-2" class="me-2"></i>
+              Confirm Delete
+            </button>
+            <a href="{% url 'coupon_list' %}" class="btn btn-cancel">
+              <i data-feather="x" class="me-2"></i>
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>
-.alert-custom {
+  .alert-custom {
     display: flex;
     align-items: center;
     padding: 15px;
     margin-bottom: 20px;
     border-radius: 4px;
     background-color: #fff3f3;
-}
+  }
 
-.alert-custom .alert-icon {
+  .alert-custom .alert-icon {
     margin-right: 15px;
     color: #dc3545;
     font-size: 24px;
-}
+  }
 
-.alert-custom .alert-text h5 {
+  .alert-custom .alert-text h5 {
     color: #dc3545;
     margin-bottom: 10px;
-}
+  }
 
-.delete-form {
+  .delete-form {
     display: flex;
     align-items: center;
-}
+  }
 </style>
 {% endblock %}

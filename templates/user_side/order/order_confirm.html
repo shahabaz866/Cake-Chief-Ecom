@@ -160,8 +160,9 @@
                                     </span>
                                 </div>
                             </div>
+                            
                             <div class="col-auto text-end">
-                                <p class="text-muted small mb-0"><strong>₹{{ order.subtotal |floatformat:2 }} each</p></strong>
+                                <p class="text-muted small mb-0"><strong>₹{{  item.price |floatformat:2 }} each</p></strong>
                             </div>
                         </div>
                         {% endfor %}
@@ -232,6 +233,22 @@
                             <div class="card-body p-4">
                                 <div class="bg-light rounded-4 p-4 mb-3">
                                     <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Tax</span>
+                                        <span>₹{{ order.tax |floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Delivery Charge</span>
+                                        <span>₹{{ order.delivery_charge|floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Packaging Charge</span>
+                                        <span>₹{{ order.packaging_charge |floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Discount</span>
+                                        <span>₹-{{ order.discount |floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">Subtotal</span>
                                         <span>₹{{ order.subtotal |floatformat:2 }}</span>
                                     </div>
@@ -283,9 +300,7 @@
                     <a href="{% url 'shop' %}" class="btn btn-outline-custom-primary rounded-pill px-4 py-2">
                         <i class="bi bi-arrow-left me-2"></i>Continue Shopping
                     </a>
-                    {% comment %} <button onclick="window.print()" class="btn btn-custom-primary rounded-pill px-4 py-2">
-                        <i class="bi bi-printer-fill me-2"></i>Print Order
-                    </button> {% endcomment %}
+                   
                 </div>
             </div>
         </div>
@@ -294,11 +309,12 @@
 
 <!-- Track Order Button -->
 <div class="position-fixed bottom-0 end-0 m-4 no-print">
-    <button class="btn btn-custom-primary rounded-circle shadow-lg p-3" 
-            data-bs-toggle="tooltip" data-bs-placement="left" title="Track Order">
+    <a href="{% url 'order_app:track_order' %}" class="btn btn-custom-primary rounded-circle shadow-lg p-3"
+       data-bs-toggle="tooltip" data-bs-placement="left" title="Track Order">
         <i class="bi bi-truck"></i>
-    </button>
+    </a>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}

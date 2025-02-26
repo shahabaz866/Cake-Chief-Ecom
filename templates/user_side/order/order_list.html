@@ -81,6 +81,70 @@
             color: #9ca3af;
             margin: 0 0.25rem;
         }
+        :root {
+            --primary-color:#b52a2a;
+            --primary-light: #fdf2f2;
+            --primary-dark: #b33333;
+        }
+        
+        .bg-custom-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .text-custom-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        .border-custom-primary {
+            border-color: var(--primary-color) !important;
+        }
+        
+        .btn-custom-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-custom-primary:hover {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .btn-outline-custom-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-custom-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .order-status-pill {
+            font-size: 0.85rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+        }
+        
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(211, 60, 60, 0.1) !important;
+        }
+        
+        .custom-icon-bg {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -111,6 +175,18 @@
             <h1 class="text-4xl font-bold text-gray-900 mb-4" style="color: var(--primary-color)">My Orders</h1>
             <p class="text-gray-600 text-lg">Track and manage your recent purchases</p>
         </header>
+        {% comment %} <div class="modal-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No messages to display.</p>
+            {% endif %}
+        </div> {% endcomment %}
+        
         {% if orders_with_items %}
 
         <!-- Orders Overview -->
@@ -179,7 +255,7 @@
                         {% if order.order.order_status == 'PROCESSING' or order_with_items.order.order_status == 'SHIPPED' %}
 
                         <form method="POST" action="{% url 'order_app:cancel_order' order.order.id %}" 
-                        onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                        >
                         {% csrf_token %}
                         <button type="submit" class="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-red-50 transition-colors">
                             <i class="bi bi-x-circle mr-2"></i>Cancel Order
@@ -240,14 +316,21 @@
                 </a>
             </div>
             
-            {% endif %}
-            
-            
+            {% endif %} 
         </div>
+        
+    </div>
+    <div class="fixed bottom-4 right-4 z-50 no-print transition-transform duration-300 ease-in-out" id="trackOrderButton">
+        <a href="{% url 'order_app:track_order' %}" 
+           class="btn btn-custom-primary rounded-full shadow-lg p-3 transform hover:scale-105 transition-all"
+           data-bs-toggle="tooltip" 
+           data-bs-placement="left" 
+           title="Track Order">
+            <i class="bi bi-truck text-2xl"></i>
+        </a>
     </div>
 
     <script>
-        // Optional: Toggle between order list and empty state
         function toggleEmptyState() {
             const orderList = document.querySelector('.space-y-6 > div:first-child');
             const emptyState = document.getElementById('empty-state');
@@ -262,5 +345,28 @@
             // }
         }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const trackButton = document.getElementById('trackOrderButton');
+            let lastScrollTop = 0;
+    
+            window.addEventListener('scroll', function() {
+                let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (currentScroll > lastScrollTop && currentScroll > 200) {
+                    // Scrolling down and past 200px
+                    trackButton.classList.remove('translate-y-full');
+                    trackButton.classList.add('translate-y-0');
+                } else {
+                    // Scrolling up or above 200px
+                    trackButton.classList.remove('translate-y-0');
+                    trackButton.classList.add('translate-y-full');
+                }
+                
+                lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+            });
+        });
+    </script>
+    
 </body>
 </html>

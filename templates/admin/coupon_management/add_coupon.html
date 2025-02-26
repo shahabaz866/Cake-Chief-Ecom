@@ -1,135 +1,158 @@
 {% extends 'admin/bas.html' %}
-
 {% block content %}
 
 <style>
-    .feather-rupee {
-        font-size: 21px;
-        color: #000;
-    }
+  .feather-rupee {
+    font-size: 21px;
+    color: #000;
+  }
 </style>
 <div class="page-wrapper">
-    <div class="content">
-        <div class="page-header">
-            <div class="page-title">
-                <h4>{% if coupon %}Edit Coupon{% else %}Add New Coupon{% endif %}</h4>
-                <h6>Manage your store coupon details</h6>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <form method="post" class="row">
-                    {% csrf_token %}
-                    
-                    <div class="col-lg-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Coupon Code <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <div class="input-group-text"><i data-feather="tag"></i></div>
-                                <input type="text" 
-                                       name="code" 
-                                       class="form-control" 
-                                       value="{{ coupon.code|default:'' }}" 
-                                       placeholder="Enter coupon code" 
-                                       required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Discount Amount <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <div class="input-group-text"><i class="feather feather-rupee">₹</i></div>
-                                <input type="number" 
-                                       name="discount" 
-                                       class="form-control" 
-                                       step="0.01" 
-                                       value="{{ coupon.discount|default:'' }}" 
-                                       placeholder="Enter discount amount" 
-                                       required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Valid From <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <div class="input-group-text"><i data-feather="calendar"></i></div>
-                                <input type="datetime-local" 
-                                       name="valid_from" 
-                                       class="form-control" 
-                                       value="{{ coupon.valid_from|date:'Y-m-d\\TH:i'|default:'' }}" 
-                                       required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Valid To <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <div class="input-group-text"><i data-feather="calendar"></i></div>
-                                <input type="datetime-local" 
-                                       name="valid_to" 
-                                       class="form-control" 
-                                       value="{{ coupon.valid_to|date:'Y-m-d\\TH:i'|default:'' }}" 
-                                       required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-12 col-sm-12">
-                        <div class="form-group">
-                            <label>Coupon Status</label>
-                            <div class="status-toggle">
-                                <input 
-                                    type="checkbox" 
-                                    id="active" 
-                                    name="active" 
-                                    class="check" 
-                                    {% if coupon.active %}checked{% endif %}
-                                >
-                                <label for="active" class="checktoggle" style=" "></label>
-
-                                <br>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-submit me-2">
-                                <i data-feather="save" class="me-2"></i>
-                                Save Coupon
-                            </button>
-                            <a href="{% url 'coupon_list' %}" class="btn btn-cancel">
-                                <i data-feather="x" class="me-2"></i>
-                                Cancel
-                            </a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+  <div class="content">
+    <div class="page-header">
+      <div class="page-title">
+        <h4>{% if coupon %}Edit Coupon{% else %}Add New Coupon{% endif %}</h4>
+        <h6>Manage your store coupon details</h6>
+      </div>
     </div>
+    {% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-body">
+        <form method="post" class="row">
+          {% csrf_token %}
+
+          <div class="col-lg-6 col-sm-12">
+            <div class="form-group">
+              <label>Coupon Code <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <div class="input-group-text"><i data-feather="tag"></i></div>
+                <input
+                  type="text"
+                  name="code"
+                  class="form-control"
+                  value="{{ coupon.code|default:'' }}"
+                  placeholder="Enter coupon code"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-sm-12">
+            <div class="form-group">
+              <label>Discount Amount <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <div class="input-group-text">
+                  <i class="feather feather-rupee">₹</i>
+                </div>
+                <input
+                  type="number"
+                  name="discount"
+                  class="form-control"
+                  step="0.01"
+                  value="{{ coupon.discount|default:'' }}"
+                  placeholder="Enter discount amount"
+                  required
+                />
+              </div>
+              {% if form.errors.discount %}
+              <p class="text-danger">{{ form.errors.discount }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-sm-12">
+            <div class="form-group">
+              <label>Valid From <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <div class="input-group-text">
+                  <i data-feather="calendar"></i>
+                </div>
+                <input
+                  type="datetime-local"
+                  name="valid_from"
+                  class="form-control"
+                  value="{{ coupon.valid_from|date:'Y-m-d\\TH:i'|default:'' }}"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-sm-12">
+            <div class="form-group">
+              <label>Valid To <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <div class="input-group-text">
+                  <i data-feather="calendar"></i>
+                </div>
+                <input
+                  type="datetime-local"
+                  name="valid_to"
+                  class="form-control"
+                  value="{{ coupon.valid_to|date:'Y-m-d\\TH:i'|default:'' }}"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-12 col-sm-12">
+            <div class="form-group">
+              <label>Coupon Status</label>
+              <div class="status-toggle">
+                <input
+                  type="checkbox"
+                  id="active"
+                  name="active"
+                  class="check"
+                  {%
+                  if
+                  coupon.active
+                  %}checked{%
+                  endif
+                  %}
+                />
+                <label for="active" class="checktoggle" style=""></label>
+
+                <br />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-12">
+            <div class="form-group">
+              <button type="submit" class="btn btn-submit me-2">
+                <i data-feather="save" class="me-2"></i>
+                Save Coupon
+              </button>
+              <a href="{% url 'coupon_list' %}" class="btn btn-cancel">
+                <i data-feather="x" class="me-2"></i>
+                Cancel
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-$(document).ready(function() {
+  $(document).ready(function () {
     // Optional: Add form validation
-    $('form').on('submit', function(e) {
-        let validFrom = new Date($('input[name="valid_from"]').val());
-        let validTo = new Date($('input[name="valid_to"]').val());
+    $("form").on("submit", function (e) {
+      let validFrom = new Date($('input[name="valid_from"]').val());
+      let validTo = new Date($('input[name="valid_to"]').val());
 
-        if (validFrom >= validTo) {
-            showToast('Valid To date must be after Valid From date', 'error');
-            e.preventDefault();
-        }
+      if (validFrom >= validTo) {
+        showToast("Valid To date must be after Valid From date", "error");
+        e.preventDefault();
+      }
     });
-});
+  });
 </script>
 {% endblock %}

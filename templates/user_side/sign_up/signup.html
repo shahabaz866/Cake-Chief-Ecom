@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+   
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style media="screen">
         
@@ -20,8 +21,11 @@
             margin: 0;
             box-sizing: border-box;
         }
+        
         body {
             background-color: #ffffff;
+            {% comment %} background: url("{% static 'user_assets/images/bg_sign.svg' %}") no-repeat center center fixed;
+            background-size: cover; {% endcomment %}
         }
         .background {
             width: 430px;
@@ -128,38 +132,72 @@
             opacity: 1;
         }
        
-            
+        .svg-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Keeps the SVG behind the form */
+        }
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Adjust input padding to prevent text overlap with icon */
+        .password-container input[type="password"] {
+            padding-right: 35px;
+        }
     </style>
 
 </head>
 <body>
+ <div class="svg-container">
+ 
+    
+    </div> 
+    
+    
     <form action="{% url 'SignupPage' %}" method="post">
         {% csrf_token %}
-       
-
+        
         <div class="logo-container">
             <a href="{% url 'home' %}">
                 <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo">
             </a>
         </div>
         
-        
         <label for="username">Username</label>
-        <input type="text" name="username" id="username" placeholder="Enter Username" required>
+        <input type="text" name="username" id="username" placeholder="Enter Username" 
+            value="{{ form_data.username }}" required>
 
         <label for="email">Email</label>
-        <input type="email" name="email" id="email" placeholder="Enter Email" required>
+        <input type="email" name="email" id="email" placeholder="Enter Email" 
+            value="{{ form_data.email }}" required>
 
         <label for="password1">Password</label>
-        <input type="password" name="password1" id="password1" placeholder="Enter Password" required>
+        <div class="password-container">
+            <input type="password" name="password1" id="password1" placeholder="Enter Password" required>
+            <i class="fas fa-eye toggle-password" data-target="password1"></i>
+        </div>
 
-        <label for="password2">Confirm Password</label>
-        <input type="password" name="password2" id="password2" placeholder="Confirm Password" required>
+        <label for="password2">Password</label>
+        <div class="password-container">
+            <input type="password" name="password2" id="password2" placeholder="Confirm Password" required>
+            <i class="fas fa-eye toggle-password" data-target="password2"></i>
+        </div>
 
         <button type="submit">Sign Up</button>
-
-       
-
         <p id="msg">Already have an account? <a href="{% url 'login' %}" style="color:#b52a2a;">Login</a></p>
     </form>
 
@@ -168,14 +206,28 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    {% comment %} <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            if (document.querySelectorAll('.bd-example-modal-sm .alert').length > 0) {
-                var messageModal = new bootstrap.Modal(document.querySelector('.bd-example-modal-sm'));
-                messageModal.show();
-            }
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        this.classList.remove('fa-eye');
+                        this.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        this.classList.remove('fa-eye-slash');
+                        this.classList.add('fa-eye');
+                    }
+                });
+            });
         });
-        </script> {% endcomment %}
+    </script>
         <script>
             function showToast(message, type) {
               let backgroundColor = "#000";

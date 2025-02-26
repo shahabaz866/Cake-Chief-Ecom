@@ -165,10 +165,11 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>
-                            <span class="transaction-type {% if transaction.transaction_type == 'credit' %}type-credit{% else %}type-debit{% endif %}">
+                            <span class="transaction-type {% if transaction.transaction_type|lower == 'credit' %}type-credit{% else %}type-debit{% endif %}">
                                 {{ transaction.transaction_type|title }}
                             </span>
                         </td>
+                        
                         <td class="amount">₹{{ transaction.amount }}</td>
                         <td>{{ transaction.description|default:"N/A" }}</td>
                         <td>{{ transaction.timestamp }}</td>

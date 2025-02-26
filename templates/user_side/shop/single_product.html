@@ -6,8 +6,10 @@
 {% load custom_filters %}
 <style>
   .product-section {
-    padding: 4rem 0;
+    {% comment %} padding: 4rem 0; {% endcomment %}
+    padding-top: 4rem;
     background-color: #ffffff;
+    margin-left: 0;
   }
 
   .product-gallery {
@@ -16,6 +18,7 @@
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    height: 100%;
   }
   /* Main Image Styles */
   .main-image-container {
@@ -456,7 +459,96 @@
   .rating-input label:hover ~ label {
       color: #fbbf24;
   }
- 
+  {% comment %} .product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #eee;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  .product-card img {
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .product-card .card-body {
+    padding: 1rem;
+  }
+
+  .product-card .card-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-card .card-text {
+    font-weight: bold;
+    color: #dc3545;
+  }
+
+  .product-card .btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  } {% endcomment %}
+  @keyframes bounceArrow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  .variant-selection {
+    position: relative;
+    margin: 20px 0;
+    padding-top: 30px; /* Space for the arrow */
+  }
+  
+  .variant-arrow-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #dc3545;
+    font-size: 24px;
+    animation: bounceArrow 2s infinite;
+    opacity: 0.8;
+  }
+  
+  /* Style the select element */
+  .variant-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .variant-select:hover {
+    border-color: #dc3545;
+  }
+  
+  .variant-select:focus {
+    outline: none;
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
 </style>
 {% endblock %}
 <div class="bg-light py-3">
@@ -543,29 +635,20 @@
         <div class="product-info">
           <h1 class="product-title">{{ product.title }}</h1>
 
-          <div class="product-badges mb-3">
-            <!-- Bestseller Badge -->
+          <div class="product-badges mb-3" id="product-badges_{{ product.id }}">
             {% if product.is_bestseller %}
             <span class="badge bg-warning text-dark me-2">Bestseller</span>
             {% endif %}
-
-            <!-- New Flavor Badge -->
+          
             {% if product.is_new %}
             <span class="badge bg-success me-2">New Flavor</span>
             {% endif %}
-             {% if product.variants.first.stock <= 0 %}
-            <span class="badge bg-danger me-2">Out of Stock</span>
-
-            {% else %}
-            <span class="badge bg-success me-2">In Stock</span>
-
-            {% endif %}
-
-            <!-- Dietary Info Badge -->
+          
+            <!-- Variant-specific stock badge will be dynamically updated -->
+            <span id="variant-stock-badge_{{ product.id }}" class="badge me-2"></span>
+          
             {% if product.dietary_info %}
-            <span class="badge bg-info text-dark me-2"
-              >{{ product.dietary_info }}</span
-            >
+            <span class="badge bg-info text-dark me-2">{{ product.dietary_info }}</span>
             {% endif %}
           </div>
 
@@ -574,29 +657,34 @@
             {% comment %} <input type="hidden" name = "variant_price" id="price_{{ product.id }}" value="{{ product.variants.first.price }}"> {% endcomment %}
             <span class="serving-info text-muted" id="weight_{{ product.id }}">({{ product.variants.first.weight }})</span>
         </div>
-        <div class="stock-indicator" data-stock="{{ product.variants.first.stock }}">
+        <div class="stock-indicator" id="stock-indicator_{{ product.id }}" data-stock="{{ product.variants.first.stock }}">
           <div class="variant-selection">
-            <label for="variant-select">Choose Variant:</label>
-            <select id="variant-select" class="variant-select" onchange="handleVariantChange(this, {{ product.id }})" name="variant">
+            <div class="variant-arrow-indicator">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+            <label for="variant-select"><strong>Choose Variant:</strong></label>
+            <select id="variant-select_{{ product.id }}" 
+                    class="variant-select" 
+                    onchange="handleVariantChange(this, {{ product.id }})" 
+                    name="variant">
               {% for variant in product.variants.all %}
-                  <option value="{{ variant.id }}" 
-                          data-stock="{{ variant.stock }}" 
-                          data-price="{{ variant.price }}" 
-                          data-weight="{{ variant.weight }}">
-                      {{ variant.weight }} - ₹{{ variant.price }}
-                  </option>
+                <option value="{{ variant.id }}" 
+                        data-stock="{{ variant.stock }}" 
+                        data-price="{{ variant.price }}" 
+                        data-weight="{{ variant.weight }}">
+                  {{ variant.weight }} - ₹{{ variant.price }}
+                </option>
               {% endfor %}
             </select>
-{% comment %} <input type="hidden" id="variant-price-{{ product.id }}" name="variant_price" value="{{ product.variants.first.price }}"> {% endcomment %}
-        </div>
+          </div>
           <div class="stock-status">
-              <span id="stock-text_{{ product.id }}" class="stock-text">In Stock</span>
-              <span id="stock-badge_{{ product.id }}" class="stock-badge"></span>
+            <span id="stock-text_{{ product.id }}" class="stock-text">In Stock</span>
+            <span id="stock-badge_{{ product.id }}" class="stock-badge"></span>
           </div>
           <div class="stock-bar-container">
-              <div id="stock-bar_{{ product.id }}" class="stock-bar" style="width: 100%;"></div>
+            <div id="stock-bar_{{ product.id }}" class="stock-bar" style="width: 100%;"></div>
           </div>
-      </div>
+        </div>
 
 
           <div
@@ -662,7 +750,7 @@
           </div>
 
           <!-- Customization Options -->
-          <div class="customization-section mb-4">
+          {% comment %} <div class="customization-section mb-4">
             <h3 class="section-title">Customize Your Cake</h3>
 
             <!-- Message on Cake -->
@@ -676,34 +764,25 @@
               />
               <small class="text-muted">Maximum 50 characters</small>
             </div>
-          </div>
+          </div> {% endcomment %}
 
-          <!-- Ordering Section -->
-          <div class="ordering-section mb-4">
-          
-            {% if product.variants.stock <= 0 %}
-            <span class="badge bg-danger me-2">Out of Stock</span>
-
-            {% else %}
-            
-
-           
-            <div class="action-buttons">
-              {% comment %} <a
-                id="addToCartLink"
-                href="{% url 'cart_app:add_cart' product.id  %}?quantity=1"
-                class="btn btn-primary btn-lg add-to-cart w-75"
-              >
-                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-              </a> {% endcomment %}
-              <button type="submit" class="btn btn-primary btn-lg add-to-cart w-75">
-                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-              </button>
-              {% endif %}
-              <a href="{% url 'wishlist_app:add_to_wishlist' product.id variant.id|default:0  %}" class="btn btn-outline-danger btn-lg wishlist-btn">
-                <i class="far fa-heart"></i>
-            </a>
-            </div>
+         <!-- Ordering Section -->
+<div class="ordering-section mb-4">
+  <div id="add-to-cart-container_{{ product.id }}">
+    {% if product.variants.first.stock > 0 %}
+    <div class="action-buttons">
+      <button type="submit" class="btn btn-primary btn-lg add-to-cart w-75">
+        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+      </button>
+       <a href="{% url 'wishlist_app:add_to_wishlist' product.id product.variants.first.id %}"
+      class="btn btn-outline-danger btn-lg wishlist-btn"
+      data-product-id="{{ product.id }}" id="wishlist-btn_{{ product.id }}">
+       <i class="far fa-heart"></i>
+   </a> 
+    </div>
+    {% endif %}
+  </div>
+</div>
           </div>
         </form>
 
@@ -711,147 +790,33 @@
         </div>
       </div>
     </div>
-    <div class="reviews-section mt-8">
-      <!-- Rating Summary -->
-      <div class="rating-summary bg-gray-50 p-6 rounded-lg mb-6">
-          <div class="flex items-start">
-              <!-- Average Rating -->
-              <div class="text-center mr-8">
-                  <div class="text-4xl font-bold">{{ product.average_rating }}</div>
-                  <div class="text-yellow-400 text-2xl">
-                      {% for i in "12345" %}
-                          {% if forloop.counter <= product.average_rating %}
-                              ★
-                          {% else %}
-                              ☆
-                          {% endif %}
-                      {% endfor %}
-                  </div>
-                  <div class="text-sm text-gray-600">{{ total_reviews }} reviews</div>
-              </div>
-              
-              <!-- Rating Distribution -->
-              {% comment %} <div class="flex-grow">
-                  {% comment %} {% for rating in "54321" %}
-                      <div class="flex items-center mb-1">
-                          <span class="w-12 text-sm">{{ rating }} stars</span>
-                          <div class="flex-grow mx-2 h-4 bg-gray-200 rounded">
-                              {% with count=rating_distribution %}
-                              <div class="h-full bg-yellow-400 rounded" 
-                                   style="width: {% if total_reviews %}{{ total_reviews }}{% else %}0{% endif %}%">
-                              </div>
-                              {% endwith %}
-                          </div>
-                          <span class="w-12 text-sm text-right">{{ rating_distribution }}</span>
-                      </div>
-                  {% endfor %} {% endcomment %}
-              {% comment %} </div> {% endcomment %} 
-          </div>
-      </div>
-  
-      <!-- Review Form -->
-      {% if user.is_authenticated %}
-          <div class="review-form bg-white p-6 rounded-lg shadow-sm mb-6">
-              <h3 class="text-xl font-semibold mb-4">
-                  {% comment %} {% if user_review %}
-                      Edit Your Review
-                  {% else %}
-                      Write a Review
-                  {% endif %} {% endcomment %}
-              </h3>
-              <form method="post" action="{% url 'add_review' product.id %}" enctype="multipart/form-data">
-                  {% csrf_token %}
-                  
-                  <!-- Rating Input -->
-                  <div class="mb-4">
-                      <label class="block text-gray-700 font-medium mb-2">Rating</label>
-                      <div class="flex space-x-4">
-                          {{ review_form.rating }}
-                      </div>
-                  </div>
-                  
-                  <!-- Comment Input -->
-                  <div class="mb-4">
-                      <label class="block text-gray-700 font-medium mb-2">Your Review</label>
-                      {{ review_form.comment }}
-                  </div>
-                  
-                  <!-- Image Upload -->
-                  <div class="mb-4">
-                      <label class="block text-gray-700 font-medium mb-2">Add Photos (optional)</label>
-                      {{ review_form.images }}
-                  </div>
-                  
-                  <div class="flex items-center">
-                      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                          {% if user_review %}
-                              Update Review
-                          {% else %}
-                              Submit Review
-                          {% endif %}
-                      </button>
-                      {% if user_review %}
-                          <a href="{% url 'delete_review' user_review.id %}" 
-                             class="ml-4 text-red-600 hover:text-red-700"
-                             onclick="return confirm('Are you sure you want to delete your review?')">
-                              Delete Review
-                          </a>
-                      {% endif %}
-                  </div>
+    <div class="related-products mb-5 mx-4">
+      <h3 class="text-danger h4 text-uppercase mb-4 mt-4 text-center">You May Also Like</h3>
+      <div class="row">
+        {% for product in related_products %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+          <div class="card h-100 product-card">
+            <a href="{% url 'product_detail' product.id %}">
+              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
+            </a>
+            <div class="card-body">
+              <h5 class="card-title">{{ product.title }}</h5>
+              <p class="card-text text-muted">₹{{ product.variants.first.price }}</p>
+              <form method="POST" action="{% url 'cart_app:add_cart' product.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <!-- Assuming you have a default variant -->
+                <input type="hidden" name="variant" value="{{ product.variants.first.id }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                </button>
               </form>
+            </div>
           </div>
-      {% endif %}
-  
-      <!-- Reviews List -->
-      <div class="reviews-list">
-          {% for review in reviews %}
-              <div class="review-item border-b border-gray-200 py-6 {% if not forloop.last %}mb-4{% endif %}">
-                  <div class="flex justify-between items-start mb-2">
-                      <div>
-                          <div class="font-semibold">{{ review.user.username }}</div>
-                          <div class="text-yellow-400">
-                              {% for i in "12345" %}
-                                  {% if forloop.counter <= review.rating %}
-                                      ★
-                                  {% else %}
-                                      ☆
-                                  {% endif %}
-                              {% endfor %}
-                          </div>
-                          <div class="text-sm text-gray-500">
-                              {{ review.created_at|date:"F d, Y" }}
-                          </div>
-                      </div>
-                      
-                      <!-- Helpful Button -->
-                      {% if user.is_authenticated and user != review.user %}
-                          <form method="post" action="{% url 'helpful_review' review.id %}">
-                              {% csrf_token %}
-                              <button type="submit" 
-                                      class="text-sm text-gray-600 hover:text-blue-600 flex items-center">
-                                  <span class="mr-1">Helpful</span>
-                                  <span class="bg-gray-100 px-2 py-1 rounded">
-                                      {{ review.helpful_votes }}
-                                  </span>
-                              </button>
-                          </form>
-                      {% endif %}
-                  </div>
-                  
-                  <p class="text-gray-700 mb-4">{{ review.comment }}</p>
-                  
-                  {% if review.images %}
-                      <div class="mt-2">
-                          <img src="{{ review.images.url }}" alt="Review image" 
-                               class="max-w-xs rounded-lg shadow-sm">
-                      </div>
-                  {% endif %}
-              </div>
-          {% empty %}
-              <p class="text-gray-600">No reviews yet. Be the first to review this product!</p>
-          {% endfor %}
+        </div>
+        {% endfor %}
       </div>
-  </div>
+    </div>
   </div>
 </div>
 
@@ -1011,64 +976,144 @@
       updateStockIndicator(stockIndicator, newStock, lowThreshold, criticalThreshold);
   }
   
-  // Function to update stock indicator UI
-  function updateStockIndicator(indicator, stock, lowThreshold, criticalThreshold) {
-      const textElement = indicator.querySelector(".stock-text");
-      const badgeElement = indicator.querySelector(".stock-badge");
-      const barElement = indicator.querySelector(".stock-bar");
+  function handleVariantChange(selectElement, productId) {
+  // Get selected variant details
+  const selectedOption = selectElement.options[selectElement.selectedIndex];
+  const stock = parseInt(selectedOption.getAttribute('data-stock'), 10);
+  const price = selectedOption.getAttribute('data-price');
+  const weight = selectedOption.getAttribute('data-weight');
+
+  // Update price and weight
+  document.getElementById(`price_${productId}`).innerText = `₹${price}`;
+  document.getElementById(`weight_${productId}`).innerText = `(${weight})`;
+
+  // Update stock indicator
+  const stockIndicator = document.getElementById(`stock-indicator_${productId}`);
+  updateStockIndicator(stockIndicator, stock);
+
+  // Update stock badge
+  updateVariantStockBadge(productId, stock);
+}
+
+function updateVariantStockBadge(productId, stock) {
+  const badgeElement = document.getElementById(`variant-stock-badge_${productId}`);
   
-      let status, barWidth, text;
-  
-      if (stock <= 0) {
-          status = "out-of-stock";
-          barWidth = 0;
-          text = "Out of Stock";
-          badgeElement.textContent = "";
-      } else if (stock <= criticalThreshold) {
-          status = "critical-stock";
-          barWidth = 10;
-          text = `Only ${stock} left!`;
-          badgeElement.textContent = "Selling Fast!";
-      } else if (stock <= lowThreshold) {
-          status = "low-stock";
-          barWidth = 20;
-          text = `Low Stock - ${stock} remaining`;
-          badgeElement.textContent = "Selling Fast!";
-      } else {
-          status = "in-stock";
-          barWidth = 50;
-          text = `In Stock (${stock} available)`;
-          badgeElement.textContent = "";
-      }
-  
-      // Update elements
-      indicator.dataset.status = status;
-      textElement.textContent = text;
-      barElement.style.width = `${barWidth}%`;
-  
-      // Optional: Update classes for styling based on status
-      indicator.classList.remove("out-of-stock", "critical-stock", "low-stock", "in-stock");
-      indicator.classList.add(status);
+  if (stock <= 0) {
+    badgeElement.textContent = 'Out of Stock';
+    badgeElement.className = 'badge bg-danger me-2';
+  } else if (stock <= 3) {
+    badgeElement.textContent = 'Few Left';
+    badgeElement.className = 'badge bg-warning text-dark me-2';
+  } else {
+    badgeElement.textContent = 'In Stock';
+    badgeElement.className = 'badge bg-success me-2';
   }
+}
+
+function handleVariantChange(selectElement, productId) {
+  // Get selected variant details
+  const selectedOption = selectElement.options[selectElement.selectedIndex];
+  const stock = parseInt(selectedOption.getAttribute('data-stock'), 10);
+  const price = selectedOption.getAttribute('data-price');
+  const weight = selectedOption.getAttribute('data-weight');
+
+  // Update price and weight
+  document.getElementById(`price_${productId}`).innerText = `₹${price}`;
+  document.getElementById(`weight_${productId}`).innerText = `(${weight})`;
+
+  // Update stock indicator
+  const stockIndicator = document.getElementById(`stock-indicator_${productId}`);
+  updateStockIndicator(stockIndicator, stock);
+
+  // Update stock badge
+  updateVariantStockBadge(productId, stock);
+}
+
+function updateVariantStockBadge(productId, stock) {
+  const badgeElement = document.getElementById(`variant-stock-badge_${productId}`);
   
-  // Initialize stock indicators when page is loaded
-  document.addEventListener("DOMContentLoaded", function () {
-      // Initialize the stock indicators for all product variants
-      const stockIndicators = document.querySelectorAll(".stock-indicator");
-  
-      stockIndicators.forEach((indicator) => {
-          const variantSelect = indicator.querySelector(".variant-select");
-          if (variantSelect) {
-              // Initialize stock based on the first variant
-              const initialOption = variantSelect.options[variantSelect.selectedIndex];
-              const initialStock = parseInt(initialOption.getAttribute("data-stock"), 10);
-              const lowThreshold = 5;
-              const criticalThreshold = 2;
-  
-              updateStockIndicator(indicator, initialStock, lowThreshold, criticalThreshold);
-          }
-      });
+  if (stock <= 0) {
+    badgeElement.textContent = 'Out of Stock';
+    badgeElement.className = 'badge bg-danger me-2';
+  } else if (stock <= 3) {
+    badgeElement.textContent = 'Few Left';
+    badgeElement.className = 'badge bg-warning text-dark me-2';
+  } else {
+    badgeElement.textContent = 'In Stock';
+    badgeElement.className = 'badge bg-success me-2';
+  }
+}
+
+// Modify the existing updateStockIndicator function to handle variant stock
+function updateStockIndicator(indicator, stock) {
+  const textElement = indicator.querySelector(".stock-text");
+  const badgeElement = indicator.querySelector(".stock-badge");
+  const barElement = indicator.querySelector(".stock-bar");
+
+  let status, barWidth, text;
+
+  if (stock <= 0) {
+    status = "out-of-stock";
+    barWidth = 0;
+    text = "Out of Stock";
+    badgeElement.textContent = "";
+  } else if (stock <= 3) {
+    status = "critical-stock";
+    barWidth = 10;
+    text = `Only ${stock} left!`;
+    badgeElement.textContent = "Selling Fast!";
+  } else if (stock <= 6) {
+    status = "low-stock";
+    barWidth = 20;
+    text = `Low Stock - ${stock} remaining`;
+    badgeElement.textContent = "Selling Fast!";
+  } else {
+    status = "in-stock";
+    barWidth = 50;
+    text = `In Stock (${stock} available)`;
+    badgeElement.textContent = "";
+  }
+
+  // Update elements
+  indicator.dataset.status = status;
+  textElement.textContent = text;
+  barElement.style.width = `${barWidth}%`;
+}
+
+// Initialize stock indicators when page is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  const stockIndicators = document.querySelectorAll(".stock-indicator");
+
+  stockIndicators.forEach((indicator) => {
+    const variantSelect = indicator.querySelector(".variant-select");
+    if (variantSelect) {
+      // Initialize stock based on the first variant
+      const initialOption = variantSelect.options[variantSelect.selectedIndex];
+      const initialStock = parseInt(initialOption.getAttribute("data-stock"), 10);
+
+      updateStockIndicator(indicator, initialStock);
+      updateVariantStockBadge(variantSelect.id.split('_')[1], initialStock);
+    }
   });
+});
+
+// Initialize stock indicators when page is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  const stockIndicators = document.querySelectorAll(".stock-indicator");
+
+  stockIndicators.forEach((indicator) => {
+    const variantSelect = indicator.querySelector(".variant-select");
+    if (variantSelect) {
+      // Initialize stock based on the first variant
+      const initialOption = variantSelect.options[variantSelect.selectedIndex];
+      const initialStock = parseInt(initialOption.getAttribute("data-stock"), 10);
+
+      updateStockIndicator(indicator, initialStock);
+      updateVariantStockBadge(variantSelect.id.split('_')[1], initialStock);
+    }
+  });
+});
+
 </script>
 
 <script>
@@ -1093,20 +1138,144 @@
       updateCartLink();
     }
   }
-  {% comment %} function updateWishlistLink(productId, variantId) {
-    const wishlistLink = document.querySelector(`#wishlist-link-${productId}`);
-    if (wishlistLink) {
-        wishlistLink.href = `/add_to_wishlist/${productId}/${variantId}/`;
-    }
-}
-
-// Example call
-document.getElementById('variant-select').addEventListener('change', function () {
-    const selectedVariantId = this.value;
-    updateWishlistLink(productId, selectedVariantId);
-}); {% endcomment %}
-
+  
 </script>
+<script>
+  function handleVariantChange(selectElement, productId) {
+    // Get selected variant details
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const stock = parseInt(selectedOption.getAttribute('data-stock'), 10);
+    const price = selectedOption.getAttribute('data-price');
+    const weight = selectedOption.getAttribute('data-weight');
+  
+    // Update price and weight
+    document.getElementById(`price_${productId}`).innerText = `₹${price}`;
+    document.getElementById(`weight_${productId}`).innerText = `(${weight})`;
+  
+    // Update stock indicator
+    const stockIndicator = document.getElementById(`stock-indicator_${productId}`);
+    updateStockIndicator(stockIndicator, stock);
+  
+    // Update stock badge
+    updateVariantStockBadge(productId, stock);
+  
+    // Toggle Add to Cart button
+    toggleAddToCartButton(selectElement, productId);
+  }
+  
+  function toggleAddToCartButton(selectElement, productId) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const stock = parseInt(selectedOption.getAttribute('data-stock'), 10);
+    const addToCartContainer = document.getElementById(`add-to-cart-container_${productId}`);
+  
+    if (stock <= 0) {
+      addToCartContainer.innerHTML = `
+        <div class="alert alert-danger">
+          Sorry, this variant is currently out of stock.
+        </div>
+      `;
+    } else {
+      addToCartContainer.innerHTML = `
+        <div class="action-buttons">
+          <button type="submit" class="btn btn-primary btn-lg add-to-cart w-75">
+            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+          </button>
+          <a href="{% url 'wishlist_app:add_to_wishlist' product.id variant.id|default:0 %}"
+   class="btn btn-outline-danger btn-lg wishlist-btn"
+   data-product-id="{{ product.id }}">
+   <i class="far fa-heart"></i>
+</a>
+ {% comment %} <a href="/wishlist/add/${productId}/" class="btn btn-outline-danger btn-lg wishlist-btn">
+            <i class="far fa-heart"></i>
+          </a> {% endcomment %} 
+        </div>
+      `;
+    }
+  }
+  
+  function updateVariantStockBadge(productId, stock) {
+    const badgeElement = document.getElementById(`variant-stock-badge_${productId}`);
+    
+    if (stock <= 0) {
+      badgeElement.textContent = 'Out of Stock';
+      badgeElement.className = 'badge bg-danger me-2';
+    } else if (stock <= 3) {
+      badgeElement.textContent = 'Few Left';
+      badgeElement.className = 'badge bg-warning text-dark me-2';
+    } else {
+      badgeElement.textContent = 'In Stock';
+      badgeElement.className = 'badge bg-success me-2';
+    }
+  }
+  
+  function updateStockIndicator(indicator, stock) {
+    const textElement = indicator.querySelector(".stock-text");
+    const badgeElement = indicator.querySelector(".stock-badge");
+    const barElement = indicator.querySelector(".stock-bar");
+  
+    let status, barWidth, text;
+  
+    if (stock <= 0) {
+      status = "out-of-stock";
+      barWidth = 0;
+      text = "Out of Stock";
+      badgeElement.textContent = "";
+    } else if (stock <= 3) {
+      status = "critical-stock";
+      barWidth = 10;
+      text = `Only ${stock} left!`;
+      badgeElement.textContent = "Selling Fast!";
+    } else if (stock <= 6) {
+      status = "low-stock";
+      barWidth = 20;
+      text = `Low Stock - ${stock} remaining`;
+      badgeElement.textContent = "Selling Fast!";
+    } else {
+      status = "in-stock";
+      barWidth = 50;
+      text = `In Stock (${stock} available)`;
+      badgeElement.textContent = "";
+    }
+  
+    // Update elements
+    indicator.dataset.status = status;
+    textElement.textContent = text;
+    barElement.style.width = `${barWidth}%`;
+  }
+  
+  // Initialize stock indicators when page is loaded
+  document.addEventListener("DOMContentLoaded", function () {
+    const stockIndicators = document.querySelectorAll(".stock-indicator");
+  
+    stockIndicators.forEach((indicator) => {
+      const variantSelect = indicator.querySelector(".variant-select");
+      if (variantSelect) {
+        // Initialize stock based on the first variant
+        const initialOption = variantSelect.options[variantSelect.selectedIndex];
+        const initialStock = parseInt(initialOption.getAttribute("data-stock"), 10);
+  
+        updateStockIndicator(indicator, initialStock);
+        updateVariantStockBadge(variantSelect.id.split('_')[1], initialStock);
+        
+        // Toggle initial Add to Cart button state
+        toggleAddToCartButton(variantSelect, variantSelect.id.split('_')[1]);
+      }
+    });
+  });
+</script>
+
+<script>
+  // Remove arrow after first interaction
+  document.querySelector('.variant-select').addEventListener('click', function() {
+    const arrow = document.querySelector('.variant-arrow-indicator');
+    if (arrow) {
+      arrow.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => {
+        arrow.remove();
+      }, 500);
+    }
+  });
+  </script>
 
 
 {% endblock %}

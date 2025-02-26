@@ -1,0 +1,330 @@
+{% extends 'admin/bas.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --success-color: #4caf50;
+        --warning-color: #ff9800;
+        --danger-color: #f44336;
+        --info-color: #2196f3;
+        --gray-100: #f8f9fa;
+        --gray-200: #e9ecef;
+        --gray-300: #dee2e6;
+        --gray-800: #343a40;
+    }
+
+    {% comment %} body {
+        background-color: var(--gray-100);
+        font-family: 'Inter', sans-serif;
+    } {% endcomment %}
+
+    .page-wrapper {
+        margin-top:30px;
+        margin
+   
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid var(--gray-200);
+        padding: 1rem 1.5rem;
+    }
+
+    .badges {
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    .status-badge i {
+        font-size: 0.875rem;
+    }
+
+    .bg-pending { 
+        background-color: #fff3cd; 
+        color: #856404; 
+    }
+
+    .bg-processing { 
+        background-color: #cce5ff; 
+        color: #004085; 
+    }
+
+    .bg-delivered { 
+        background-color: #d4edda; 
+        color: #155724; 
+    }
+
+    .bg-cancelled { 
+        background-color: #f8d7da; 
+        color: #721c24; 
+    }
+
+    .order-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .product-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .product-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background-color: var(--gray-300);
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -35px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        .page-wrapper {
+            padding: 1rem;
+        }
+    }
+    .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+    
+    .content {
+        max-width: 1200px;
+        width: 100%;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .page-header {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .card {
+        margin-bottom: 20px;
+    }
+    
+    .card-header {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .badges {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+</style>
+
+<div class="page-wrapper ">
+    <div class="content ">
+        <div class="page-header ">
+            <div class="page-title">
+                <h4>Order Details #{{ order.id }}</h4>
+                <h6>Comprehensive Order Information</h6>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Order Overview</h5>
+                <span class="badges 
+                    {% if order.order_status == 'PENDING' %}bg-lightred
+                    {% elif order.order_status == 'PROCESSING' %}bg-lightyellow
+                    {% elif order.order_status == 'DELIVERED' %}bg-lightgreen
+                    {% elif order.order_status == 'CANCELLED' %}bg-lightgrey
+                    {% endif %}">
+                    {{ order.get_order_status_display }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Customer Information -->
+                    <div class="col-lg-4 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Customer Information</label>
+                            <p>{{ order.user_address.name }}</p>
+                            <p>{{ order.user.email }}</p>
+                            <p>{{ order.user_address.phone_number }}</p>
+                        </div>
+                    </div>
+                    <!-- Order Summary -->
+                    <div class="col-lg-4 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Order Summary</label>
+                            <p><strong>Total Amount:</strong> ₹{{ order.total_amount|floatformat:2 }}</p>
+                            <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+                            <p><strong>Order Date:</strong> {{ order.created_at|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                    <!-- Shipping Address -->
+                    <div class="col-lg-4 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label>Shipping Address</label>
+                            {% if order.user_address %}
+                            <address>
+                                {{ order.user_address.address }}<br>
+                                {{ order.user_address.locality }}<br>
+                                {{ order.user_address.city }}, {{ order.user_address.state }}<br>
+                                {{ order.user_address.pincode }}
+                            </address>
+                            {% else %}
+                            <p class="text-muted">No shipping address provided</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Order Items</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        {% for item in order.items.all %}
+                        <div class="product-item">
+                            <div>
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="product-image">
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">{{ item.product.title }}</h5>
+                                {% if item.variants %}
+                                <p class="text-muted mb-1">Variant: {{ item.variants.weight }}</p>
+                                {% endif %}
+                                <div class="d-flex justify-content-between">
+                                    <p class="mb-0">₹{{ item.price|floatformat:2 }} × {{ item.quantity }}</p>
+                                    {% comment %} <p class="mb-0"><strong>₹{{ order.subtotal|floatformat:2 }}</strong></p> {% endcomment %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end">
+                            <div>
+                                <p class="mb-1 text-end">Subtotal: <strong>₹{{ order.subtotal|floatformat:2 }}</strong></p>
+                                <p class="mb-1 text-end">tax: <strong>₹{{ order.tax|floatformat:2 }}</strong></p>
+                                <p class="mb-1 text-end">delivery charge: <strong>₹{{ order.delivery_charge|floatformat:2 }}</strong></p>
+                                <p class="mb-1 text-end">packaging charge: <strong>₹{{ order.packaging_charge|floatformat:2 }}</strong></p>
+                                <p class="mb-1 text-end">discount: <strong>-₹{{ order.discount|floatformat:2 }}</strong></p>
+                                <p class="mb-0 text-end">Total: <strong>₹{{ order.total_amount|floatformat:2 }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if order.payment_id != "N/A" %}
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Payment Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+                                <p class="mb-1"><strong>Payment ID:</strong> {{ order.payment_id }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Signature ID:</strong> {{ order.signature_id }}</p>
+                                <p class="mb-0"><strong>Status:</strong> {{ order.get_payment_status_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if order.cancellation_requested %}
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Cancellation Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <h5>Cancellation Request</h5>
+                                <p class="text-muted mb-1">Status: {{ order.get_cancellation_status_display }}</p>
+                                <p><strong>Reason:</strong> {{ order.cancellation_reason }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

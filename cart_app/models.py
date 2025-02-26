@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from dashboard.models import Product,Variant 
 from django.utils.timezone import now
+from django.utils.timezone import make_aware
 
 
 
@@ -37,6 +38,7 @@ class CartItem(models.Model):
             self.total_price = self.product.price * self.quantity
         super().save(*args, **kwargs)
 
+
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)
     discount = models.DecimalField(max_digits=5, decimal_places=2)  
@@ -44,6 +46,11 @@ class Coupon(models.Model):
     valid_to = models.DateTimeField()
     active = models.BooleanField(default=True)
 
+    def save(self, *args, **kwargs):
+        if self.valid_from and self.valid_to:
+            self.valid_from = make_aware(self.valid_from)
+            self.valid_to = make_aware(self.valid_to)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.code
-

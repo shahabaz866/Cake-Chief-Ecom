@@ -1,136 +1,103 @@
 {% extends 'user_side/base.html' %}
-{% load static %}
-
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <!-- Order Header -->
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Cancel Order #{{ order.id }}</h1>
-            <p class="text-gray-600">Placed on: {{ order.created_at|date:"F d, Y" }}</p>
+
+<div class="min-h-screen bg-gray-100 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <!-- Order Details Header -->
+        <div class="border-b pb-4 mb-4">
+            <h1 class="text-2xl font-bold text-gray-800">Cancel Order #{{ order.id }}</h1>
+            <p class="text-gray-600 mt-1">Please confirm your order cancellation</p>
         </div>
 
-        <!-- Cancellation Status -->
-        {% if order.is_cancelled %}
-            <div class="bg-gray-50 border-l-4 border-gray-400 p-4 mb-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-gray-800">Order Already Cancelled</h3>
-                        <p class="text-sm text-gray-600 mt-1">
-                            This order was cancelled on {{ order.cancelled_at|date:"F d, Y" }}
-                        </p>
-                    </div>
+        <!-- Order Summary -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">Order Summary</h2>
+            <div class="bg-gray-50 p-4 rounded">
+                <div class="flex justify-between mb-2">
+                    <span class="text-gray-600">Order Total:</span>
+                    <span class="font-medium">₹{{ order.total_amount }}</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span class="text-gray-600">Order Status:</span>
+                    <span class="font-medium">{{ order.order_status }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Payment Method:</span>
+                    <span class="font-medium">{{ order.payment_method }}</span>
                 </div>
             </div>
-        {% elif not order.can_be_cancelled %}
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800">Cannot Cancel Order</h3>
-                        <p class="text-sm text-yellow-700 mt-1">
-                            This order cannot be cancelled because it has been {% if order.order_status == 'SHIPPED' %}shipped{% else %}processed{% endif %}.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <!-- Cancellation Form -->
-            <form method="POST" action="{% url 'cancel_order' order.id %}" class="mt-4">
-                {% csrf_token %}
-                
-                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">Are you sure you want to cancel this order?</h3>
-                            <p class="text-sm text-red-700 mt-1">This action cannot be undone.</p>
-                        </div>
-                    </div>
-                </div>
+        </div>
 
-                <div class="mb-6">
+        <!-- Messages Section -->
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+                <div class="p-4 rounded {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Cancellation Form -->
+        {% if order.order_status in 'PROCESSING,SHIPPED' %}
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
                     <label for="cancellation_reason" class="block text-sm font-medium text-gray-700 mb-2">
                         Reason for Cancellation
                     </label>
-                    <select id="cancellation_reason" name="cancellation_reason" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">Select a reason</option>
-                        <option value="CHANGED_MIND">Changed my mind</option>
-                        <option value="WRONG_ITEM">Ordered wrong item</option>
-                        <option value="SHIPPING_TIME">Shipping time too long</option>
-                        <option value="FOUND_BETTER_PRICE">Found better price elsewhere</option>
-                        <option value="DUPLICATE_ORDER">Duplicate order</option>
-                        <option value="OTHER">Other reason</option>
-                    </select>
+                    <textarea 
+                        id="cancellation_reason"
+                        name="cancellation_reason"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    ></textarea>
                 </div>
 
-                <div class="mb-6">
-                    <label for="cancellation_notes" class="block text-sm font-medium text-gray-700 mb-2">
-                        Additional Comments (Optional)
-                    </label>
-                    <textarea id="cancellation_notes" name="cancellation_notes" rows="3"
-                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                              placeholder="Please provide any additional details about your cancellation..."></textarea>
+                <!-- Warning Message -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                    <div class="flex">
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                Please note: Once cancelled, this action cannot be undone.
+                                {% if order.payment_method == 'wallet' %}
+                                    The amount will be refunded to your wallet.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
 
-            <!-- Order Details Summary -->
-            <div class="mt-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h2>
-                <div class="border rounded-lg overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            {% for item in order_items %}
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.product.title }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.total_amount}}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${{ item.price }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot class="bg-gray-50">
-                            <tr>
-                                <td colspan="2" class="px-6 py-4 text-right font-medium">Total:</td>
-                                <td class="px-6 py-4 text-gray-900 font-medium">${{ order.total_amount }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="mt-8 flex justify-end space-x-4">
-                {% if not order.is_cancelled and order.can_be_cancelled %}
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                <!-- Action Buttons -->
+                <div class="flex space-x-4">
+                    <button 
+                        type="submit"
+                        class="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                    >
                         Confirm Cancellation
                     </button>
-                {% endif %}
-                </form> 
-                <a href="{% url 'order_app:order_detail' order_id %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    View Order
+                    <a 
+                        href="{% url 'order_app:order_detail' order.id %}"
+                        class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-center"
+                    >
+                        Go Back
+                    </a>
+                </div>
+            </form>
+        {% else %}
+            <div class="bg-gray-50 p-4 rounded text-center">
+                <p class="text-gray-700">This order cannot be cancelled at this time.</p>
+                <a 
+                    href="{% url 'order_app:order_detail' order.id %}"
+                    class="mt-4 inline-block bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                >
+                    Return to Order Details
                 </a>
             </div>
+        {% endif %}
     </div>
 </div>
+
 {% endblock %}

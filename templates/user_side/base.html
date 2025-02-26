@@ -289,14 +289,30 @@ display: none;
 }
 }
 
-.count {
-background-color: #b52a2a !important;
-color: white !important;
-border-radius: 50%; /* Make it look like a badge */
-padding: 2px 6px; /* Adjust padding for a circular shape */
-font-weight: bold;
-font-size: 0.9em; /* Adjust size as needed */
+.count-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: #ff3b3b; /* Bright red for visibility */
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.8em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  transform: scale(1);
+  transition: transform 0.2s ease-in-out;
 }
+
+/* Add a slight pop effect when count updates */
+.count-badge.updated {
+  transform: scale(1.2);
+}
+
 .icon.fas.fa-shopping-cart, .icon.far.fa-heart{
 color: #000000;
 }
@@ -485,6 +501,7 @@ grid-template-columns: 1fr;
 
 }
 </style>
+{% block extra_css %}{% endblock %}
 </head>
 <body>
     <div class="site-wrap" style="width: 100%;">
@@ -494,9 +511,7 @@ grid-template-columns: 1fr;
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 
                 <div style="flex: 1; display: flex; align-items: center;">
-                  {% comment %} <form action="" class="site-block-top-search" style="display: flex; align-items: center;">
-                    <input type="text" class="form-control border-0" placeholder="Search" style="margin-left: 5px;">
-                  </form> {% endcomment %}
+                 
                 </div>
 
                 
@@ -506,55 +521,60 @@ grid-template-columns: 1fr;
                     <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo">
                   </a>
                 </div>
-       
                 <div style="flex: 1;">
                   <div class="site-top-icons">
                     <ul class="icons-container">
-                      {% if  user.is_authenticated %}
+                      {% if user.is_authenticated %}
                       <li class="icon-item user-dropdown">
                         <button class="dropdown-toggle">
                           <i class="icon fas fa-user"></i>
                         </button>
                         <div class="dropdown-menu">
-                          <a href="{% url "user_app:user_show" %}" class="dropdown-item">
-                            <i class="fas fa-user-circle"></i>
-                            Profile
-                          </a>
-                         <a href="{% url "order_app:order_list" %}" class="dropdown-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Orders 
-                          </a> 
-                          <a href="#" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            Settings
-                          </a>
-                          <a href="{% url "logout" %}" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Logout
-                          </a>
-                          <a href="{% url "wallet_app:wallet_view" %}" class="dropdown-item">
-                            <i class="fas fa-wallet"></i>
-
-                            Wallet
-                          </a>
-
-                       
+                          {% if demo_user %}
+                            <a href="{% url 'logout' %}" class="dropdown-item">
+                              <i class="fas fa-sign-out-alt"></i>
+                              Logout
+                            </a>
+                          {% else %}
+                            <a href="{% url 'user_app:user_show' %}" class="dropdown-item">
+                              <i class="fas fa-user-circle"></i>
+                              Profile
+                            </a>
+                            <a href="{% url 'order_app:order_list' %}" class="dropdown-item">
+                              <i class="fas fa-map-marker-alt"></i>
+                              Orders
+                            </a>
+                            <a href="{% url 'wallet_app:wallet_view' %}" class="dropdown-item">
+                              <i class="fas fa-wallet"></i>
+                              Wallet
+                            </a>
+                            <a href="{% url 'logout' %}" class="dropdown-item">
+                              <i class="fas fa-sign-out-alt"></i>
+                              Logout
+                            </a>
+                          {% endif %}
                         </div>
                       </li>
                       {% endif %}
+                      {% if user.is_authenticated and not user.username == 'demo_user' %}
                       <li class="icon-item">
                         <a href="{% url "wishlist_app:wishlist" %}" class="icon-link">
                             <i class="icon far fa-heart"></i>
+                            <span class="count-badge" >
+                              {{ request.session.wishlist_count|default:0 }}
+                          </span>
                         </a>
                       </li>
-                      {% if user.is_authenticated and not user.username == 'demo_user' %}
+                      
                       <li class="icon-item">
                         <a href="{% url "cart_app:cart" %}" class="icon-link site-cart">
                             <i class="icon fas fa-shopping-cart"></i>
-                          {% comment %} <span class="count" stl>2</span> {% endcomment %}
+                            <span class="count-badge" >
+                                {{ request.session.cart_count|default:0 }}
+                            </span>
                         </a>
-
-                      </li>
+                    </li>
+                    
                       {% endif %}
                       {% if not user.is_authenticated %}
                       <li style="margin-left: 30px;">
@@ -584,13 +604,14 @@ grid-template-columns: 1fr;
     <a href="{% url 'home' %}">Home</a>
     
   </li>
+  
   <li >
     <a href="{% url "about" %}">About</a>
     
   </li>
   <li><a href="{% url "shop" %}">Shop</a></li>
  
-  <li><a href="{% url "review_list" %}">Reviews</a></li>
+  {% comment %} <li><a href="{% url "review_list" %}">Reviews</a></li> {% endcomment %}
   <li><a href="{% url "contact" %}">Contact</a></li>
   <li> 
    
@@ -633,7 +654,7 @@ grid-template-columns: 1fr;
                     </div>
         
                     <!-- Promo Section -->
-                    <div class="footer-col">
+                    {% comment %} <div class="footer-col">
                         <h3 class="footer-heading">Featured</h3>
                         <div class="promo-card">
                             <img src="{% static 'user_assets/images/Blueberry.jpg' %}" alt="Promo image" class="promo-image">
@@ -642,7 +663,7 @@ grid-template-columns: 1fr;
                                 <p class="promo-text">Limited time offer - 25% off</p>
                             </div>
                         </div>
-                    </div>
+                    </div> {% endcomment %}
         
                     <!-- Contact Info -->
                     <div class="footer-col">
@@ -664,7 +685,7 @@ grid-template-columns: 1fr;
                     </div>
         
                     <!-- Newsletter Section -->
-                    <div class="footer-col">
+                    {% comment %} <div class="footer-col">
                         <h3 class="footer-heading">Newsletter</h3>
                         <p class="newsletter-text">Subscribe to receive updates and exclusive offers</p>
                         <form method="post" action="" class="newsletter-form">
@@ -674,7 +695,7 @@ grid-template-columns: 1fr;
                             </div>
                             <button type="submit" class="newsletter-button">Subscribe</button>
                         </form>
-                    </div>
+                    </div> {% endcomment %}
                 </div>
         
                 <!-- Copyright -->

@@ -163,38 +163,71 @@
         .toastify.on {
             opacity: 1;
         }
+        .password-container {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #757575;
+        }   .auth-links-container {
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .signup-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .forgot-password-link {
+            color: #b52a2a;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            display: inline-block;
+            padding: 5px 0;
+        }
+
+        .forgot-password-link:hover {
+            color: #8a1f1f;
+            text-decoration: underline;
+        }
+
+        .signup-link {
+            color: #b52a2a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .signup-link:hover {
+            color: #8a1f1f;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-   
-
     <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
-        <style>
-            .password-container {
-                position: relative;
-            }
-            .toggle-password {
-                position: absolute;
-                right: 10px;
-                top: 50%;
-                transform: translateY(-50%);
-                cursor: pointer;
-                color: #757575;
-            }
-        </style>
+        {% csrf_token %}
         
         <div class="logo-container">
             <a href="{% url 'home' %}">
                 <img class="log_logo" src="{% static 'user_assets/images/logo.png' %}" alt="Logo">
             </a>
         </div>
-        {% csrf_token %}
+        
         <label for="username">Username</label>
-        <input type="text" placeholder="Enter Username" id="username" name="username">
+        <input type="text" placeholder="Enter Username" value="user7" id="username" name="username">
         
         <label for="password">Password</label>
         <div class="password-container">
-            <input type="password" placeholder="Password" id="password" name="pass">
+            <input type="password" value="User1@123" placeholder="Password" id="password" name="pass">
             <i class="fas fa-eye toggle-password" id="togglePassword"></i>
         </div>
         
@@ -203,22 +236,22 @@
         {% endif %}
         
         <button type="submit">Login</button>
-    
+        
         <div class="divider">
             <span>OR</span>
         </div>
-        {% load socialaccount %}
+        
         <a href="{% provider_login_url 'google' %}?next=/" class="google-btn">
             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google logo">
             Sign in with Google
         </a>
-        <button type="submit" name="demo_login" value="1">Guest User</button>
-    
-        <div style="text-align: center; margin-top: 20px;">
-            Don't have an account? <a href="{% url 'SignupPage' %}" style="color:#b52a2a;">Sign up</a>
-        </div>
-        <div class="form-group">
-            <a href="{% url 'forgot_password' %}"class="float-right">Forgot Password?</a>
+        
+        <button type="submit" name="demo_login" value="1" formnovalidate>Guest User</button>        
+        <div class="auth-links-container">
+            <div class="signup-text">
+                Don't have an account? <a href="{% url 'SignupPage' %}" class="signup-link">Sign up</a>
+            </div>
+            <a href="{% url 'forgot_password' %}" class="forgot-password-link">Forgot your password?</a>
         </div>
     </form>
                       

@@ -139,9 +139,9 @@
                                 <th>Price</th>
                                 <th>Stock</th>
                                 <th>Weight</th>
-                                <th>Description</th>
-                                <th class="text-center">Edit</th>
-                                <th class="text-center">Actions</th>
+                                {% comment %} <th>Description</th> {% endcomment %}
+                               
+                                <th class="text-center">view</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -169,17 +169,17 @@
                                     {% endfor %}
                                 </td>
                             
-                                <td class="description-cell" title="{{ prdt.description }}">
-                                    {{ prdt.description|wrap_text:120|safe }}
+                                {% comment %} <td class="description-cell" title="{{ prdt.description }}"> {% endcomment %}
+                                    {% comment %} {{ prdt.description|wrap_text:120|safe }} {% endcomment %}
                                 </td>
-                                <td class="text-center">
+                                {% comment %} <td class="text-center">
                                     <a href="{% url 'edit_product' prdt.id %}" 
                                        class="btn btn-link text-primary p-0" 
                                        title="Edit Product">
                                         <i class="bi bi-pencil-square fs-5"></i>
                                     </a>
-                                </td>
-                                <td class="text-center">
+                                </td> {% endcomment %}
+                                {% comment %} <td class="text-center">
                                     {% if prdt.is_active %}
                                         <a href="{% url 'delete_product' prdt.id %}" 
                                            class="btn btn-danger btn-sm" 
@@ -192,6 +192,15 @@
                                             <i class="bi bi-unlock-fill me-1"></i>Unblock
                                         </a>
                                     {% endif %}
+                                </td> {% endcomment %}
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'admin_product_detail' prdt.id %}" class="btn btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
