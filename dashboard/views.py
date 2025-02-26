@@ -89,8 +89,8 @@ def dashboard(request):
 
             summary = Order.objects.aggregate(
             total_sales=Sum('total_amount'),
-            total_discounts=Sum('user_cart__coupon__discount'),  # Access discount from related cart
-            total_taxes=Sum('user_cart__tax')  # Access tax from related cart
+            total_discounts=Sum('user_cart__coupon__discount'),  
+            total_taxes=Sum('user_cart__tax')  
         )
 
 
@@ -311,7 +311,6 @@ def add_products(request):
                 
                 has_errors = False
 
-                # Validate title
                 if not title:
                     messages.error(request, "Product name is required.")
                     has_errors = True
@@ -324,7 +323,6 @@ def add_products(request):
 
 
 
-                # Validate description
                 if not description:
                     messages.error(request, "Description is required.")
                     has_errors = True
@@ -336,19 +334,16 @@ def add_products(request):
                     messages.error(request, "Invalid category selected.")
                     has_errors = True
 
-                # Validate flavour
                 try:
                     flavour = Flavour.objects.get(id=flavour_id)
                 except (Flavour.DoesNotExist, ValueError):
                     messages.error(request, "Invalid flavour selected.")
                     has_errors = True
 
-                # Validate main image
                 if not image:
                     messages.error(request, "Product image is required.")
                     has_errors = True
 
-                # Validate additional images
                 additional_images = []
                 for i in range(3):
                     image_key = f'additional_product_image_{i}'
@@ -359,7 +354,6 @@ def add_products(request):
                     messages.warning(request, f"You can upload up to 3 additional images. Currently, only {len(additional_images)} images are uploaded.")
                     has_errors = True
 
-                # Check for duplicate product
                 if not has_errors and Product.objects.filter(
                     title=title, 
                     category=category, 
@@ -390,7 +384,6 @@ def add_products(request):
                         if selected_sizes:
                             product.sizes.set(selected_sizes)
                             
-                        # Save additional images
                         for additional_image in additional_images:
                             ProductImages.objects.create(
                                 product=product,
@@ -402,7 +395,6 @@ def add_products(request):
                         prices = request.POST.getlist('varient_price[]')
                         stocks = request.POST.getlist('varient_stock[]')
 
-                        # Process each variant
                         for weight, price, stock in zip(weights, prices, stocks):
                                 if weight and price and stock:
                                     try:
@@ -438,7 +430,7 @@ def add_products(request):
                         if stock < 0:
                             messages.error(request, "Stock value cannot be negative.")
                             has_errors = True
-                            break  # Stop processing if any stock is negative
+                            break  
                     except ValueError:
                         messages.error(request, "Invalid stock value. Please enter a valid number.")
                         has_errors = True

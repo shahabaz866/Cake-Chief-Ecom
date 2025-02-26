@@ -40,8 +40,8 @@ urlpatterns = [
     path('coupons/edit/<int:pk>/', views.coupon_edit, name='coupon_edit'),
     path('coupons/delete/<int:pk>/', views.coupon_delete, name='coupon_delete'),
 
-path('admin/product/<int:product_id>/', views.admin_product_detail, name='admin_product_detail'),
-path('admin/product/<int:product_id>/toggle/', views.toggle_product_status, name='toggle_product_status'),
+    path('admin/product/<int:product_id>/', views.admin_product_detail, name='admin_product_detail'),
+    path('admin/product/<int:product_id>/toggle/', views.toggle_product_status, name='toggle_product_status'),
 
     path('sales-report/', views.sales_report, name='sales_report'),
 

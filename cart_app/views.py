@@ -192,12 +192,11 @@ def quantity_minus(request, item_id):
 
         item.refresh_from_db()
 
-        # Check if coupon discount is greater than the cart total
         refresh_page = False
         if cart.coupon and cart.total < cart.coupon.discount:
             cart.coupon = None
             cart.save()
-            refresh_page = True  # Flag to refresh the page
+            refresh_page = True  
 
         cart_total_data = calculate_cart_total(item.cart)
 
@@ -210,8 +209,7 @@ def quantity_minus(request, item_id):
         response_data['grand_total'] = cart_total_data['grand_total']
         response_data['coupon_applied'] = bool(item.cart.coupon)
         response_data['discount'] = cart_total_data['discount'] if item.cart.coupon else 0
-        response_data['refresh_page'] = refresh_page  # Send flag to the frontend
-
+        response_data['refresh_page'] = refresh_page  
         item.cart.total = response_data['grand_total']
         item.cart.save()
 
