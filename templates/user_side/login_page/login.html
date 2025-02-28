@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <title>Login Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{% static 'admin_assets\img\Starlogo.png' %}">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -28,17 +29,21 @@
             min-height: 100vh;
             margin: 0;
             background-color: #ffffff;
+            padding: 15px;
         }
         
         form {
-            width: 370px;
+            width: 100%;
+            max-width: 370px;
             border-radius: 10px;
             backdrop-filter: blur(10px);
-            padding: 20px 30px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         
         .background {
-            width: 430px;
+            width: 100%;
+            max-width: 430px;
             height: 500px;
             position: absolute;
             transform: translate(-50%, -50%);
@@ -53,21 +58,25 @@
             outline: none;
             border: none;
         }
+        
         form h3 {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 500;
-            line-height: 42px;
+            line-height: 1.2;
             text-align: center;
+            margin-bottom: 20px;
         }
+        
         label {
             display: block;
             margin-top: 5px;
             font-size: 16px;
             font-weight: 500;
         }
+        
         input {
             display: block;
-            height: 30px;
+            height: 40px;
             width: 100%;
             background-color: #ffffff;
             border-radius: 6px;
@@ -77,13 +86,14 @@
             font-weight: 300;
             border: 1px solid rgb(128, 128, 128);
         }
+        
         button, .google-btn {
             margin-top: 20px;
             width: 100%;
             background-color:#b52a2a;
             color: #ffffff !important;
-            padding: 8px 0;
-            font-size: 18px;
+            padding: 10px 0;
+            font-size: 16px;
             font-weight: 600;
             border-radius: 7px;
             cursor: pointer;
@@ -137,10 +147,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
+        
         .log_logo {
-            width: 80px;
+            width: 70px;
             height: auto;
         }
 
@@ -163,9 +174,11 @@
         .toastify.on {
             opacity: 1;
         }
+        
         .password-container {
             position: relative;
         }
+        
         .toggle-password {
             position: absolute;
             right: 10px;
@@ -173,12 +186,14 @@
             transform: translateY(-50%);
             cursor: pointer;
             color: #757575;
-        }   .auth-links-container {
+        }
+        
+        .auth-links-container {
             margin-top: 20px;
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .signup-text {
@@ -209,6 +224,51 @@
         .signup-link:hover {
             color: #8a1f1f;
             text-decoration: underline;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media screen and (max-width: 480px) {
+            form {
+                padding: 15px;
+            }
+            
+            .log_logo {
+                width: 60px;
+            }
+            
+            form h3 {
+                font-size: 24px;
+            }
+            
+            label {
+                font-size: 14px;
+            }
+            
+            input {
+                height: 36px;
+            }
+            
+            button, .google-btn {
+                padding: 8px 0;
+                font-size: 15px;
+            }
+            
+            .auth-links-container {
+                gap: 8px;
+            }
+            
+            .signup-text, .forgot-password-link {
+                font-size: 13px;
+            }
+        }
+        
+        /* Toast notifications for smaller screens */
+        @media screen and (max-width: 768px) {
+            .toastify {
+                max-width: 90% !important;
+                left: 5% !important;
+                right: 5% !important;
+            }
         }
     </style>
 </head>
@@ -257,7 +317,6 @@
                       
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-
         document.addEventListener('DOMContentLoaded', function() {
             const togglePassword = document.getElementById('togglePassword');
             const passwordInput = document.getElementById('password');
@@ -278,38 +337,38 @@
         });
     
         function showToast(message, type) {
-          let backgroundColor = "#000";
-          switch(type) {
-            case 'success':
-              backgroundColor = "#28a745";
-              break;
-            case 'error':
-              backgroundColor = "#dc3545";
-              break;
-            case 'warning':
-              backgroundColor = "#ffc107";
-              break;
-            case 'info':
-              backgroundColor = "#17a2b8";
-              break;
-          }
-      
-          Toastify({
-            text: message,
-            duration: 3000,
-            gravity: "top",
-            position: "right",
-            style: {
-              background: backgroundColor,
-            },
-          }).showToast();
+            let backgroundColor = "#000";
+            switch(type) {
+                case 'success':
+                    backgroundColor = "#28a745";
+                    break;
+                case 'error':
+                    backgroundColor = "#dc3545";
+                    break;
+                case 'warning':
+                    backgroundColor = "#ffc107";
+                    break;
+                case 'info':
+                    backgroundColor = "#17a2b8";
+                    break;
+            }
+        
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: window.innerWidth <= 768 ? "center" : "right",
+                style: {
+                    background: backgroundColor,
+                },
+            }).showToast();
         }
       
         // For Django messages
         {% if messages %}
-          {% for message in messages %}
-            showToast("{{ message }}", "{{ message.tags }}");
-          {% endfor %}
+            {% for message in messages %}
+                showToast("{{ message }}", "{{ message.tags }}");
+            {% endfor %}
         {% endif %}
     </script>
 </body>

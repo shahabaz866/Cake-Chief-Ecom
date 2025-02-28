@@ -3,17 +3,17 @@
 {% load static %}
 <head>
     <title>Signup Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{% static 'admin_assets/img/Starlogo.png' %}">
-
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-   
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
     <style media="screen">
-        
         *,
         *:before,
         *:after {
@@ -23,31 +23,34 @@
         }
         
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
             background-color: #ffffff;
-            {% comment %} background: url("{% static 'user_assets/images/bg_sign.svg' %}") no-repeat center center fixed;
-            background-size: cover; {% endcomment %}
         }
-        .background {
-            width: 430px;
-            height: 500px; /* Reduced height */
-            position: absolute;
-            transform: translate(-50%, -50%);
-            left: 50%;
-            top: 50%;
+        
+        .svg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
         }
+        
         form {
-            height: 550px; /* Further reduced height */
-            width: 370px; /* Reduced width to bring it inside the box */
-            background-color: rgba(255, 255, 255, 0.7);
-            position: absolute;
-            transform: translate(-50%, -50%);
-            top: 50%;
-            left: 50%;
+            width: 100%;
+            max-width: 370px;
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             backdrop-filter: blur(10px);
-            {% comment %} border: 3px solid ; {% endcomment %}
-            padding: 20px 30px; /* Reduced padding */
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
+        
         form * {
             font-family: 'Poppins', sans-serif;
             color: #000000;
@@ -55,37 +58,42 @@
             outline: none;
             border: none;
         }
+        
         form h3 {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 500;
-            line-height: 42px;
+            line-height: 1.2;
             text-align: center;
+            margin-bottom: 15px;
         }
+        
         label {
             display: block;
-            margin-top: 5px; /* Adjusted margin */
+            margin-top: 10px;
             font-size: 16px;
             font-weight: 500;
         }
+        
         input {
             display: block;
-            height: 30px;
+            height: 40px;
             width: 100%;
             background-color: #ffffff;
             border-radius: 6px;
             padding: 0 10px;
-            margin-top: 8px;
+            margin-top: 6px;
             font-size: 14px;
             font-weight: 300;
             border: 1px solid rgb(128, 128, 128);
         }
-        button, .google-btn {
+        
+        button {
             margin-top: 20px;
             width: 100%;
-            background-color:#b52a2a;
+            background-color: #b52a2a;
             color: #ffffff;
-            padding: 12px 0; /* Adjusted padding */
-            font-size: 18px;
+            padding: 10px 0;
+            font-size: 16px;
             font-weight: 600;
             border-radius: 7px;
             cursor: pointer;
@@ -93,23 +101,25 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border: none;
         }
-        .google-btn img {
-            margin-right: 10px;
-        }
-        {% comment %} #msg {
-            margin-top: 15px; /* Adjusted margin */
-            text-align: center;
-        } {% endcomment %}
+        
         .logo-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 10px; /* Reduced margin */
+            margin-bottom: 15px;
         }
+        
         .log_logo {
-            width: 80px; /* Reduced logo size */
+            width: 70px;
             height: auto;
+        }
+        
+        #msg {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
         }
         
         .toastify {
@@ -131,20 +141,12 @@
         .toastify.on {
             opacity: 1;
         }
-       
-        .svg-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Keeps the SVG behind the form */
-        }
+        
         .password-container {
             position: relative;
             width: 100%;
         }
-
+        
         .toggle-password {
             position: absolute;
             right: 10px;
@@ -153,20 +155,55 @@
             cursor: pointer;
             color: #666;
         }
-
-        /* Adjust input padding to prevent text overlap with icon */
-        .password-container input[type="password"] {
+        
+        .password-container input[type="password"],
+        .password-container input[type="text"] {
             padding-right: 35px;
         }
+        
+        /* Media Queries for Responsiveness */
+        @media screen and (max-width: 480px) {
+            form {
+                padding: 15px;
+            }
+            
+            .log_logo {
+                width: 60px;
+            }
+            
+            label {
+                font-size: 14px;
+                margin-top: 8px;
+            }
+            
+            input {
+                height: 36px;
+                font-size: 13px;
+            }
+            
+            button {
+                padding: 8px 0;
+                font-size: 15px;
+            }
+            
+            #msg {
+                font-size: 13px;
+                margin-top: 12px;
+            }
+        }
+        
+        /* Toast notifications for smaller screens */
+        @media screen and (max-width: 768px) {
+            .toastify {
+                max-width: 90% !important;
+                left: 5% !important;
+                right: 5% !important;
+            }
+        }
     </style>
-
 </head>
 <body>
- <div class="svg-container">
- 
-    
-    </div> 
-    
+    <div class="svg-container"></div>
     
     <form action="{% url 'SignupPage' %}" method="post">
         {% csrf_token %}
@@ -191,7 +228,7 @@
             <i class="fas fa-eye toggle-password" data-target="password1"></i>
         </div>
 
-        <label for="password2">Password</label>
+        <label for="password2">Confirm Password</label>
         <div class="password-container">
             <input type="password" name="password2" id="password2" placeholder="Confirm Password" required>
             <i class="fas fa-eye toggle-password" data-target="password2"></i>
@@ -200,12 +237,10 @@
         <button type="submit">Sign Up</button>
         <p id="msg">Already have an account? <a href="{% url 'login' %}" style="color:#b52a2a;">Login</a></p>
     </form>
-
-   
     
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toggleButtons = document.querySelectorAll('.toggle-password');
@@ -227,42 +262,41 @@
                 });
             });
         });
-    </script>
-        <script>
-            function showToast(message, type) {
-              let backgroundColor = "#000";
-              switch(type) {
+        
+        function showToast(message, type) {
+            let backgroundColor = "#000";
+            switch(type) {
                 case 'success':
-                  backgroundColor = "#28a745";
-                  break;
+                    backgroundColor = "#28a745";
+                    break;
                 case 'error':
-                  backgroundColor = "#dc3545";
-                  break;
+                    backgroundColor = "#dc3545";
+                    break;
                 case 'warning':
-                  backgroundColor = "#ffc107";
-                  break;
+                    backgroundColor = "#ffc107";
+                    break;
                 case 'info':
-                  backgroundColor = "#17a2b8";
-                  break;
-              }
-          
-              Toastify({
+                    backgroundColor = "#17a2b8";
+                    break;
+            }
+            
+            Toastify({
                 text: message,
                 duration: 3000,
                 gravity: "top",
-                position: "right",
+                position: window.innerWidth <= 768 ? "center" : "right",
                 style: {
-                  background: backgroundColor,
+                    background: backgroundColor,
                 },
-              }).showToast();
-            }
-          
-            // For Django messages
-            {% if messages %}
-              {% for message in messages %}
+            }).showToast();
+        }
+        
+        // For Django messages
+        {% if messages %}
+            {% for message in messages %}
                 showToast("{{ message }}", "{{ message.tags }}");
-              {% endfor %}
-            {% endif %}
-          </script>
+            {% endfor %}
+        {% endif %}
+    </script>
 </body>
 </html>
